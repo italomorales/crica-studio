@@ -1,0 +1,59 @@
+<main id="main" class="suppliers container">
+    <section class="supplier-intro">
+        <span class="eyebrow">
+            <i></i>
+            PARA QUEM TAMBÉM CRIA
+        </span>
+        <h1>
+            Fornecedores
+            <span class="small-lime"></span>
+        </h1>
+        <h2>Materiais e produtos indicados pela Crica</h2>
+        <p>
+            Explore materiais, embalagens e acessórios para suas ideias.
+            <br />
+            Aqui, a compra acontece em outras plataformas.
+        </p>
+    </section>
+    <aside class="affiliate-notice">
+        <span aria-hidden="true">↗</span>
+        <p>
+            Esta página contém links de afiliado. Podemos receber comissão pelas compras realizadas
+            por esses links. A compra acontece na plataforma indicada.
+        </p>
+    </aside>
+    <section aria-label="Produtos indicados">
+        <crica-filters
+            [options]="['Todos', 'Shopee', 'Mercado Livre', 'TikTok Shop', 'AliExpress', 'Outra']"
+            label="Plataformas"
+            searchLabel="Buscar indicações"
+            [selected]="platform"
+            [query]="query"
+            (selection)="platform = $event"
+            (search)="query = $event" />
+        <div class="results-row">
+            <p aria-live="polite">
+                {{ filtered.length }} {{ filtered.length === 1 ? 'indicação' : 'indicações' }}
+            </p>
+            <span class="demo-note">Seleção demonstrativa</span>
+            @if (query || platform !== 'Todos') {
+            <button class="clear" (click)="clear()">Limpar filtros ×</button>
+            }
+        </div>
+        <div class="product-grid suppliers-grid">
+            @for (product of filtered; track product.id) {
+            <crica-affiliate-card [product]="product" (demo)="details.openAffiliate($event)" />
+            } @empty {
+            <div class="empty">
+                <h3>Nenhum produto encontrado</h3>
+                <p>Tente outro nome ou escolha outra plataforma.</p>
+                <button class="secondary" (click)="clear()">Limpar filtros</button>
+            </div>
+            }
+        </div>
+        <p class="catalog-note">
+            Seleção demonstrativa. Consulte condições e disponibilidade na plataforma indicada.
+        </p>
+    </section>
+</main>
+<crica-details #details />

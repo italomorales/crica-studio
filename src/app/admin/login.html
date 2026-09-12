@@ -1,0 +1,76 @@
+<main class="login-page">
+    <div class="login-brand-panel">
+        <a routerLink="/loja">
+            <img src="/assets/crica-studio-logo.png" alt="Crica Studio" width="220" height="120" />
+        </a>
+        <div>
+            <span class="eyebrow">POR DENTRO DA CRICA</span>
+            <h1>
+                Um espaço para
+                <br />
+                suas próximas ideias.
+            </h1>
+            <p>
+                Organize os produtos da loja, suas indicações e os detalhes que fazem a Crica ser
+                sua.
+            </p>
+        </div>
+        <a routerLink="/loja" class="back-store">← Voltar à loja</a>
+    </div>
+    <section class="login-form-panel">
+        <div class="login-card">
+            <span class="demo-badge">Ambiente de demonstração</span>
+            <h2>Bem-vinda à administração.</h2>
+            <p>Entre para cuidar do seu catálogo.</p>
+            <form (ngSubmit)="submit()">
+                <label for="email">E-mail</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="username"
+                    required
+                    [(ngModel)]="email" />
+                <label for="password">Senha</label>
+                <div class="password-field">
+                    <input
+                        id="password"
+                        name="password"
+                        [type]="show ? 'text' : 'password'"
+                        autocomplete="current-password"
+                        required
+                        [(ngModel)]="password" />
+                    <button
+                        type="button"
+                        (click)="show = !show"
+                        [attr.aria-label]="show ? 'Ocultar senha' : 'Mostrar senha'">
+                        {{ show ? 'Ocultar' : 'Mostrar' }}
+                    </button>
+                </div>
+                @if (error) {
+                <p class="error-text" role="alert">{{ error }}</p>
+                }
+                <button class="primary full" type="submit">
+                    Entrar
+                    <span aria-hidden="true">→</span>
+                </button>
+            </form>
+            <div class="demo-credentials">
+                <strong>Experimente com estes dados</strong>
+                <p>
+                    {{ demoEmail }}
+                    <br />
+                    Senha:
+                    <code>{{ demoPassword }}</code>
+                </p>
+                <button class="text-link" type="button" (click)="fill()">
+                    Preencher dados de demonstração
+                </button>
+            </div>
+            <p class="login-disclaimer">
+                Login simulado, sem autenticação real. Os cadastros são salvos apenas neste
+                navegador. Use os dados de demonstração acima.
+            </p>
+        </div>
+    </section>
+</main>

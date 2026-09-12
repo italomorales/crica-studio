@@ -1,127 +1,69 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { safeImage } from '../services/local-store';
+import imagePickerTemplate from './image-picker.html?raw';
+
 @Component({
-  selector: 'crica-image-picker',
-  standalone: true,
-  imports: [FormsModule],
-  template: `<div class="image-editor">
-    <div class="image-previews">
-      @for (image of images; track $index; let i = $index) {
-        <div>
-          <img
-            [src]="image"
-            alt="Imagem cadastrada"
-            (error)="$any($event.target).style.visibility = 'hidden'"
-          /><span>{{ i === 0 ? 'Principal' : 'Foto ' + (i + 1) }}</span
-          ><button type="button" (click)="remove(i)" [attr.aria-label]="'Remover foto ' + (i + 1)">
-            ×
-          </button>
-        </div>
-      } @empty {
-        <div class="no-image">
-          Adicione uma foto<br /><small>ou escolha um exemplo abaixo</small>
-        </div>
-      }
-    </div>
-    <div class="image-controls">
-      <label class="secondary upload-control"
-        >{{ busy ? 'Preparando foto…' : 'Selecionar arquivo'
-        }}<input
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          [disabled]="busy || images.length >= limit"
-          (change)="upload($event)" /></label
-      ><button class="secondary" type="button" (click)="showExamples = !showExamples">
-        Imagens de demonstração
-      </button>
-    </div>
-    @if (showExamples) {
-      <div class="example-images">
-        @for (n of [1, 2, 3, 4, 5, 6, 7, 8]; track n) {
-          <button
-            type="button"
-            [disabled]="images.length >= limit"
-            (click)="add('/assets/product-' + n + '.webp')"
-            [attr.aria-label]="'Usar imagem de demonstração ' + n"
-          >
-            <img [src]="'/assets/product-' + n + '.webp'" alt="" />
-          </button>
-        }
-      </div>
-    }
-    <div class="image-url">
-      <input
-        aria-label="URL de imagem"
-        placeholder="Ou cole uma URL HTTPS de imagem"
-        [(ngModel)]="url"
-        [ngModelOptions]="{ standalone: true }"
-      /><button class="secondary" type="button" (click)="add(url)">Adicionar</button>
-    </div>
-    <small
-      >Até {{ limit }} {{ limit === 1 ? 'foto' : 'fotos' }}. PNG, JPG ou WebP; até 5 MB por arquivo.
-      Fotos enviadas são reduzidas e ficam somente neste navegador.</small
-    >
-    @if (error) {
-      <p class="error-text" role="alert">{{ error }}</p>
-    }
-  </div>`,
+    selector: 'crica-image-picker',
+    standalone: true,
+    imports: [FormsModule],
+    template: imagePickerTemplate,
 })
 export class ImagePickerComponent {
-  @Input() images: string[] = [];
-  @Input() limit = 5;
-  @Output() changed = new EventEmitter<string[]>();
-  url = '';
-  error = '';
-  showExamples = false;
-  busy = false;
-  add(url: string) {
-    this.error = '';
-    if (this.images.length >= this.limit) {
-      this.error = 'Remova uma foto antes de adicionar outra.';
-      return;
+    @Input() images: string[] = [];
+    @Input() limit = 5;
+    @Output() changed = new EventEmitter<string[]>();
+    url = '';
+    error = '';
+    showExamples = false;
+    busy = false;
+    add(url: string) {
+        this.error = '';
+        if (this.images.length >= this.limit) {
+            this.error = 'Remova uma foto antes de adicionar outra.';
+            return;
+        }
+        if (!safeImage(url.trim())) {
+            this.error = 'Informe uma URL HTTPS válida ou escolha uma imagem de demonstração.';
+            return;
+        }
+        this.changed.emit([...this.images, url.trim()]);
+        this.url = '';
     }
-    if (!safeImage(url.trim())) {
-      this.error = 'Informe uma URL HTTPS válida ou escolha uma imagem de demonstração.';
-      return;
+    remove(i: number) {
+        this.changed.emit(this.images.filter((_, index) => index !== i));
     }
-    this.changed.emit([...this.images, url.trim()]);
-    this.url = '';
-  }
-  remove(i: number) {
-    this.changed.emit(this.images.filter((_, index) => index !== i));
-  }
-  async upload(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    this.error = '';
-    if (
-      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-      file.size > 5 * 1024 * 1024
-    ) {
-      this.error = 'Escolha uma imagem PNG, JPG ou WebP de até 5 MB.';
-      input.value = '';
-      return;
+    async upload(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+        this.error = '';
+        if (
+            !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+            file.size > 5 * 1024 * 1024
+        ) {
+            this.error = 'Escolha uma imagem PNG, JPG ou WebP de até 5 MB.';
+            input.value = '';
+            return;
+        }
+        this.busy = true;
+        try {
+            const bitmap = await createImageBitmap(file);
+            const ratio = Math.min(1, 1000 / Math.max(bitmap.width, bitmap.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(bitmap.width * ratio);
+            canvas.height = Math.round(bitmap.height * ratio);
+            canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            const url = canvas.toDataURL('image/webp', 0.78);
+            bitmap.close();
+            if (url.length > 550000)
+                throw new Error('Esta imagem ocupa muito espaço. Use uma versão menor.');
+            this.add(url);
+        } catch (e) {
+            this.error = e instanceof Error ? e.message : 'Não foi possível abrir a imagem.';
+        } finally {
+            this.busy = false;
+            input.value = '';
+        }
     }
-    this.busy = true;
-    try {
-      const bitmap = await createImageBitmap(file);
-      const ratio = Math.min(1, 1000 / Math.max(bitmap.width, bitmap.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(bitmap.width * ratio);
-      canvas.height = Math.round(bitmap.height * ratio);
-      canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      const url = canvas.toDataURL('image/webp', 0.78);
-      bitmap.close();
-      if (url.length > 550000)
-        throw new Error('Esta imagem ocupa muito espaço. Use uma versão menor.');
-      this.add(url);
-    } catch (e) {
-      this.error = e instanceof Error ? e.message : 'Não foi possível abrir a imagem.';
-    } finally {
-      this.busy = false;
-      input.value = '';
-    }
-  }
 }
