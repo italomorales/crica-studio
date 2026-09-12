@@ -1,0 +1,19 @@
+import type {Product,AffiliateProduct} from './models';
+export const PRODUCTS:Product[] = [
+ {id:'caneca-branca',name:'Caneca branca personalizada',category:'Canecas',description:'Uma tela em branco para sua frase, ilustração ou memória favorita.',images:['/assets/product-1.webp'],characteristics:['Modelo de demonstração: caneca branca'],personalization:['Nome ou frase','Ilustração ou fotografia','Arte enviada por você'],demo:true},
+ {id:'caneca-colorida',name:'Caneca com alça e interior coloridos',category:'Canecas',description:'Um toque de cor para dar ainda mais personalidade à sua ideia.',images:['/assets/product-2.webp'],characteristics:['Modelo de demonstração: alça e interior coloridos','Cores disponíveis a confirmar no atendimento'],personalization:['Nome ou mensagem','Estampa temática','Combinação de cores a consultar'],demo:true},
+ {id:'caneca-colher',name:'Caneca com colher',category:'Canecas',description:'Sua arte favorita em um modelo com espaço para a colher.',images:['/assets/product-3.webp'],characteristics:['Modelo de demonstração: alça com suporte para colher'],personalization:['Frase especial','Nome','Ilustração temática'],demo:true},
+ {id:'caneca-eventos',name:'Caneca para empresas e eventos',category:'Canecas',description:'A identidade da sua marca ou a lembrança de um encontro especial.',images:['/assets/product-4.webp'],characteristics:['Modelo de demonstração para projetos corporativos e eventos'],personalization:['Marca da empresa','Identidade do evento','Nomes individuais'],demo:true},
+ {id:'botton-32',name:'Botton com alfinete 32 mm',category:'Bottons',description:'Uma pequena forma de levar sua ideia com você.',images:['/assets/product-5.webp'],characteristics:['Modelo de demonstração: alfinete, 32 mm'],personalization:['Ilustração','Nome ou frase curta','Marca'],demo:true},
+ {id:'botton-44',name:'Botton com alfinete 44 mm',category:'Bottons',description:'Mais espaço para sua mensagem, sua causa ou sua criação.',images:['/assets/product-6.webp'],characteristics:['Modelo de demonstração: alfinete, 44 mm'],personalization:['Arte temática','Frase','Identidade de evento'],demo:true},
+ {id:'botton-chaveiro',name:'Botton chaveiro',category:'Bottons',description:'Personalidade para acompanhar as chaves no dia a dia.',images:['/assets/product-7.webp'],characteristics:['Modelo de demonstração: botton com argola','Tamanho a combinar no atendimento'],personalization:['Nome','Arte autoral','Marca ou evento'],demo:true},
+ {id:'botton-abridor',name:'Botton abridor 58 mm',category:'Bottons',description:'Uma lembrança com a sua arte e uma função a mais.',images:['/assets/product-8.webp'],characteristics:['Modelo de demonstração: abridor, 58 mm'],personalization:['Estampa temática','Identidade de festa','Marca'],demo:true},
+];
+export const AFFILIATES:AffiliateProduct[] = [
+ {id:'canecas-base',name:'Canecas para personalização',description:'Modelos em branco para explorar projetos de estamparia.',category:'Bases para criar',platform:'Shopee'},
+ {id:'componentes',name:'Componentes para bottons',description:'Peças para compor bottons e experimentar diferentes modelos.',category:'Componentes',platform:'Mercado Livre'},
+ {id:'caixas',name:'Caixas para canecas',description:'Embalagens para organizar a apresentação dos seus projetos.',category:'Embalagens',platform:'Shopee'},
+ {id:'fita',name:'Fita para sublimação',description:'Acessório para auxiliar no posicionamento da arte durante o trabalho.',category:'Acessórios',platform:'TikTok Shop'},
+ {id:'chaveiros',name:'Argolas para chaveiros',description:'Componentes para montar peças e lembranças personalizadas.',category:'Componentes',platform:'Mercado Livre'},
+ {id:'sacos',name:'Embalagens para bottons',description:'Opções para separar e apresentar pequenas peças.',category:'Embalagens',platform:'TikTok Shop'},
+];
