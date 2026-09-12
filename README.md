@@ -23,20 +23,20 @@ O build gera `dist/`, incluindo entradas para acesso direto às duas rotas. O pr
 
 ## Onde editar
 
-| Conteúdo | Arquivo |
-|---|---|
-| Produtos, imagens, descrições, características e personalização | `src/app/data/products.ts` |
-| Interfaces tipadas | `src/app/data/models.ts` |
-| WhatsApp e destinos de afiliado | `src/app/data/site.config.ts` |
-| Serviço que fornece os dados locais | `src/app/services/catalog.service.ts` |
-| Formação de mensagem e validação dos destinos | `src/app/services/contact.ts` |
-| Header, rodapé, filtros e alternativa de imagem | `src/app/components/shared.ts` |
-| Cards de produtos próprios e de afiliados | `src/app/components/cards.ts` |
-| Painel de detalhes, quantidade, mensagem e cópia | `src/app/components/details.ts` |
-| Loja, fornecedores e busca combinada | `src/app/pages.ts` |
-| Rotas e inicialização | `src/main.ts` |
-| Paleta, fonte, espaços, bordas e responsividade | `src/styles.css` |
-| Fotos ilustrativas, SVGs e fonte local | `public/assets/` |
+| Conteúdo                                                        | Arquivo                               |
+| --------------------------------------------------------------- | ------------------------------------- |
+| Produtos, imagens, descrições, características e personalização | `src/app/data/products.ts`            |
+| Interfaces tipadas                                              | `src/app/data/models.ts`              |
+| WhatsApp e destinos de afiliado                                 | `src/app/data/site.config.ts`         |
+| Serviço que fornece os dados locais                             | `src/app/services/catalog.service.ts` |
+| Formação de mensagem e validação dos destinos                   | `src/app/services/contact.ts`         |
+| Header, rodapé, filtros e alternativa de imagem                 | `src/app/components/shared.ts`        |
+| Cards de produtos próprios e de afiliados                       | `src/app/components/cards.ts`         |
+| Painel de detalhes, quantidade, mensagem e cópia                | `src/app/components/details.ts`       |
+| Loja, fornecedores e busca combinada                            | `src/app/pages.ts`                    |
+| Rotas e inicialização                                           | `src/main.ts`                         |
+| Paleta, fonte, espaços, bordas e responsividade                 | `src/styles.css`                      |
+| Fotos ilustrativas, SVGs e fonte local                          | `public/assets/`                      |
 
 `CatalogService` é o ponto simples para futuramente substituir os mocks por chamadas a uma API.
 
