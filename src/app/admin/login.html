@@ -1,11 +1,15 @@
 <main class="login-page">
   <div class="login-brand-panel">
-    <a routerLink="/loja"
-      ><img src="/assets/crica-studio-logo.png" alt="Crica Studio" width="220" height="120"
-    /></a>
+    <a routerLink="/loja">
+      <img src="/assets/crica-studio-logo.png" alt="Crica Studio" width="220" height="120" />
+    </a>
     <div>
       <span class="eyebrow">POR DENTRO DA CRICA</span>
-      <h1>Um espaço para<br />suas próximas ideias.</h1>
+      <h1>
+        Um espaço para
+        <br />
+        suas próximas ideias.
+      </h1>
       <p>Organize os produtos da loja, suas indicações e os detalhes que fazem a Crica ser sua.</p>
     </div>
     <a routerLink="/loja" class="back-store">← Voltar à loja</a>
@@ -16,15 +20,15 @@
       <h2>Bem-vinda à administração.</h2>
       <p>Entre para cuidar do seu catálogo.</p>
       <form (ngSubmit)="submit()">
-        <label for="email">E-mail</label
-        ><input
+        <label for="email">E-mail</label>
+        <input
           id="email"
           name="email"
           type="email"
           autocomplete="username"
           required
-          [(ngModel)]="email"
-        /><label for="password">Senha</label>
+          [(ngModel)]="email" />
+        <label for="password">Senha</label>
         <div class="password-field">
           <input
             id="password"
@@ -32,24 +36,29 @@
             [type]="show ? 'text' : 'password'"
             autocomplete="current-password"
             required
-            [(ngModel)]="password"
-          /><button
+            [(ngModel)]="password" />
+          <button
             type="button"
             (click)="show = !show"
-            [attr.aria-label]="show ? 'Ocultar senha' : 'Mostrar senha'"
-          >
+            [attr.aria-label]="show ? 'Ocultar senha' : 'Mostrar senha'">
             {{ show ? 'Ocultar' : 'Mostrar' }}
           </button>
         </div>
         @if (error) {
-          <p class="error-text" role="alert">{{ error }}</p>
+        <p class="error-text" role="alert">{{ error }}</p>
         }
-        <button class="primary full" type="submit">Entrar <span aria-hidden="true">→</span></button>
+        <button class="primary full" type="submit">
+          Entrar
+          <span aria-hidden="true">→</span>
+        </button>
       </form>
       <div class="demo-credentials">
         <strong>Experimente com estes dados</strong>
         <p>
-          {{ demoEmail }}<br />Senha: <code>{{ demoPassword }}</code>
+          {{ demoEmail }}
+          <br />
+          Senha:
+          <code>{{ demoPassword }}</code>
         </p>
         <button class="text-link" type="button" (click)="fill()">
           Preencher dados de demonstração

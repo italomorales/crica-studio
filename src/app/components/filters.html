@@ -1,31 +1,30 @@
 <div class="filterbar">
   <div class="chips" [attr.aria-label]="label" role="group">
     @for (option of options; track option) {
-      <button
-        type="button"
-        [class.selected]="selected === option"
-        [attr.aria-pressed]="selected === option"
-        (click)="selection.emit(option)"
-      >
-        {{ option }}
-      </button>
+    <button
+      type="button"
+      [class.selected]="selected === option"
+      [attr.aria-pressed]="selected === option"
+      (click)="selection.emit(option)">
+      {{ option }}
+    </button>
     }
   </div>
-  <label class="search"
-    ><svg
+  <label class="search">
+    <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       stroke-width="1.6"
-      aria-hidden="true"
-    >
+      aria-hidden="true">
       <circle cx="10.5" cy="10.5" r="6.5" />
-      <path d="m16 16 5 5" /></svg
-    ><span class="sr-only">{{ searchLabel }}</span
-    ><input
+      <path d="m16 16 5 5" />
+    </svg>
+    <span class="sr-only">{{ searchLabel }}</span>
+    <input
       type="search"
       [placeholder]="searchLabel"
       [value]="query"
-      (input)="search.emit($any($event.target).value)"
-  /></label>
+      (input)="search.emit($any($event.target).value)" />
+  </label>
 </div>

@@ -1,22 +1,32 @@
 <main id="main">
   <section class="hero container">
     <div class="hero-copy">
-      <span class="eyebrow hero-kicker"><i></i> PERSONALIZADOS COM A SUA ESSÊNCIA</span>
-      <h1>Sua ideia merece<br /><span>ganhar forma.</span></h1>
+      <span class="eyebrow hero-kicker">
+        <i></i>
+        PERSONALIZADOS COM A SUA ESSÊNCIA
+      </span>
+      <h1>
+        Sua ideia merece
+        <br />
+        <span>ganhar forma.</span>
+      </h1>
       <p>
         Criamos canecas e bottons personalizados para pessoas, empresas e eventos. Você traz a
         ideia. A gente cria com você.
       </p>
-      <a class="primary" href="#catalogo">Explorar produtos <span aria-hidden="true">↓</span></a>
+      <a class="primary" href="#catalogo">
+        Explorar produtos
+        <span aria-hidden="true">↓</span>
+      </a>
     </div>
     <div class="hero-art">
       <img
         src="/assets/hero.webp"
         alt="Caneca com estampa botânica — composição ilustrativa"
         width="640"
-        height="640"
-      /><span class="hero-label">Feito para você.</span
-      ><span class="hero-caption">Sua arte. Seu jeito.</span>
+        height="640" />
+      <span class="hero-label">Feito para você.</span>
+      <span class="hero-caption">Sua arte. Seu jeito.</span>
     </div>
   </section>
   <section id="catalogo" class="catalog container" aria-labelledby="catalog-title">
@@ -25,36 +35,37 @@
         <span class="eyebrow">LOJA CRICA</span>
         <h2 id="catalog-title">Escolha o começo da sua ideia.</h2>
       </div>
-      <span class="demo-note"><i></i> Catálogo demonstrativo</span>
+      <span class="demo-note">
+        <i></i>
+        Catálogo demonstrativo
+      </span>
     </div>
     <crica-filters
       [options]="categories"
       [selected]="category"
       [query]="query"
       (selection)="category = $event"
-      (search)="query = $event"
-    />
+      (search)="query = $event" />
     <div class="results-row">
       <p aria-live="polite">
         {{ filtered.length }} {{ filtered.length === 1 ? 'modelo' : 'modelos' }} para personalizar
       </p>
       @if (query || category !== 'Todos') {
-        <button class="clear" (click)="clear()">Limpar filtros ×</button>
+      <button class="clear" (click)="clear()">Limpar filtros ×</button>
       }
     </div>
     <div class="product-grid">
       @for (product of filtered; track product.id) {
-        <crica-product-card
-          [product]="product"
-          (details)="details.open($event)"
-          (order)="details.open($event, true)"
-        />
+      <crica-product-card
+        [product]="product"
+        (details)="details.open($event)"
+        (order)="details.open($event, true)" />
       } @empty {
-        <div class="empty">
-          <h3>Nenhum produto encontrado</h3>
-          <p>Tente outra palavra ou explore todos os modelos.</p>
-          <button class="secondary" (click)="clear()">Limpar filtros</button>
-        </div>
+      <div class="empty">
+        <h3>Nenhum produto encontrado</h3>
+        <p>Tente outra palavra ou explore todos os modelos.</p>
+        <button class="secondary" (click)="clear()">Limpar filtros</button>
+      </div>
       }
     </div>
     <p class="catalog-note">
