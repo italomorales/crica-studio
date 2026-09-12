@@ -10,17 +10,13 @@ import './admin.css';
 import { LoginComponent } from './app/admin/login';
 import { AdminComponent, unsavedGuard } from './app/admin/admin';
 import { demoGuard } from './app/services/auth.service';
+import appTemplate from './app.html?raw';
+
 @Component({
   selector: 'crica-app',
   standalone: true,
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
-  template: `@if (!isAdmin) {
-      <crica-header />
-    }
-    <router-outlet />
-    @if (!isAdmin) {
-      <crica-footer />
-    }`,
+  template: appTemplate,
 })
 class AppComponent {
   router = inject(Router);

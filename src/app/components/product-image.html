@@ -1,0 +1,17 @@
+<div class="product-visual">
+  @if (src && !failed) {
+    <img
+      [src]="src"
+      [alt]="alt + ' — imagem ilustrativa'"
+      (error)="failed = true"
+      loading="lazy"
+      width="640"
+      height="640"
+    />
+  } @else {
+    <div class="image-placeholder">
+      <span>{{ label }}</span
+      ><small>Imagem em preparação</small>
+    </div>
+  }
+</div>

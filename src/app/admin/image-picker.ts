@@ -1,71 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { safeImage } from '../services/local-store';
+import imagePickerTemplate from './image-picker.html?raw';
+
 @Component({
   selector: 'crica-image-picker',
   standalone: true,
   imports: [FormsModule],
-  template: `<div class="image-editor">
-    <div class="image-previews">
-      @for (image of images; track $index; let i = $index) {
-        <div>
-          <img
-            [src]="image"
-            alt="Imagem cadastrada"
-            (error)="$any($event.target).style.visibility = 'hidden'"
-          /><span>{{ i === 0 ? 'Principal' : 'Foto ' + (i + 1) }}</span
-          ><button type="button" (click)="remove(i)" [attr.aria-label]="'Remover foto ' + (i + 1)">
-            ×
-          </button>
-        </div>
-      } @empty {
-        <div class="no-image">
-          Adicione uma foto<br /><small>ou escolha um exemplo abaixo</small>
-        </div>
-      }
-    </div>
-    <div class="image-controls">
-      <label class="secondary upload-control"
-        >{{ busy ? 'Preparando foto…' : 'Selecionar arquivo'
-        }}<input
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          [disabled]="busy || images.length >= limit"
-          (change)="upload($event)" /></label
-      ><button class="secondary" type="button" (click)="showExamples = !showExamples">
-        Imagens de demonstração
-      </button>
-    </div>
-    @if (showExamples) {
-      <div class="example-images">
-        @for (n of [1, 2, 3, 4, 5, 6, 7, 8]; track n) {
-          <button
-            type="button"
-            [disabled]="images.length >= limit"
-            (click)="add('/assets/product-' + n + '.webp')"
-            [attr.aria-label]="'Usar imagem de demonstração ' + n"
-          >
-            <img [src]="'/assets/product-' + n + '.webp'" alt="" />
-          </button>
-        }
-      </div>
-    }
-    <div class="image-url">
-      <input
-        aria-label="URL de imagem"
-        placeholder="Ou cole uma URL HTTPS de imagem"
-        [(ngModel)]="url"
-        [ngModelOptions]="{ standalone: true }"
-      /><button class="secondary" type="button" (click)="add(url)">Adicionar</button>
-    </div>
-    <small
-      >Até {{ limit }} {{ limit === 1 ? 'foto' : 'fotos' }}. PNG, JPG ou WebP; até 5 MB por arquivo.
-      Fotos enviadas são reduzidas e ficam somente neste navegador.</small
-    >
-    @if (error) {
-      <p class="error-text" role="alert">{{ error }}</p>
-    }
-  </div>`,
+  template: imagePickerTemplate,
 })
 export class ImagePickerComponent {
   @Input() images: string[] = [];

@@ -23,6 +23,16 @@ O build gera `dist/`, incluindo entradas para acesso direto às duas rotas. O pr
 
 ## Onde editar
 
+Os templates ficam em arquivos `.html` separados, ao lado do TypeScript correspondente.
+Por exemplo, o painel administrativo usa `src/app/admin/admin.html` e sua lógica fica em
+`src/app/admin/admin.ts`. Os arquivos com vários componentes, como `shared.ts`, `cards.ts`
+e `pages.ts`, importam um HTML por componente (`header.html`, `product-card.html`,
+`shop.html`, entre outros). O componente principal usa `src/app.html`.
+
+Como o projeto usa Angular JIT com Vite, cada HTML é importado com `?raw` e passado à
+propriedade `template` do componente. Para alterar o layout, edite diretamente o HTML;
+para alterar o comportamento, edite o TypeScript.
+
 | Conteúdo                                                        | Arquivo                               |
 | --------------------------------------------------------------- | ------------------------------------- |
 | Produtos, imagens, descrições, características e personalização | `src/app/data/products.ts`            |

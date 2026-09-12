@@ -1,0 +1,446 @@
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <a routerLink="/admin/loja" class="admin-brand"
+      ><img src="/assets/crica-studio-logo.png" alt="Crica Studio" width="140" height="76" /></a
+    ><span class="sidebar-label">ADMINISTRAÇÃO</span>
+    <nav aria-label="Administração">
+      <a routerLink="/admin/loja" routerLinkActive="active" ariaCurrentWhenActive="page"
+        ><span aria-hidden="true">▦</span> Produtos da loja</a
+      ><a routerLink="/admin/fornecedores" routerLinkActive="active" ariaCurrentWhenActive="page"
+        ><span aria-hidden="true">↗</span> Fornecedores</a
+      ><a routerLink="/admin/tipos" routerLinkActive="active" ariaCurrentWhenActive="page"
+        ><span aria-hidden="true">≡</span> Tipos</a
+      ><a routerLink="/admin/configuracoes" routerLinkActive="active" ariaCurrentWhenActive="page"
+        ><span aria-hidden="true">⚙</span> Configurações</a
+      >
+    </nav>
+    <div class="sidebar-bottom">
+      <a routerLink="/loja">← Ver site</a
+      ><button type="button" (click)="logout()">Sair da demonstração</button
+      ><small>Crica Studio<br />Ideias que ganham forma.</small>
+    </div>
+  </aside>
+  <div class="admin-workspace">
+    <header class="admin-topbar">
+      <span>Seu studio, organizado.</span><span class="demo-badge">Demonstração local</span>
+    </header>
+    <main class="admin-main">
+      <div class="admin-page-heading">
+        <div>
+          <span class="eyebrow">{{
+            editing ? 'CADASTRO' : section === 'configuracoes' ? 'PREFERÊNCIAS' : 'SEU CATÁLOGO'
+          }}</span>
+          <h1>{{ editing ? (isNew ? 'Novo cadastro' : 'Editar cadastro') : title }}</h1>
+          <p>{{ subtitle }}</p>
+        </div>
+        @if (!editing && section !== 'configuracoes') {
+          <button class="primary" (click)="create()">
+            +
+            {{
+              section === 'tipos'
+                ? 'Novo tipo'
+                : section === 'loja'
+                  ? 'Novo produto'
+                  : 'Nova indicação'
+            }}
+          </button>
+        }
+      </div>
+      @if (catalog.storageWarning()) {
+        <div class="admin-notice" role="status">{{ catalog.storageWarning() }}</div>
+      }
+      @if (notice) {
+        <div class="success-notice" role="status">{{ notice }}</div>
+      }
+      @if (errors.length) {
+        <div class="error-summary" role="alert" tabindex="-1" id="form-errors">
+          <strong>Confira antes de salvar</strong>
+          <ul>
+            @for (error of errors; track error) {
+              <li>{{ error }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (section === 'configuracoes') {
+        <section class="admin-panel settings-panel">
+          <h2>Atendimento pelo WhatsApp</h2>
+          <p>Um único contato para todos os pedidos da loja.</p>
+          <form (ngSubmit)="saveSettings()">
+            <label for="whatsapp">Número internacional</label
+            ><input
+              id="whatsapp"
+              name="whatsapp"
+              type="tel"
+              inputmode="numeric"
+              [(ngModel)]="whatsapp"
+              placeholder="Código do país + DDD + número"
+            /><small
+              >Somente dígitos. Deixe vazio para manter a prévia da mensagem com “Contato em
+              configuração”.</small
+            ><button class="primary" type="submit">Salvar configurações</button>
+          </form>
+        </section>
+        <section class="admin-panel settings-panel">
+          <h2>Dados desta demonstração</h2>
+          <p>
+            As alterações ficam neste navegador, inclusive após atualizar a página. Outro
+            dispositivo começa com os exemplos iniciais. O login é apenas uma simulação.
+          </p>
+          <p>
+            O catálogo público deste navegador acompanha os cadastros publicados. Fotos e rascunhos
+            também ficam armazenados localmente.
+          </p>
+          <button class="secondary danger-button" type="button" (click)="reset()">
+            Restaurar dados de demonstração</button
+          ><small>Apaga seus cadastros locais e restaura os exemplos. Pediremos confirmação.</small>
+        </section>
+      } @else if (editing && section === 'tipos') {
+        <section class="admin-panel type-editor">
+          <form (ngSubmit)="saveType()">
+            <label for="type-name">Nome do tipo *</label
+            ><input
+              id="type-name"
+              name="type-name"
+              [(ngModel)]="typeDraft.name"
+              maxlength="60"
+              required
+              placeholder="Ex.: Caneca"
+            /><label for="scope">Onde usar *</label
+            ><select id="scope" name="scope" [(ngModel)]="typeDraft.scope">
+              <option value="shop">Loja</option>
+              <option value="suppliers">Fornecedores</option>
+              <option value="both">Ambos</option></select
+            ><label class="check-label"
+              ><input type="checkbox" name="active" [(ngModel)]="typeDraft.active" /> Ativo para
+              novos cadastros</label
+            >
+            <p class="field-help">
+              Desativar um tipo não esconde produtos existentes. Tipos já utilizados são preservados
+              para manter os vínculos.
+            </p>
+            <div class="form-actions">
+              <button class="primary" type="submit">Salvar tipo</button
+              ><button class="secondary" type="button" (click)="cancel()">Cancelar</button>
+            </div>
+          </form>
+        </section>
+      } @else if (editing) {
+        <form class="item-editor" (ngSubmit)="save()">
+          <div class="editor-main">
+            <section class="admin-panel">
+              <h2>Informações do produto</h2>
+              <label for="item-title">Título *</label
+              ><input
+                id="item-title"
+                name="title"
+                [(ngModel)]="draft.name"
+                required
+                maxlength="120"
+                placeholder="Como o produto aparecerá no catálogo"
+              />
+              <div class="form-two">
+                <div>
+                  <label for="item-type">Tipo *</label
+                  ><select id="item-type" name="type" [(ngModel)]="draft.typeId" required>
+                    <option value="">Selecione</option>
+                    @for (t of availableTypes; track t.id) {
+                      <option [value]="t.id">{{ t.name }}{{ t.active ? '' : ' (inativo)' }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label for="item-order">Ordem de exibição</label
+                  ><input
+                    id="item-order"
+                    name="order"
+                    type="number"
+                    min="0"
+                    step="1"
+                    [(ngModel)]="draft.order"
+                    required
+                  />
+                </div>
+              </div>
+              <label for="short-description">Descrição curta</label
+              ><textarea
+                id="short-description"
+                name="description"
+                [(ngModel)]="draft.description"
+                rows="3"
+                maxlength="240"
+                placeholder="Resuma o produto para o card"
+              ></textarea
+              ><small
+                >{{ draft.description.length }}/240 caracteres · Necessária para publicar.</small
+              >
+              @if (section === 'loja') {
+                <label for="full-description">Descrição completa</label
+                ><textarea
+                  id="full-description"
+                  name="fullDescription"
+                  [(ngModel)]="draft.fullDescription"
+                  rows="5"
+                  placeholder="Detalhes que ajudam o cliente a escolher"
+                ></textarea>
+              }
+            </section>
+            <section class="admin-panel">
+              <h2>{{ section === 'loja' ? 'Fotos do produto' : 'Foto principal' }}</h2>
+              <p>A primeira imagem aparece no card.</p>
+              <crica-image-picker
+                [images]="images"
+                [limit]="section === 'loja' ? 5 : 1"
+                (changed)="images = $event"
+              />
+            </section>
+            @if (section === 'loja') {
+              <section class="admin-panel">
+                <h2>Personalização e características</h2>
+                <label for="characteristics">Características</label
+                ><textarea
+                  id="characteristics"
+                  name="characteristics"
+                  [(ngModel)]="characteristics"
+                  rows="3"
+                  placeholder="Uma característica por linha"
+                ></textarea
+                ><label for="personalization">Opções de personalização</label
+                ><textarea
+                  id="personalization"
+                  name="personalization"
+                  [(ngModel)]="personalization"
+                  rows="3"
+                  placeholder="Nome&#10;Frase&#10;Logotipo"
+                ></textarea
+                ><small
+                  >Uma opção por linha. Inclua apenas informações que você pode confirmar.</small
+                >
+              </section>
+            }
+          </div>
+          <aside class="editor-aside">
+            @if (section === 'loja') {
+              <section class="admin-panel">
+                <h2>Preço</h2>
+                <label for="price-mode">Como apresentar</label
+                ><select id="price-mode" name="priceMode" [(ngModel)]="draft.priceMode">
+                  <option value="consult">Sob consulta</option>
+                  <option value="fixed">Preço fixo</option>
+                  <option value="from">A partir de</option>
+                </select>
+                @if (draft.priceMode !== 'consult') {
+                  <label for="price">Valor em R$ *</label
+                  ><input
+                    id="price"
+                    name="price"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    [(ngModel)]="draft.price"
+                    required
+                  />
+                }
+                <p class="field-help">
+                  O pedido continua pelo WhatsApp, sem carrinho ou pagamento no site.
+                </p>
+              </section>
+            } @else {
+              <section class="admin-panel">
+                <h2>Destino da indicação</h2>
+                <label for="platform">Plataforma *</label
+                ><select id="platform" name="platform" [(ngModel)]="draft.platform">
+                  @for (p of platforms; track p) {
+                    <option [value]="p">{{ p }}</option>
+                  }</select
+                ><label for="seller">Loja ou vendedor</label
+                ><input
+                  id="seller"
+                  name="seller"
+                  [(ngModel)]="draft.seller"
+                  maxlength="120"
+                  placeholder="Opcional"
+                /><label for="affiliate-url">Link de afiliado</label
+                ><input
+                  id="affiliate-url"
+                  name="url"
+                  type="url"
+                  [(ngModel)]="draft.url"
+                  placeholder="https://…"
+                /><small>Cole o link completo. Os parâmetros serão preservados.</small
+                ><label class="check-label"
+                  ><input type="checkbox" name="demoListing" [(ngModel)]="draft.demoListing" />
+                  Indicação de demonstração</label
+                >
+                <p class="field-help">
+                  Permite experimentar sem foto ou anúncio real. O botão mostra uma explicação até
+                  você configurar o destino.
+                </p>
+              </section>
+            }
+            <section class="admin-panel">
+              <h2>Publicação</h2>
+              <label for="status">Status</label
+              ><select id="status" name="status" [(ngModel)]="draft.status">
+                <option value="draft">Rascunho</option>
+                <option value="published">Publicado</option>
+                <option value="inactive">Inativo</option>
+              </select>
+              <p class="field-help">Somente os publicados aparecem no site deste navegador.</p>
+              <button class="primary full" type="submit">Salvar alterações</button
+              ><button class="secondary full" type="button" (click)="save('draft')">
+                Salvar rascunho</button
+              ><button class="secondary full" type="button" (click)="save('published')">
+                Publicar</button
+              ><button class="text-link full" type="button" (click)="cancel()">Cancelar</button>
+            </section>
+          </aside>
+        </form>
+      } @else if (section === 'tipos') {
+        <div class="admin-panel">
+          <div class="admin-filters">
+            <label class="admin-search"
+              ><span class="sr-only">Buscar tipos</span
+              ><input type="search" placeholder="Buscar tipos" [(ngModel)]="query" /></label
+            ><select aria-label="Filtrar tipos por situação" [(ngModel)]="status">
+              <option value="all">Todos os tipos</option>
+              <option value="active">Ativos</option>
+              <option value="inactive">Inativos</option>
+            </select>
+          </div>
+          <div class="type-list">
+            @for (t of filteredTypes; track t.id) {
+              <article class="type-row">
+                <div>
+                  <h3>{{ t.name }}</h3>
+                  <p>
+                    {{ scopeLabel(t.scope) }} · {{ usage(t.id) }}
+                    {{ usage(t.id) === 1 ? 'item vinculado' : 'itens vinculados' }}
+                  </p>
+                </div>
+                <span class="status-pill" [class.published]="t.active">{{
+                  t.active ? 'Ativo' : 'Inativo'
+                }}</span>
+                <div class="row-actions">
+                  <button (click)="editType(t)">Editar</button
+                  ><button (click)="toggleType(t)">
+                    {{ t.active ? 'Desativar' : 'Ativar' }}
+                  </button>
+                </div>
+              </article>
+            } @empty {
+              <div class="empty">
+                <h3>Nenhum tipo encontrado</h3>
+                <button class="secondary" (click)="clear()">Limpar filtros</button>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="admin-stats">
+          <div>
+            <span>Publicados</span><strong>{{ count('published') }}</strong
+            ><small>Visíveis no catálogo</small>
+          </div>
+          <div>
+            <span>Rascunhos</span><strong>{{ count('draft') }}</strong
+            ><small>Ideias em preparação</small>
+          </div>
+          <div>
+            <span>Inativos</span><strong>{{ count('inactive') }}</strong
+            ><small>Fora do catálogo</small>
+          </div>
+        </div>
+        <section class="admin-panel catalog-list-panel">
+          <div class="admin-filters">
+            <label class="admin-search"
+              ><span class="sr-only">Buscar cadastros</span
+              ><input type="search" placeholder="Buscar por título" [(ngModel)]="query" /></label
+            ><select aria-label="Filtrar por tipo" [(ngModel)]="typeFilter">
+              <option value="all">Todos os tipos</option>
+              @for (t of sectionTypes; track t.id) {
+                <option [value]="t.id">{{ t.name }}</option>
+              }</select
+            ><select aria-label="Filtrar por status" [(ngModel)]="status">
+              <option value="all">Todos os status</option>
+              <option value="published">Publicados</option>
+              <option value="draft">Rascunhos</option>
+              <option value="inactive">Inativos</option>
+            </select>
+            @if (section === 'fornecedores') {
+              <select aria-label="Filtrar por plataforma" [(ngModel)]="platformFilter">
+                <option value="all">Todas as plataformas</option>
+                @for (p of platforms; track p) {
+                  <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            }
+          </div>
+          <div class="admin-results">
+            <span aria-live="polite"
+              >{{ filtered.length }} {{ filtered.length === 1 ? 'cadastro' : 'cadastros' }}</span
+            >
+            @if (query || status !== 'all' || typeFilter !== 'all' || platformFilter !== 'all') {
+              <button class="text-link" (click)="clear()">Limpar filtros</button>
+            }
+          </div>
+          <div class="admin-table-header">
+            <span>Produto</span><span>{{ section === 'loja' ? 'Preço' : 'Plataforma' }}</span
+            ><span>Status</span><span>Ações</span>
+          </div>
+          @for (item of filtered; track item.id) {
+            <article class="admin-product-row">
+              <div class="row-product">
+                @if (itemImage(item)) {
+                  <img
+                    [src]="itemImage(item)"
+                    alt=""
+                    (error)="$any($event.target).style.visibility = 'hidden'"
+                  />
+                } @else {
+                  <div class="row-image-placeholder" aria-hidden="true">C</div>
+                }
+                <div>
+                  <button class="row-title" (click)="edit(item)">{{ item.name }}</button>
+                  <p>{{ catalog.typeName(item.typeId) }} · Ordem {{ item.order }}</p>
+                </div>
+              </div>
+              <div class="row-meta">
+                {{ section === 'loja' ? price(item) : $any(item).platform }}
+              </div>
+              <span
+                class="status-pill"
+                [class.published]="item.status === 'published'"
+                [class.draft]="item.status === 'draft'"
+                >{{ statusLabel(item.status) }}</span
+              >
+              <div class="row-actions">
+                <button (click)="edit(item)" [attr.aria-label]="'Editar ' + item.name">
+                  Editar</button
+                ><button (click)="duplicate(item)" [attr.aria-label]="'Duplicar ' + item.name">
+                  Duplicar</button
+                ><button
+                  (click)="toggle(item)"
+                  [attr.aria-label]="
+                    (item.status === 'inactive' ? 'Ativar ' : 'Desativar ') + item.name
+                  "
+                >
+                  {{ item.status === 'inactive' ? 'Ativar' : 'Desativar' }}
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <div class="empty">
+              <h3>Nenhum cadastro encontrado</h3>
+              <p>Tente outro título ou limpe os filtros.</p>
+              <button class="secondary" (click)="clear()">Limpar filtros</button>
+            </div>
+          }
+        </section>
+        <p class="admin-footnote">
+          Publicado aqui, visível no catálogo deste navegador. Rascunhos ficam só na administração.
+        </p>
+      }
+    </main>
+  </div>
+</div>
