@@ -104,3 +104,5 @@ Os registros iniciais ficam em `src/app/data/seed.ts`; os campos e regras ficam 
 ## Paleta atualizada — 12/09/2026
 
 Azul principal `#0255A5` para ações e textos de marca; azul secundário `#39A3FE` para detalhes de navegação e grafismos. Os fundos de apoio usam uma tonalidade suave (`#EBF6FF`), mantendo contraste dos textos. Tokens centralizados em `src/styles.css`.
+
+version 20260912
