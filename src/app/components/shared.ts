@@ -6,44 +6,44 @@ import filtersTemplate from './filters.html?raw';
 import productImageTemplate from './product-image.html?raw';
 
 @Component({
-  selector: 'crica-header',
-  standalone: true,
-  imports: [RouterLink, RouterLinkActive],
-  template: headerTemplate,
+    selector: 'crica-header',
+    standalone: true,
+    imports: [RouterLink, RouterLinkActive],
+    template: headerTemplate,
 })
 export class HeaderComponent {}
 @Component({
-  selector: 'crica-footer',
-  standalone: true,
-  imports: [RouterLink],
-  template: footerTemplate,
+    selector: 'crica-footer',
+    standalone: true,
+    imports: [RouterLink],
+    template: footerTemplate,
 })
 export class FooterComponent {}
 @Component({
-  selector: 'crica-filters',
-  standalone: true,
-  template: filtersTemplate,
+    selector: 'crica-filters',
+    standalone: true,
+    template: filtersTemplate,
 })
 export class FiltersComponent {
-  @Input() options: string[] = [];
-  @Input() selected = 'Todos';
-  @Input() query = '';
-  @Input() label = 'Categorias';
-  @Input() searchLabel = 'Buscar produtos';
-  @Output() selection = new EventEmitter<string>();
-  @Output() search = new EventEmitter<string>();
+    @Input() options: string[] = [];
+    @Input() selected = 'Todos';
+    @Input() query = '';
+    @Input() label = 'Categorias';
+    @Input() searchLabel = 'Buscar produtos';
+    @Output() selection = new EventEmitter<string>();
+    @Output() search = new EventEmitter<string>();
 }
 @Component({
-  selector: 'crica-product-image',
-  standalone: true,
-  template: productImageTemplate,
+    selector: 'crica-product-image',
+    standalone: true,
+    template: productImageTemplate,
 })
 export class ProductImageComponent {
-  @Input() src?: string;
-  @Input() alt = 'Produto';
-  @Input() label = 'CRICA / SELEÇÃO';
-  failed = false;
-  ngOnChanges() {
-    this.failed = false;
-  }
+    @Input() src?: string;
+    @Input() alt = 'Produto';
+    @Input() label = 'CRICA / SELEÇÃO';
+    failed = false;
+    ngOnChanges() {
+        this.failed = false;
+    }
 }

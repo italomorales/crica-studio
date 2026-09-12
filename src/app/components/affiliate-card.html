@@ -1,25 +1,25 @@
 <article class="product-card affiliate-card">
-  <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
-  <div class="card-body">
-    <span
-      class="platform"
-      [class.shopee]="product.platform === 'Shopee'"
-      [class.mercado]="product.platform === 'Mercado Livre'">
-      {{ product.platform }}
-    </span>
-    <h3>{{ product.name }}</h3>
-    <p>{{ product.description }}</p>
-    @if (url) {
-    <a class="text-action" [href]="url" target="_blank" rel="sponsored noopener noreferrer">
-      Ver {{ preposition }} {{ product.platform }}
-      <span aria-hidden="true">↗</span>
-      <span class="sr-only">(link de afiliado, abre em nova aba)</span>
-    </a>
-    } @else {
-    <button class="text-action" (click)="demo.emit(product)">
-      Ver {{ preposition }} {{ product.platform }}
-      <span aria-hidden="true">↗</span>
-    </button>
-    }
-  </div>
+    <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+    <div class="card-body">
+        <span
+            class="platform"
+            [class.shopee]="product.platform === 'Shopee'"
+            [class.mercado]="product.platform === 'Mercado Livre'">
+            {{ product.platform }}
+        </span>
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        @if (url) {
+        <a class="text-action" [href]="url" target="_blank" rel="sponsored noopener noreferrer">
+            Ver {{ preposition }} {{ product.platform }}
+            <span aria-hidden="true">↗</span>
+            <span class="sr-only">(link de afiliado, abre em nova aba)</span>
+        </a>
+        } @else {
+        <button class="text-action" (click)="demo.emit(product)">
+            Ver {{ preposition }} {{ product.platform }}
+            <span aria-hidden="true">↗</span>
+        </button>
+        }
+    </div>
 </article>

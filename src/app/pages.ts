@@ -8,51 +8,51 @@ import shopTemplate from './shop.html?raw';
 import suppliersTemplate from './suppliers.html?raw';
 
 @Component({
-  selector: 'crica-shop',
-  standalone: true,
-  imports: [FiltersComponent, ProductCardComponent, DetailsComponent],
-  template: shopTemplate,
+    selector: 'crica-shop',
+    standalone: true,
+    imports: [FiltersComponent, ProductCardComponent, DetailsComponent],
+    template: shopTemplate,
 })
 export class ShopComponent {
-  catalog = inject(CatalogService);
-  category = 'Todos';
-  query = '';
-  get categories() {
-    return ['Todos', ...new Set(this.catalog.products.map((p) => p.category))];
-  }
-  get filtered() {
-    const q = normalize(this.query);
-    return this.catalog.products.filter(
-      (p) =>
-        (this.category === 'Todos' || p.category === this.category) &&
-        normalize(p.name + ' ' + p.description).includes(q),
-    );
-  }
-  clear() {
-    this.category = 'Todos';
-    this.query = '';
-  }
+    catalog = inject(CatalogService);
+    category = 'Todos';
+    query = '';
+    get categories() {
+        return ['Todos', ...new Set(this.catalog.products.map((p) => p.category))];
+    }
+    get filtered() {
+        const q = normalize(this.query);
+        return this.catalog.products.filter(
+            (p) =>
+                (this.category === 'Todos' || p.category === this.category) &&
+                normalize(p.name + ' ' + p.description).includes(q),
+        );
+    }
+    clear() {
+        this.category = 'Todos';
+        this.query = '';
+    }
 }
 @Component({
-  selector: 'crica-suppliers',
-  standalone: true,
-  imports: [FiltersComponent, AffiliateCardComponent, DetailsComponent],
-  template: suppliersTemplate,
+    selector: 'crica-suppliers',
+    standalone: true,
+    imports: [FiltersComponent, AffiliateCardComponent, DetailsComponent],
+    template: suppliersTemplate,
 })
 export class SuppliersComponent {
-  catalog = inject(CatalogService);
-  platform = 'Todos';
-  query = '';
-  get filtered() {
-    const q = normalize(this.query);
-    return this.catalog.affiliates.filter(
-      (p) =>
-        (this.platform === 'Todos' || p.platform === this.platform) &&
-        normalize(p.name).includes(q),
-    );
-  }
-  clear() {
-    this.platform = 'Todos';
-    this.query = '';
-  }
+    catalog = inject(CatalogService);
+    platform = 'Todos';
+    query = '';
+    get filtered() {
+        const q = normalize(this.query);
+        return this.catalog.affiliates.filter(
+            (p) =>
+                (this.platform === 'Todos' || p.platform === this.platform) &&
+                normalize(p.name).includes(q),
+        );
+    }
+    clear() {
+        this.platform = 'Todos';
+        this.query = '';
+    }
 }

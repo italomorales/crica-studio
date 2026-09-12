@@ -1,24 +1,24 @@
 <article class="product-card">
-  <button
-    class="image-button"
-    type="button"
-    (click)="details.emit(product)"
-    [attr.aria-label]="'Ver detalhes de ' + product.name">
-    <crica-product-image [src]="product.images[0]" [alt]="product.name" />
-    <span class="image-link" aria-hidden="true">↗</span>
-  </button>
-  <div class="card-body">
-    <span class="eyebrow category">{{ product.category }}</span>
-    <h3>
-      <button (click)="details.emit(product)">{{ product.name }}</button>
-    </h3>
-    <p>{{ product.description }}</p>
-    <div class="card-bottom">
-      <span class="price">{{ price(product) }}</span>
-      <button class="text-action" (click)="order.emit(product)">
-        Pedir pelo WhatsApp
-        <span aria-hidden="true">↗</span>
-      </button>
+    <button
+        class="image-button"
+        type="button"
+        (click)="details.emit(product)"
+        [attr.aria-label]="'Ver detalhes de ' + product.name">
+        <crica-product-image [src]="product.images[0]" [alt]="product.name" />
+        <span class="image-link" aria-hidden="true">↗</span>
+    </button>
+    <div class="card-body">
+        <span class="eyebrow category">{{ product.category }}</span>
+        <h3>
+            <button (click)="details.emit(product)">{{ product.name }}</button>
+        </h3>
+        <p>{{ product.description }}</p>
+        <div class="card-bottom">
+            <span class="price">{{ price(product) }}</span>
+            <button class="text-action" (click)="order.emit(product)">
+                Pedir pelo WhatsApp
+                <span aria-hidden="true">↗</span>
+            </button>
+        </div>
     </div>
-  </div>
 </article>

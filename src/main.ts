@@ -13,41 +13,44 @@ import { demoGuard } from './app/services/auth.service';
 import appTemplate from './app.html?raw';
 
 @Component({
-  selector: 'crica-app',
-  standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
-  template: appTemplate,
+    selector: 'crica-app',
+    standalone: true,
+    imports: [RouterOutlet, HeaderComponent, FooterComponent],
+    template: appTemplate,
 })
 class AppComponent {
-  router = inject(Router);
-  get isAdmin() {
-    return this.router.url.startsWith('/admin') || this.router.url.startsWith('/login');
-  }
+    router = inject(Router);
+    get isAdmin() {
+        return this.router.url.startsWith('/admin') || this.router.url.startsWith('/login');
+    }
 }
 bootstrapApplication(AppComponent, {
-  providers: [
-    provideRouter(
-      [
-        { path: '', redirectTo: 'loja', pathMatch: 'full' },
-        { path: 'loja', component: ShopComponent, title: 'Loja Crica | Crica Studio' },
-        {
-          path: 'fornecedores',
-          component: SuppliersComponent,
-          title: 'Fornecedores | Crica Studio',
-        },
-        { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
-        { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
-        ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({
-          path: 'admin/' + section,
-          component: AdminComponent,
-          canActivate: [demoGuard],
-          canDeactivate: [unsavedGuard],
-          data: { section },
-          title: 'Administração | Crica Studio',
-        })),
-        { path: '**', redirectTo: 'loja' },
-      ],
-      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
-    ),
-  ],
+    providers: [
+        provideRouter(
+            [
+                { path: '', redirectTo: 'loja', pathMatch: 'full' },
+                { path: 'loja', component: ShopComponent, title: 'Loja Crica | Crica Studio' },
+                {
+                    path: 'fornecedores',
+                    component: SuppliersComponent,
+                    title: 'Fornecedores | Crica Studio',
+                },
+                { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
+                { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
+                ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({
+                    path: 'admin/' + section,
+                    component: AdminComponent,
+                    canActivate: [demoGuard],
+                    canDeactivate: [unsavedGuard],
+                    data: { section },
+                    title: 'Administração | Crica Studio',
+                })),
+                { path: '**', redirectTo: 'loja' },
+            ],
+            withInMemoryScrolling({
+                scrollPositionRestoration: 'enabled',
+                anchorScrolling: 'enabled',
+            }),
+        ),
+    ],
 }).catch(console.error);
