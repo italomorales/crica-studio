@@ -1125,3 +1125,7 @@ crica-affiliate-card {
         transition: none !important;
     }
 }
+.api-status {
+    color: var(--muted);
+    font-size: 12px;
+}

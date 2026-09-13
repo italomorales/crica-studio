@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import headerTemplate from './header.html?raw';
 import footerTemplate from './footer.html?raw';
@@ -18,7 +18,19 @@ export class HeaderComponent {}
     imports: [RouterLink],
     template: footerTemplate,
 })
-export class FooterComponent {}
+export class FooterComponent implements OnInit {
+    apiStatus = 'Verificando conexão com a API…';
+
+    async ngOnInit() {
+        try {
+            const response = await fetch('https://api.cricastudio.com/api/ping');
+            if (!response.ok) throw new Error(`Status ${response.status}`);
+            this.apiStatus = 'API conectada';
+        } catch {
+            this.apiStatus = 'API indisponível';
+        }
+    }
+}
 @Component({
     selector: 'crica-filters',
     standalone: true,
