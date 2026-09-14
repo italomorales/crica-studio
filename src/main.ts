@@ -9,7 +9,7 @@ import './styles.css';
 import './admin.css';
 import { LoginComponent } from './app/admin/login';
 import { AdminComponent, unsavedGuard } from './app/admin/admin';
-import { demoGuard } from './app/services/auth.service';
+import { authGuard } from './app/services/auth.service';
 import { ConstructionComponent } from './app/construction';
 import appTemplate from './app.html?raw';
 
@@ -42,7 +42,7 @@ bootstrapApplication(AppComponent, {
                 ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({
                     path: 'admin/' + section,
                     component: AdminComponent,
-                    canActivate: [demoGuard],
+                    canActivate: [authGuard],
                     canDeactivate: [unsavedGuard],
                     data: { section },
                     title: 'Administração | Crica Studio',

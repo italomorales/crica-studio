@@ -1,24 +1,57 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
-const KEY = 'crica.demo-session';
-export const DEMO_EMAIL = 'demo@crica.example';
-export const DEMO_PASSWORD = 'Crica123!';
+
+const KEY = 'crica.admin-access-token';
+const API_URL = (
+    import.meta.env.VITE_API_URL ||
+    (import.meta.env.DEV ? 'http://localhost:5030' : 'https://api.cricastudio.com')
+).replace(/\/$/, '');
+
+type LoginResponse = { accessToken: string; expiresAt: string };
+export type LoginOutcome = 'ok' | 'invalid-credentials' | 'unavailable';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-    readonly loggedIn = signal(false);
-    constructor() {
+    readonly loggedIn = signal(this.hasValidStoredToken());
+
+    private hasValidStoredToken() {
         try {
-            this.loggedIn.set(sessionStorage.getItem(KEY) === 'active');
-        } catch {}
+            const token = sessionStorage.getItem(KEY);
+            return !!token && !this.isExpired(token);
+        } catch {
+            return false;
+        }
     }
-    login(email: string, password: string) {
-        if (email.trim().toLowerCase() !== DEMO_EMAIL || password !== DEMO_PASSWORD) return false;
+
+    private isExpired(token: string) {
         try {
-            sessionStorage.setItem(KEY, 'active');
-        } catch {}
-        this.loggedIn.set(true);
-        return true;
+            const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+            return typeof payload.exp !== 'number' || payload.exp * 1000 <= Date.now();
+        } catch {
+            return true;
+        }
     }
+
+    async login(email: string, password: string): Promise<LoginOutcome> {
+        try {
+            const response = await fetch(`${API_URL}/api/admin/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.trim(), password }),
+            });
+            if (response.status === 401) return 'invalid-credentials';
+            if (!response.ok) return 'unavailable';
+
+            const data = (await response.json()) as LoginResponse;
+            if (!data.accessToken || this.isExpired(data.accessToken)) return 'unavailable';
+            sessionStorage.setItem(KEY, data.accessToken);
+            this.loggedIn.set(true);
+            return 'ok';
+        } catch {
+            return 'unavailable';
+        }
+    }
+
     logout() {
         try {
             sessionStorage.removeItem(KEY);
@@ -26,6 +59,6 @@ export class AuthService {
         this.loggedIn.set(false);
     }
 }
-// This guard simulates navigation only; it is NOT server-side authentication.
-export const demoGuard: CanActivateFn = () =>
+
+export const authGuard: CanActivateFn = () =>
     inject(AuthService).loggedIn() || inject(Router).createUrlTree(['/login']);

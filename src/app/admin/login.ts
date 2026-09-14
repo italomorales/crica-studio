@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, DEMO_EMAIL, DEMO_PASSWORD } from '../services/auth.service';
+import { AuthService } from '../services/auth.service';
 import loginTemplate from './login.html?raw';
 
 @Component({
@@ -13,25 +13,28 @@ import loginTemplate from './login.html?raw';
 export class LoginComponent {
     auth = inject(AuthService);
     router = inject(Router);
-    demoEmail = DEMO_EMAIL;
-    demoPassword = DEMO_PASSWORD;
+    changeDetector = inject(ChangeDetectorRef);
     email = '';
     password = '';
     show = false;
     error = '';
+    loading = false;
     constructor() {
         if (this.auth.loggedIn()) this.router.navigateByUrl('/admin/loja');
     }
-    fill() {
-        this.email = DEMO_EMAIL;
-        this.password = DEMO_PASSWORD;
+    async submit() {
+        if (this.loading) return;
         this.error = '';
-    }
-    submit() {
-        if (this.auth.login(this.email, this.password)) {
+        this.loading = true;
+        const outcome = await this.auth.login(this.email, this.password);
+        this.loading = false;
+        if (outcome === 'ok') {
             this.router.navigateByUrl('/admin/loja');
+        } else if (outcome === 'invalid-credentials') {
+            this.error = 'E-mail ou senha incorretos.';
         } else {
-            this.error = 'E-mail ou senha incorretos. Use os dados de demonstração abaixo.';
+            this.error = 'Não foi possível acessar a API. Tente novamente em instantes.';
         }
+        this.changeDetector.detectChanges();
     }
 }
