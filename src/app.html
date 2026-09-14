@@ -1,7 +1,12 @@
+@if (showConstruction) {
+<crica-construction />
+} @else {
 @if (!isAdmin) {
 <crica-header />
 }
 <router-outlet />
 @if (!isAdmin) {
 <crica-footer />
+}
+
 }

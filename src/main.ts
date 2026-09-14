@@ -10,15 +10,17 @@ import './admin.css';
 import { LoginComponent } from './app/admin/login';
 import { AdminComponent, unsavedGuard } from './app/admin/admin';
 import { demoGuard } from './app/services/auth.service';
+import { ConstructionComponent } from './app/construction';
 import appTemplate from './app.html?raw';
 
 @Component({
     selector: 'crica-app',
     standalone: true,
-    imports: [RouterOutlet, HeaderComponent, FooterComponent],
+    imports: [RouterOutlet, HeaderComponent, FooterComponent, ConstructionComponent],
     template: appTemplate,
 })
 class AppComponent {
+    readonly showConstruction = import.meta.env.PROD || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'construction');
     router = inject(Router);
     get isAdmin() {
         return this.router.url.startsWith('/admin') || this.router.url.startsWith('/login');
