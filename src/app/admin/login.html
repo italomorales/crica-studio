@@ -1,7 +1,7 @@
 <main class="login-page">
     <div class="login-brand-panel">
         <a routerLink="/loja">
-            <img src="/assets/crica-studio-logo.png" alt="Crica Studio" width="220" height="120" />
+            <img src="/assets/crica-studio-logo-transparent.png" alt="Crica Studio" width="180" height="66" />
         </a>
         <div>
             <span class="eyebrow">POR DENTRO DA CRICA</span>
@@ -19,7 +19,6 @@
     </div>
     <section class="login-form-panel">
         <div class="login-card">
-            <span class="demo-badge">Ambiente de demonstração</span>
             <h2>Bem-vinda à administração.</h2>
             <p>Entre para cuidar do seu catálogo.</p>
             <form (ngSubmit)="submit()">
@@ -50,27 +49,11 @@
                 @if (error) {
                 <p class="error-text" role="alert">{{ error }}</p>
                 }
-                <button class="primary full" type="submit">
-                    Entrar
+                <button class="primary full" type="submit" [disabled]="loading">
+                    {{ loading ? 'Entrando…' : 'Entrar' }}
                     <span aria-hidden="true">→</span>
                 </button>
             </form>
-            <div class="demo-credentials">
-                <strong>Experimente com estes dados</strong>
-                <p>
-                    {{ demoEmail }}
-                    <br />
-                    Senha:
-                    <code>{{ demoPassword }}</code>
-                </p>
-                <button class="text-link" type="button" (click)="fill()">
-                    Preencher dados de demonstração
-                </button>
-            </div>
-            <p class="login-disclaimer">
-                Login simulado, sem autenticação real. Os cadastros são salvos apenas neste
-                navegador. Use os dados de demonstração acima.
-            </p>
         </div>
     </section>
 </main>

@@ -9,7 +9,7 @@ import './styles.css';
 import './admin.css';
 import { LoginComponent } from './app/admin/login';
 import { AdminComponent, unsavedGuard } from './app/admin/admin';
-import { demoGuard } from './app/services/auth.service';
+import { authGuard } from './app/services/auth.service';
 import { ConstructionComponent } from './app/construction';
 import appTemplate from './app.html?raw';
 
@@ -20,7 +20,9 @@ import appTemplate from './app.html?raw';
     template: appTemplate,
 })
 class AppComponent {
-    readonly showConstruction = import.meta.env.PROD || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'construction');
+    // readonly showConstruction = import.meta.env.PROD || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'construction');
+    readonly showConstruction = false;
+    
     router = inject(Router);
     get isAdmin() {
         return this.router.url.startsWith('/admin') || this.router.url.startsWith('/login');
@@ -42,7 +44,7 @@ bootstrapApplication(AppComponent, {
                 ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({
                     path: 'admin/' + section,
                     component: AdminComponent,
-                    canActivate: [demoGuard],
+                    canActivate: [authGuard],
                     canDeactivate: [unsavedGuard],
                     data: { section },
                     title: 'Administração | Crica Studio',
