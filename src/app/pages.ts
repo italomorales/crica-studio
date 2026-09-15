@@ -6,6 +6,8 @@ import { ProductCardComponent, AffiliateCardComponent } from './components/cards
 import { DetailsComponent } from './components/details';
 import shopTemplate from './shop.html?raw';
 import suppliersTemplate from './suppliers.html?raw';
+import storefrontTemplate from './storefront.html?raw';
+import { SITE_CONFIG } from './data/site.config';
 
 @Component({
     selector: 'crica-shop',
@@ -55,4 +57,12 @@ export class SuppliersComponent {
         this.platform = 'Todos';
         this.query = '';
     }
+}
+@Component({
+    selector: 'crica-storefront',
+    standalone: true,
+    template: storefrontTemplate,
+})
+export class StorefrontComponent {
+    readonly storefronts = SITE_CONFIG.storefronts;
 }

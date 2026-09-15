@@ -2,6 +2,7 @@ import { mkdir, copyFile } from 'node:fs/promises';
 for (const route of [
     'loja',
     'fornecedores',
+    'vitrine',
     'login',
     'admin',
     'admin/loja',
