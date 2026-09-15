@@ -118,7 +118,7 @@ a:focus-visible {
     min-height: 96px;
     display: flex;
     align-items: center;
-    gap: 64px;
+    gap: 40px;
 }
 .brand {
     display: block;
@@ -127,6 +127,35 @@ a:focus-visible {
 .brand img {
     width: 140px;
     height: auto;
+}
+.header-socials {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+.header-socials a {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--white);
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.header-socials a:hover {
+    border-color: var(--blue-secondary);
+    box-shadow: 0 4px 12px rgb(2 85 165 / 14%);
+    transform: translateY(-1px);
+}
+.header-socials img {
+    width: 21px;
+    height: 21px;
+    object-fit: contain;
+}
+.header-socials .whatsapp img {
+    filter: brightness(0) saturate(100%) invert(69%) sepia(69%) saturate(462%) hue-rotate(83deg) brightness(91%) contrast(85%);
 }
 .header-inner nav {
     display: flex;
@@ -148,11 +177,6 @@ a:focus-visible {
 }
 .header-inner nav a:hover {
     color: var(--blue);
-}
-.header-note {
-    margin-left: auto;
-    font-size: 13px;
-    color: var(--muted);
 }
 .hero {
     display: grid;
@@ -867,9 +891,6 @@ crica-affiliate-card {
     .header-inner {
         gap: 36px;
     }
-    .header-note {
-        display: none;
-    }
     .hero {
         gap: 32px;
     }
@@ -924,18 +945,35 @@ crica-affiliate-card {
         width: calc(100% - 40px);
     }
     .header-inner {
-        min-height: 126px;
-        flex-direction: column;
+        min-height: 122px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: 70px 48px;
         gap: 0;
-        align-items: center;
+        align-items: stretch;
     }
     .brand {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        justify-self: center;
         padding: 14px 0 5px;
     }
     .brand img {
         width: 140px;
     }
+    .header-socials a {
+        width: 36px;
+        height: 36px;
+    }
+    .header-socials {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: center;
+        margin-left: 0;
+    }
     .header-inner nav {
+        grid-column: 1;
+        grid-row: 2;
         align-self: center;
         gap: 32px;
         min-height: 48px;
