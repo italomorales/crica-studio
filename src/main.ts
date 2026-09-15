@@ -20,7 +20,9 @@ import appTemplate from './app.html?raw';
     template: appTemplate,
 })
 class AppComponent {
-    readonly showConstruction = import.meta.env.PROD || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'construction');
+    // readonly showConstruction = import.meta.env.PROD || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'construction');
+    readonly showConstruction = false;
+    
     router = inject(Router);
     get isAdmin() {
         return this.router.url.startsWith('/admin') || this.router.url.startsWith('/login');
