@@ -11,3 +11,26 @@
   ➜  Network: http://172.22.144.1:4173/
   ➜  press h + enter to show help
 20:56:18 [vite] (client) hmr update /src/styles.css
+21:17:37 [vite] (client) page reload src/app/pages.ts
+21:17:37 [vite] (client) page reload src/app/components/details.ts
+21:17:55 [vite] (client) page reload src/app/shop.html
+21:17:55 [vite] (client) page reload src/app/suppliers.html
+21:18:14 [vite] (client) page reload src/app/services/public-catalog.service.ts
+21:24:00 [vite] (client) page reload src/app/services/auth.service.ts
+21:24:00 [vite] (client) page reload src/app/admin/admin.ts
+21:24:26 [vite] (client) page reload src/app/admin/admin.html
+21:33:36 [vite] (client) page reload src/app/services/admin-catalog.service.ts
+21:33:36 [vite] (client) page reload src/app/admin/admin.ts
+21:33:41 [vite] (client) page reload src/app/services/admin-catalog.service.ts
+21:51:19 [vite] (client) page reload src/app/services/admin-catalog.service.ts
+21:51:19 [vite] (client) page reload src/app/admin/image-picker.ts
+21:51:19 [vite] (client) page reload src/app/admin/image-picker.html
+21:51:19 [vite] (client) page reload src/app/admin/admin.html
+21:51:25 [vite] (client) page reload src/app/admin/image-picker.ts
+22:12:08 [vite] (client) page reload src/app/admin/admin.html
+22:12:08 [vite] (client) page reload src/app/admin/admin.ts
+22:12:08 [vite] (client) page reload src/app/services/admin-catalog.service.ts
+22:22:33 [vite] vite.config.ts changed, restarting server...
+22:22:33 [vite] (client) page reload src/app/services/auth.service.ts
+22:22:33 [vite] (client) page reload src/app/services/public-catalog.service.ts
+22:22:33 [vite] server restarted.

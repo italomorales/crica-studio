@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { safeImage } from '../services/local-store';
 import { AdminCatalogService } from '../services/admin-catalog.service';
@@ -12,6 +12,7 @@ import imagePickerTemplate from './image-picker.html?raw';
 })
 export class ImagePickerComponent {
     private catalog = inject(AdminCatalogService);
+    private zone = inject(NgZone);
     @Input() images: string[] = [];
     @Input() limit = 5;
     @Input() category: 'products' | 'affiliates' = 'products';
@@ -62,12 +63,17 @@ export class ImagePickerComponent {
             );
             bitmap.close();
             if (output.size > 5 * 1024 * 1024) throw new Error('Esta imagem ocupa muito espaço. Use uma versão menor.');
-            this.add(await this.catalog.uploadImage(output, this.category));
+            const uploadedUrl = await this.catalog.uploadImage(output, this.category);
+            this.zone.run(() => this.add(uploadedUrl));
         } catch (e) {
-            this.error = e instanceof Error ? e.message : 'Não foi possível abrir a imagem.';
+            this.zone.run(() => {
+                this.error = e instanceof Error ? e.message : 'Não foi possível abrir a imagem.';
+            });
         } finally {
-            this.busy = false;
-            input.value = '';
+            this.zone.run(() => {
+                this.busy = false;
+                input.value = '';
+            });
         }
     }
 }

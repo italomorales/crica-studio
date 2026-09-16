@@ -15,5 +15,11 @@ export const SITE_CONFIG = {
             description: 'Veja a seleção da Crica disponível no Mercado Livre.',
             url: 'https://meli.la/19kz47o',
         },
+        {
+            id: 'tiktok',
+            name: 'TikTok Shop',
+            description: 'Confira nossos produtos e novidades na TikTok Shop.',
+            url: 'https://vt.tiktok.com/ZS9SpchXC1J9N-t7rS7/',
+        },
     ],
 };
