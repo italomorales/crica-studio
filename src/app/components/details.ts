@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import type { Product, AffiliateProduct } from '../data/models';
 import { ProductImageComponent } from './shared';
 import { buildMessage, validQuantity, whatsappUrl } from '../services/contact';
-import { CatalogService } from '../services/catalog.service';
+import { PublicCatalogService } from '../services/public-catalog.service';
 import { priceLabel } from '../services/local-store';
 import detailsTemplate from './details.html?raw';
 
@@ -14,7 +14,7 @@ import detailsTemplate from './details.html?raw';
     template: detailsTemplate,
 })
 export class DetailsComponent {
-    catalog = inject(CatalogService);
+    catalog = inject(PublicCatalogService);
     price = priceLabel;
     @ViewChild('dialog', { static: true }) dialog!: ElementRef<HTMLDialogElement>;
     @ViewChild('messageField') messageField?: ElementRef<HTMLTextAreaElement>;
@@ -55,7 +55,7 @@ export class DetailsComponent {
     order() {
         if (!this.product || !this.valid) return;
         this.message = buildMessage(this.product.name, this.quantity, this.idea);
-        const url = whatsappUrl(this.catalog.whatsappNumber, this.message);
+        const url = whatsappUrl(this.catalog.whatsappNumber(), this.message);
         if (url) {
             window.open(url, '_blank', 'noopener,noreferrer');
         } else {

@@ -1,5 +1,5 @@
 import { Component, inject, ViewChild } from '@angular/core';
-import { CatalogService } from './services/catalog.service';
+import { PublicCatalogService } from './services/public-catalog.service';
 import { normalize } from './services/contact';
 import { FiltersComponent } from './components/shared';
 import { ProductCardComponent, AffiliateCardComponent } from './components/cards';
@@ -16,15 +16,15 @@ import { SITE_CONFIG } from './data/site.config';
     template: shopTemplate,
 })
 export class ShopComponent {
-    catalog = inject(CatalogService);
+    catalog = inject(PublicCatalogService);
     category = 'Todos';
     query = '';
     get categories() {
-        return ['Todos', ...new Set(this.catalog.products.map((p) => p.category))];
+        return ['Todos', ...new Set(this.catalog.products().map((p) => p.category))];
     }
     get filtered() {
         const q = normalize(this.query);
-        return this.catalog.products.filter(
+        return this.catalog.products().filter(
             (p) =>
                 (this.category === 'Todos' || p.category === this.category) &&
                 normalize(p.name + ' ' + p.description).includes(q),
@@ -42,12 +42,12 @@ export class ShopComponent {
     template: suppliersTemplate,
 })
 export class SuppliersComponent {
-    catalog = inject(CatalogService);
+    catalog = inject(PublicCatalogService);
     platform = 'Todos';
     query = '';
     get filtered() {
         const q = normalize(this.query);
-        return this.catalog.affiliates.filter(
+        return this.catalog.affiliates().filter(
             (p) =>
                 (this.platform === 'Todos' || p.platform === this.platform) &&
                 normalize(p.name).includes(q),

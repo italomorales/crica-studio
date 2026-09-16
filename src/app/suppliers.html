@@ -33,7 +33,9 @@
             (search)="query = $event" />
         <div class="results-row">
             <p aria-live="polite">
-                {{ filtered.length }} {{ filtered.length === 1 ? 'indicação' : 'indicações' }}
+                @if (catalog.loading()) { Carregando indicações... } @else if (catalog.error()) {
+                Catálogo indisponível } @else { {{ filtered.length }} {{ filtered.length === 1 ?
+                'indicação' : 'indicações' }} }
             </p>
             <span class="demo-note">Seleção demonstrativa</span>
             @if (query || platform !== 'Todos') {
@@ -41,7 +43,18 @@
             }
         </div>
         <div class="product-grid suppliers-grid">
-            @for (product of filtered; track product.id) {
+            @if (catalog.loading()) {
+            <div class="empty" aria-live="polite">
+                <h3>Carregando indicações</h3>
+                <p>Estamos buscando os produtos indicados.</p>
+            </div>
+            } @else if (catalog.error()) {
+            <div class="empty" role="alert">
+                <h3>Não foi possível carregar as indicações</h3>
+                <p>{{ catalog.error() }}</p>
+                <button class="secondary" (click)="catalog.load()">Tentar novamente</button>
+            </div>
+            } @else { @for (product of filtered; track product.id) {
             <crica-affiliate-card [product]="product" (demo)="details.openAffiliate($event)" />
             } @empty {
             <div class="empty">
@@ -49,7 +62,7 @@
                 <p>Tente outro nome ou escolha outra plataforma.</p>
                 <button class="secondary" (click)="clear()">Limpar filtros</button>
             </div>
-            }
+            } }
         </div>
         <p class="catalog-note">
             Seleção demonstrativa. Consulte condições e disponibilidade na plataforma indicada.
