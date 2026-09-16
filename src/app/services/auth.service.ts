@@ -4,7 +4,7 @@ import { Router, CanActivateFn } from '@angular/router';
 const KEY = 'crica.admin-access-token';
 export const API_URL = (
     import.meta.env.VITE_API_URL ||
-    (import.meta.env.DEV ? 'http://localhost:5030' : 'https://api.cricastudio.com')
+    (import.meta.env.DEV ? '' : 'https://api.cricastudio.com')
 ).replace(/\/$/, '');
 
 type LoginResponse = { accessToken: string; expiresAt: string };
