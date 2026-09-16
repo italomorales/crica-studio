@@ -23,6 +23,10 @@
 * {
     box-sizing: border-box;
 }
+html {
+    /* Keeps the page width stable when a route does not need vertical scrolling. */
+    scrollbar-gutter: stable;
+}
 body {
     margin: 0;
     background: #fff;
