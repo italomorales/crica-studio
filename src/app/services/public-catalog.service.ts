@@ -3,7 +3,7 @@ import type { AffiliateProduct, CatalogType, Product } from '../data/models';
 
 const API_URL = (
     import.meta.env.VITE_API_URL ||
-    (import.meta.env.DEV ? 'http://localhost:5030' : 'https://api.cricastudio.com')
+    (import.meta.env.DEV ? '' : 'https://api.cricastudio.com')
 ).replace(/\/$/, '');
 
 type ApiProduct = Omit<Product, 'category' | 'typeId'> & { typeId: string };
