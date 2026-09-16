@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { safeImage } from '../services/local-store';
+import { AdminCatalogService } from '../services/admin-catalog.service';
 import imagePickerTemplate from './image-picker.html?raw';
 
 @Component({
@@ -10,8 +11,10 @@ import imagePickerTemplate from './image-picker.html?raw';
     template: imagePickerTemplate,
 })
 export class ImagePickerComponent {
+    private catalog = inject(AdminCatalogService);
     @Input() images: string[] = [];
     @Input() limit = 5;
+    @Input() category: 'products' | 'affiliates' = 'products';
     @Output() changed = new EventEmitter<string[]>();
     url = '';
     error = '';
@@ -54,11 +57,12 @@ export class ImagePickerComponent {
             canvas.width = Math.round(bitmap.width * ratio);
             canvas.height = Math.round(bitmap.height * ratio);
             canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-            const url = canvas.toDataURL('image/webp', 0.78);
+            const output = await new Promise<Blob>((resolve, reject) =>
+                canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Não foi possível preparar a imagem.')), 'image/webp', 0.78),
+            );
             bitmap.close();
-            if (url.length > 550000)
-                throw new Error('Esta imagem ocupa muito espaço. Use uma versão menor.');
-            this.add(url);
+            if (output.size > 5 * 1024 * 1024) throw new Error('Esta imagem ocupa muito espaço. Use uma versão menor.');
+            this.add(await this.catalog.uploadImage(output, this.category));
         } catch (e) {
             this.error = e instanceof Error ? e.message : 'Não foi possível abrir a imagem.';
         } finally {

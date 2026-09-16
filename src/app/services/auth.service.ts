@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 
 const KEY = 'crica.admin-access-token';
-const API_URL = (
+export const API_URL = (
     import.meta.env.VITE_API_URL ||
     (import.meta.env.DEV ? 'http://localhost:5030' : 'https://api.cricastudio.com')
 ).replace(/\/$/, '');
@@ -50,6 +50,15 @@ export class AuthService {
         } catch {
             return 'unavailable';
         }
+    }
+
+    accessToken(): string | null {
+        try {
+            const token = sessionStorage.getItem(KEY);
+            if (token && !this.isExpired(token)) return token;
+        } catch {}
+        this.logout();
+        return null;
     }
 
     logout() {

@@ -23,6 +23,10 @@
 * {
     box-sizing: border-box;
 }
+html {
+    /* Keeps the page width stable when a route does not need vertical scrolling. */
+    scrollbar-gutter: stable;
+}
 body {
     margin: 0;
     background: #fff;
@@ -118,7 +122,7 @@ a:focus-visible {
     min-height: 96px;
     display: flex;
     align-items: center;
-    gap: 64px;
+    gap: 40px;
 }
 .brand {
     display: block;
@@ -127,6 +131,35 @@ a:focus-visible {
 .brand img {
     width: 140px;
     height: auto;
+}
+.header-socials {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+.header-socials a {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--white);
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.header-socials a:hover {
+    border-color: var(--blue-secondary);
+    box-shadow: 0 4px 12px rgb(2 85 165 / 14%);
+    transform: translateY(-1px);
+}
+.header-socials img {
+    width: 21px;
+    height: 21px;
+    object-fit: contain;
+}
+.header-socials .whatsapp img {
+    filter: brightness(0) saturate(100%) invert(69%) sepia(69%) saturate(462%) hue-rotate(83deg) brightness(91%) contrast(85%);
 }
 .header-inner nav {
     display: flex;
@@ -148,11 +181,6 @@ a:focus-visible {
 }
 .header-inner nav a:hover {
     color: var(--blue);
-}
-.header-note {
-    margin-left: auto;
-    font-size: 13px;
-    color: var(--muted);
 }
 .hero {
     display: grid;
@@ -592,6 +620,100 @@ footer {
     font-size: 13px;
     color: var(--ink);
 }
+.storefront {
+    padding-block: 72px 88px;
+}
+.storefront-intro {
+    max-width: 650px;
+    text-align: center;
+    margin: 0 auto 48px;
+}
+.storefront-intro .eyebrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+}
+.storefront-intro h1 {
+    font-size: 56px;
+    font-weight: 600;
+    letter-spacing: -2px;
+    margin: 12px 0 18px;
+}
+.storefront-intro p {
+    font-size: 17px;
+}
+.storefront-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin-inline: auto;
+}
+.storefront-card {
+    display: flex;
+    min-height: 340px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    border: 1px solid #e6e8eb;
+    border-radius: 20px;
+    background: var(--white);
+    box-shadow: 0 2px 6px rgb(23 34 53 / 2%);
+}
+.storefront-logo {
+    display: grid;
+    width: 72px;
+    height: 72px;
+    place-items: center;
+    margin-bottom: 24px;
+}
+.storefront-logo img {
+    max-width: 56px;
+    max-height: 56px;
+    object-fit: contain;
+}
+.storefront-card h2 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+.storefront-card p {
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 290px;
+    margin-bottom: 28px;
+}
+.storefront-link,
+.storefront-pending {
+    margin-top: auto;
+    padding: 10px 22px;
+    min-height: 44px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.storefront-link {
+    color: white;
+    background: var(--blue);
+}
+.storefront-link:hover {
+    background: var(--blue-hover);
+}
+.storefront-link span {
+    margin-left: 5px;
+}
+.storefront-pending {
+    color: var(--muted);
+    background: #f5f5f7;
+}
+.storefront-note {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 13px;
+}
 .suppliers-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -867,9 +989,6 @@ crica-affiliate-card {
     .header-inner {
         gap: 36px;
     }
-    .header-note {
-        display: none;
-    }
     .hero {
         gap: 32px;
     }
@@ -883,6 +1002,9 @@ crica-affiliate-card {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .suppliers-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .storefront-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .section-heading {
@@ -924,24 +1046,41 @@ crica-affiliate-card {
         width: calc(100% - 40px);
     }
     .header-inner {
-        min-height: 126px;
-        flex-direction: column;
+        min-height: 122px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: 70px 48px;
         gap: 0;
-        align-items: center;
+        align-items: stretch;
     }
     .brand {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        justify-self: center;
         padding: 14px 0 5px;
     }
     .brand img {
         width: 140px;
     }
-    .header-inner nav {
+    .header-socials a {
+        width: 36px;
+        height: 36px;
+    }
+    .header-socials {
+        grid-column: 2;
+        grid-row: 2;
         align-self: center;
-        gap: 32px;
+        margin-left: 0;
+    }
+    .header-inner nav {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: center;
+        gap: 8px;
         min-height: 48px;
     }
     .header-inner nav a {
-        font-size: 14px;
+        font-size: 12px;
     }
     .hero {
         grid-template-columns: 1fr;
@@ -1001,9 +1140,29 @@ crica-affiliate-card {
         width: 100%;
     }
     .product-grid,
-    .suppliers-grid {
+    .suppliers-grid,
+    .storefront-grid {
         grid-template-columns: 1fr;
         gap: 24px;
+    }
+    .storefront {
+        padding-block: 36px 48px;
+    }
+    .storefront-intro {
+        margin-bottom: 28px;
+    }
+    .storefront-intro h1 {
+        font-size: 36px;
+    }
+    .storefront-intro p {
+        font-size: 16px;
+    }
+    .storefront-card {
+        min-height: 250px;
+        padding: 28px;
+    }
+    .storefront-logo {
+        margin-bottom: 20px;
     }
     .card-body {
         padding: 20px;
@@ -1117,6 +1276,25 @@ crica-affiliate-card {
     }
     .catalog-note {
         font-size: 12px;
+    }
+}
+@media (max-width: 350px) {
+    .header-inner nav {
+        gap: 8px;
+    }
+    .header-inner nav a {
+        font-size: 12px;
+    }
+    .header-socials {
+        gap: 4px;
+    }
+    .header-socials a {
+        width: 32px;
+        height: 32px;
+    }
+    .header-socials img {
+        width: 18px;
+        height: 18px;
     }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -7,7 +7,7 @@ import {
     RouterLinkActive,
     CanDeactivateFn,
 } from '@angular/router';
-import { CatalogService } from '../services/catalog.service';
+import { AdminCatalogService } from '../services/admin-catalog.service';
 import { AuthService } from '../services/auth.service';
 import { normalize } from '../services/contact';
 import { priceLabel, PLATFORMS, validateItem, validateType } from '../services/local-store';
@@ -22,7 +22,7 @@ import adminTemplate from './admin.html?raw';
     template: adminTemplate,
 })
 export class AdminComponent {
-    catalog = inject(CatalogService);
+    catalog = inject(AdminCatalogService);
     auth = inject(AuthService);
     router = inject(Router);
     route = inject(ActivatedRoute);
@@ -38,6 +38,7 @@ export class AdminComponent {
     isNew = false;
     baseline = '';
     whatsapp = this.catalog.whatsappNumber;
+    readonly readOnly = false;
     draft: Product & Partial<AffiliateProduct> = {
         id: '',
         name: '',
@@ -250,7 +251,7 @@ export class AdminComponent {
         this.errors = [error instanceof Error ? error.message : 'Não foi possível salvar.'];
         setTimeout(() => document.getElementById('form-errors')?.focus());
     }
-    save(status?: ItemStatus) {
+    async save(status?: ItemStatus) {
         this.errors = [];
         const d = { ...structuredClone(this.draft), status: status ?? this.draft.status };
         const item =
@@ -269,8 +270,8 @@ export class AdminComponent {
                   }
                 : { ...d, image: this.images[0] || undefined };
         try {
-            if (this.section === 'loja') this.catalog.saveProduct(item as Product);
-            else this.catalog.saveAffiliate(item as AffiliateProduct);
+            if (this.section === 'loja') await this.catalog.saveProduct(item as Product);
+            else await this.catalog.saveAffiliate(item as AffiliateProduct);
             this.editing = false;
             this.notice =
                 d.status === 'published'
@@ -283,7 +284,7 @@ export class AdminComponent {
             this.error(e);
         }
     }
-    toggle(item: Product | AffiliateProduct) {
+    async toggle(item: Product | AffiliateProduct) {
         this.errors = [];
         try {
             const updated = {
@@ -291,8 +292,8 @@ export class AdminComponent {
                 status: (item.status === 'inactive' ? 'draft' : 'inactive') as ItemStatus,
             };
             this.section === 'loja'
-                ? this.catalog.saveProduct(updated as Product)
-                : this.catalog.saveAffiliate(updated as AffiliateProduct);
+                ? await this.catalog.saveProduct(updated as Product)
+                : await this.catalog.saveAffiliate(updated as AffiliateProduct);
             this.notice =
                 updated.status === 'draft'
                     ? 'Cadastro reativado como rascunho. Revise e publique quando estiver pronto.'
@@ -309,9 +310,9 @@ export class AdminComponent {
         this.notice = '';
         this.baseline = this.snapshot();
     }
-    saveType() {
+    async saveType() {
         try {
-            this.catalog.saveType(this.typeDraft);
+            await this.catalog.saveType(this.typeDraft);
             this.editing = false;
             this.errors = [];
             this.notice = 'Tipo salvo. Os cadastros vinculados acompanham o nome atualizado.';
@@ -319,9 +320,9 @@ export class AdminComponent {
             this.error(e);
         }
     }
-    toggleType(t: CatalogType) {
+    async toggleType(t: CatalogType) {
         try {
-            this.catalog.saveType({ ...t, active: !t.active });
+            await this.catalog.saveType({ ...t, active: !t.active });
             this.errors = [];
             this.notice = t.active
                 ? 'Tipo desativado para novos cadastros. Os itens existentes foram preservados.'
@@ -330,28 +331,12 @@ export class AdminComponent {
             this.error(e);
         }
     }
-    saveSettings() {
+    async saveSettings() {
         try {
-            this.catalog.saveSettings(this.whatsapp.trim());
+            await this.catalog.saveSettings(this.whatsapp.trim());
             this.whatsapp = this.catalog.whatsappNumber;
             this.errors = [];
             this.notice = 'Configurações salvas neste navegador.';
-        } catch (e) {
-            this.error(e);
-        }
-    }
-    reset() {
-        if (
-            !window.confirm(
-                'Restaurar os exemplos? Todos os cadastros, fotos e configurações salvos neste navegador serão substituídos.',
-            )
-        )
-            return;
-        try {
-            this.catalog.reset();
-            this.whatsapp = this.catalog.whatsappNumber;
-            this.errors = [];
-            this.notice = 'Dados de demonstração restaurados.';
         } catch (e) {
             this.error(e);
         }

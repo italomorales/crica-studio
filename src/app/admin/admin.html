@@ -30,7 +30,7 @@
         </nav>
         <div class="sidebar-bottom">
             <a routerLink="/loja">← Ver site</a>
-            <button type="button" (click)="logout()">Sair da demonstração</button>
+            <button type="button" (click)="logout()">Sair</button>
             <small>
                 Crica Studio
                 <br />
@@ -41,7 +41,7 @@
     <div class="admin-workspace">
         <header class="admin-topbar">
             <span>Seu studio, organizado.</span>
-            <span class="demo-badge">Demonstração local</span>
+            <span class="demo-badge">Conectado à API</span>
         </header>
         <main class="admin-main">
             <div class="admin-page-heading">
@@ -53,16 +53,14 @@
                     <h1>{{ editing ? (isNew ? 'Novo cadastro' : 'Editar cadastro') : title }}</h1>
                     <p>{{ subtitle }}</p>
                 </div>
-                @if (!editing && section !== 'configuracoes') {
+                @if (!editing && section !== 'configuracoes' && !readOnly) {
                 <button class="primary" (click)="create()">
                     + {{ section === 'tipos' ? 'Novo tipo' : section === 'loja' ? 'Novo produto' :
                     'Nova indicação' }}
                 </button>
                 }
             </div>
-            @if (catalog.storageWarning()) {
-            <div class="admin-notice" role="status">{{ catalog.storageWarning() }}</div>
-            } @if (notice) {
+            @if (notice) {
             <div class="success-notice" role="status">{{ notice }}</div>
             } @if (errors.length) {
             <div class="error-summary" role="alert" tabindex="-1" id="form-errors">
@@ -73,7 +71,25 @@
                     }
                 </ul>
             </div>
-            } @if (section === 'configuracoes') {
+            } @if (catalog.loading()) {
+            <div class="admin-notice" role="status">Carregando dados administrativos…</div>
+            } @else if (catalog.error()) {
+            <div class="error-summary" role="alert">
+                <strong>Não foi possível carregar a administração</strong>
+                <p>{{ catalog.error() }}</p>
+                <button class="secondary" type="button" (click)="catalog.load()">Tentar novamente</button>
+            </div>
+            } @else { @if (section === 'configuracoes' && readOnly) {
+            <section class="admin-panel settings-panel">
+                <h2>Atendimento pelo WhatsApp</h2>
+                <p>Um único contato para todos os pedidos da loja.</p>
+                <p><strong>{{ catalog.whatsappNumber || 'Contato em configuração' }}</strong></p>
+            </section>
+            <section class="admin-panel settings-panel">
+                <h2>Administração conectada</h2>
+                <p>Os dados exibidos aqui vêm do banco de dados. A edição será habilitada na próxima fase.</p>
+            </section>
+            } @else if (section === 'configuracoes') {
             <section class="admin-panel settings-panel">
                 <h2>Atendimento pelo WhatsApp</h2>
                 <p>Um único contato para todos os pedidos da loja.</p>
@@ -94,21 +110,11 @@
                 </form>
             </section>
             <section class="admin-panel settings-panel">
-                <h2>Dados desta demonstração</h2>
+                <h2>Dados centralizados</h2>
                 <p>
-                    As alterações ficam neste navegador, inclusive após atualizar a página. Outro
-                    dispositivo começa com os exemplos iniciais. O login é apenas uma simulação.
+                    Cadastros, configurações e imagens são compartilhados entre dispositivos e
+                    aparecem no site conforme o status de publicação.
                 </p>
-                <p>
-                    O catálogo público deste navegador acompanha os cadastros publicados. Fotos e
-                    rascunhos também ficam armazenados localmente.
-                </p>
-                <button class="secondary danger-button" type="button" (click)="reset()">
-                    Restaurar dados de demonstração
-                </button>
-                <small>
-                    Apaga seus cadastros locais e restaura os exemplos. Pediremos confirmação.
-                </small>
             </section>
             } @else if (editing && section === 'tipos') {
             <section class="admin-panel type-editor">
@@ -210,6 +216,7 @@
                         <crica-image-picker
                             [images]="images"
                             [limit]="section === 'loja' ? 5 : 1"
+                            [category]="section === 'loja' ? 'products' : 'affiliates'"
                             (changed)="images = $event" />
                     </section>
                     @if (section === 'loja') {
@@ -347,12 +354,12 @@
                         <span class="status-pill" [class.published]="t.active">
                             {{ t.active ? 'Ativo' : 'Inativo' }}
                         </span>
-                        <div class="row-actions">
+                        @if (!readOnly) { <div class="row-actions">
                             <button (click)="editType(t)">Editar</button>
                             <button (click)="toggleType(t)">
                                 {{ t.active ? 'Desativar' : 'Ativar' }}
                             </button>
-                        </div>
+                        </div> }
                     </article>
                     } @empty {
                     <div class="empty">
@@ -420,7 +427,7 @@
                     <span>Produto</span>
                     <span>{{ section === 'loja' ? 'Preço' : 'Plataforma' }}</span>
                     <span>Status</span>
-                    <span>Ações</span>
+                    <span>{{ readOnly ? 'Modo' : 'Ações' }}</span>
                 </div>
                 @for (item of filtered; track item.id) {
                 <article class="admin-product-row">
@@ -434,7 +441,7 @@
                         <div class="row-image-placeholder" aria-hidden="true">C</div>
                         }
                         <div>
-                            <button class="row-title" (click)="edit(item)">{{ item.name }}</button>
+                            <span class="row-title">{{ item.name }}</span>
                             <p>{{ catalog.typeName(item.typeId) }} · Ordem {{ item.order }}</p>
                         </div>
                     </div>
@@ -447,7 +454,7 @@
                         [class.draft]="item.status === 'draft'">
                         {{ statusLabel(item.status) }}
                     </span>
-                    <div class="row-actions">
+                    @if (readOnly) { <div class="row-actions"><span>Somente leitura</span></div> } @else { <div class="row-actions">
                         <button (click)="edit(item)" [attr.aria-label]="'Editar ' + item.name">
                             Editar
                         </button>
@@ -463,7 +470,7 @@
                   ">
                             {{ item.status === 'inactive' ? 'Ativar' : 'Desativar' }}
                         </button>
-                    </div>
+                    </div> }
                 </article>
                 } @empty {
                 <div class="empty">
@@ -473,8 +480,8 @@
                 </div>
                 }
             </section>
-            <p class="admin-footnote">
-                Publicado aqui, visível no catálogo deste navegador. Rascunhos ficam só na
+            } <p class="admin-footnote">
+                Os dados publicados aparecem no catálogo público; rascunhos ficam apenas na
                 administração.
             </p>
             }

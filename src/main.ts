@@ -4,7 +4,7 @@ import { Component, inject } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Router, RouterOutlet, withInMemoryScrolling } from '@angular/router';
 import { HeaderComponent, FooterComponent } from './app/components/shared';
-import { ShopComponent, SuppliersComponent } from './app/pages';
+import { ShopComponent, SuppliersComponent, StorefrontComponent } from './app/pages';
 import './styles.css';
 import './admin.css';
 import { LoginComponent } from './app/admin/login';
@@ -39,6 +39,7 @@ bootstrapApplication(AppComponent, {
                     component: SuppliersComponent,
                     title: 'Fornecedores | Crica Studio',
                 },
+                { path: 'vitrine', component: StorefrontComponent, title: 'Vitrines | Crica Studio' },
                 { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
                 { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
                 ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({
