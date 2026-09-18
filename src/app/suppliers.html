@@ -15,13 +15,6 @@
             Aqui, a compra acontece em outras plataformas.
         </p>
     </section>
-    <aside class="affiliate-notice">
-        <span aria-hidden="true">↗</span>
-        <p>
-            Esta página contém links de afiliado. Podemos receber comissão pelas compras realizadas
-            por esses links. A compra acontece na plataforma indicada.
-        </p>
-    </aside>
     <section aria-label="Produtos indicados">
         <crica-filters
             [options]="['Todos', 'Shopee', 'Mercado Livre', 'TikTok Shop', 'AliExpress', 'Outra']"
@@ -37,7 +30,6 @@
                 Catálogo indisponível } @else { {{ filtered.length }} {{ filtered.length === 1 ?
                 'indicação' : 'indicações' }} }
             </p>
-            <span class="demo-note">Seleção demonstrativa</span>
             @if (query || platform !== 'Todos') {
             <button class="clear" (click)="clear()">Limpar filtros ×</button>
             }
@@ -64,9 +56,6 @@
             </div>
             } }
         </div>
-        <p class="catalog-note">
-            Seleção demonstrativa. Consulte condições e disponibilidade na plataforma indicada.
-        </p>
     </section>
 </main>
 <crica-details #details />

@@ -581,6 +581,7 @@ footer {
 }
 .supplier-intro {
     max-width: 750px;
+    margin-bottom: 32px;
 }
 .supplier-intro h1 {
     font-size: 48px;
