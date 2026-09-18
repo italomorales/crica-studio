@@ -18,7 +18,9 @@ type AffiliateFilters = { query: string; platform?: string };
 @Injectable({ providedIn: 'root' })
 export class PublicCatalogService {
     readonly products = signal<Product[]>([]);
+    readonly featuredProducts = signal<Product[]>([]);
     readonly affiliates = signal<AffiliateProduct[]>([]);
+    readonly featuredAffiliates = signal<AffiliateProduct[]>([]);
     readonly types = signal<CatalogType[]>([]);
     readonly whatsappNumber = signal('');
     readonly productsTotal = signal(0);
@@ -57,6 +59,7 @@ export class PublicCatalogService {
                 pageSize: PAGE_SIZE,
                 query: normalize(filters.query),
                 typeId: filters.typeId,
+                featured: false,
             });
             if (request !== this.productsRequest) return;
             const typeNames = new Map(this.types().map((type) => [type.id, type.name]));
@@ -72,6 +75,26 @@ export class PublicCatalogService {
                 this.productsError.set('Não foi possível carregar o catálogo. Tente novamente.');
         } finally {
             if (request === this.productsRequest) this.productsLoading.set(false);
+        }
+    }
+
+    async loadFeaturedProducts() {
+        try {
+            await this.ensureMeta();
+            const result = await this.fetchPage<ApiProduct>('products', {
+                page: 1,
+                pageSize: 3,
+                featured: true,
+            });
+            const typeNames = new Map(this.types().map((type) => [type.id, type.name]));
+            this.featuredProducts.set(
+                result.items.map((product) => ({
+                    ...product,
+                    category: typeNames.get(product.typeId) ?? 'Sem tipo',
+                })),
+            );
+        } catch {
+            this.featuredProducts.set([]);
         }
     }
 
@@ -91,6 +114,7 @@ export class PublicCatalogService {
                 pageSize: PAGE_SIZE,
                 query: normalize(filters.query),
                 platform: filters.platform,
+                featured: false,
             });
             if (request !== this.affiliatesRequest) return;
             const typeNames = new Map(this.types().map((type) => [type.id, type.name]));
@@ -106,6 +130,26 @@ export class PublicCatalogService {
                 this.affiliatesError.set('Não foi possível carregar as indicações. Tente novamente.');
         } finally {
             if (request === this.affiliatesRequest) this.affiliatesLoading.set(false);
+        }
+    }
+
+    async loadFeaturedAffiliates() {
+        try {
+            await this.ensureMeta();
+            const result = await this.fetchPage<ApiAffiliate>('affiliates', {
+                page: 1,
+                pageSize: 3,
+                featured: true,
+            });
+            const typeNames = new Map(this.types().map((type) => [type.id, type.name]));
+            this.featuredAffiliates.set(
+                result.items.map((affiliate) => ({
+                    ...affiliate,
+                    category: typeNames.get(affiliate.typeId) ?? 'Sem tipo',
+                })),
+            );
+        } catch {
+            this.featuredAffiliates.set([]);
         }
     }
 
@@ -132,7 +176,7 @@ export class PublicCatalogService {
         return this.settingsPromise;
     }
 
-    private async fetchPage<T>(resource: 'products' | 'affiliates', params: Record<string, string | number | undefined>) {
+    private async fetchPage<T>(resource: 'products' | 'affiliates', params: Record<string, string | number | boolean | undefined>) {
         const search = new URLSearchParams();
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined && value !== '') search.set(key, String(value));

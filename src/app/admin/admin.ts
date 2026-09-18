@@ -50,6 +50,7 @@ export class AdminComponent {
         characteristics: [],
         personalization: [],
         demo: true,
+        featured: false,
     };
     images: string[] = [];
     characteristics = '';
@@ -210,6 +211,7 @@ export class AdminComponent {
                 characteristics: [],
                 personalization: [],
                 demo: true,
+                featured: false,
                 priceMode: 'consult',
                 status: 'draft',
                 order: this.items.reduce((n, p) => Math.max(n, p.order || 0), 0) + 10,

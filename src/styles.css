@@ -266,6 +266,70 @@ a:focus-visible {
     object-fit: contain;
     mix-blend-mode: multiply;
 }
+.hero-featured {
+    display: block;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+.hero-featured > img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+.hero-product-name {
+    position: absolute;
+    left: 20px;
+    bottom: 18px;
+    max-width: calc(100% - 40px);
+    padding: 7px 10px;
+    border-radius: 3px;
+    background: rgb(255 255 255 / 88%);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+.hero-carousel-controls {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hero-carousel-controls > button,
+.hero-carousel-dots button {
+    border: 1px solid rgb(23 48 79 / 18%);
+    background: rgb(255 255 255 / 92%);
+    color: var(--ink);
+}
+.hero-carousel-controls > button {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 18px;
+}
+.hero-carousel-dots {
+    display: flex;
+    gap: 5px;
+}
+.hero-carousel-dots button {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border-radius: 50%;
+}
+.hero-carousel-dots button.active {
+    background: var(--blue);
+    border-color: var(--blue);
+}
 .hero-art:after {
     content: '';
     position: absolute;
@@ -581,7 +645,18 @@ footer {
 }
 .supplier-intro {
     max-width: 750px;
-    margin-bottom: 32px;
+}
+.suppliers-hero {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    align-items: center;
+    gap: 64px;
+    margin-bottom: 42px;
+}
+.supplier-kicker {
+    display: flex;
+    align-items: center;
+    gap: 9px;
 }
 .load-more {
     display: grid;
@@ -611,6 +686,21 @@ footer {
 }
 .supplier-intro p {
     font-size: 16px;
+}
+.supplier-featured-art .hero-featured,
+.supplier-featured-art crica-product-image,
+.supplier-featured-art .product-visual,
+.supplier-featured-art .product-visual > img,
+.supplier-featured-art .image-placeholder {
+    display: block;
+    height: 100%;
+}
+.supplier-featured-art .product-visual {
+    aspect-ratio: auto;
+}
+.supplier-featured-art .product-visual > img {
+    width: 100%;
+    object-fit: cover !important;
 }
 .affiliate-notice {
     display: flex;
@@ -1234,6 +1324,11 @@ crica-affiliate-card {
     }
     .supplier-intro p {
         font-size: 15px;
+    }
+    .suppliers-hero {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        margin-bottom: 32px;
     }
     .affiliate-notice {
         padding: 16px;

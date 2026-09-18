@@ -266,6 +266,13 @@
                         <p class="field-help">
                             O pedido continua pelo WhatsApp, sem carrinho ou pagamento no site.
                         </p>
+                        <label class="check-label">
+                            <input type="checkbox" name="featured" [(ngModel)]="draft.featured" />
+                            Destacar no carrossel da Loja
+                        </label>
+                        <p class="field-help">
+                            Você pode manter até três produtos publicados em destaque.
+                        </p>
                     </section>
                     } @else {
                     <section class="admin-panel">
@@ -298,9 +305,12 @@
                                 [(ngModel)]="draft.demoListing" />
                             Indicação de demonstração
                         </label>
+                        <label class="check-label">
+                            <input type="checkbox" name="featured" [(ngModel)]="draft.featured" />
+                            Destacar nos Fornecedores
+                        </label>
                         <p class="field-help">
-                            Permite experimentar sem foto ou anúncio real. O botão mostra uma
-                            explicação até você configurar o destino.
+                            Você pode manter até três indicações publicadas em destaque.
                         </p>
                     </section>
                     }

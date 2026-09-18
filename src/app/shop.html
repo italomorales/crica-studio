@@ -19,13 +19,44 @@
                 <span aria-hidden="true">↓</span>
             </a>
         </div>
-        <div class="hero-art">
+        <div
+            class="hero-art"
+            (mouseenter)="stopCarousel()"
+            (mouseleave)="startCarousel()">
+            @if (featuredProduct; as product) {
+            <button
+                class="hero-featured"
+                type="button"
+                (click)="details.open(product)"
+                [attr.aria-label]="'Ver detalhes de ' + product.name">
+                <img [src]="product.images[0]" [alt]="product.name" width="640" height="640" />
+                <span class="hero-label">Em destaque</span>
+                <span class="hero-product-name">{{ product.name }}</span>
+            </button>
+            @if (catalog.featuredProducts().length > 1) {
+            <div class="hero-carousel-controls" aria-label="Destaques da loja">
+                <button type="button" (click)="previousFeatured()" aria-label="Destaque anterior">←</button>
+                <div class="hero-carousel-dots">
+                    @for (item of catalog.featuredProducts(); track item.id; let i = $index) {
+                    <button
+                        type="button"
+                        [class.active]="i === featuredIndex"
+                        (click)="selectFeatured(i)"
+                        [attr.aria-label]="'Ver destaque ' + (i + 1)"
+                        [attr.aria-current]="i === featuredIndex ? 'true' : null"></button>
+                    }
+                </div>
+                <button type="button" (click)="nextFeatured()" aria-label="Próximo destaque">→</button>
+            </div>
+            }
+            } @else {
             <img
                 src="/assets/hero.webp"
                 alt="Caneca com estampa botânica — composição ilustrativa"
                 width="640"
                 height="640" />
             <span class="hero-label">Feito para você.</span>
+            }
         </div>
     </section>
     <section id="catalogo" class="catalog container" aria-labelledby="catalog-title">

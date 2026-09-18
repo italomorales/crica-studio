@@ -1,20 +1,68 @@
 <main id="main" class="suppliers container">
-    <section class="supplier-intro">
-        <span class="eyebrow">
-            <i></i>
-            PARA QUEM TAMBÉM CRIA
-        </span>
-        <h1>
-            Fornecedores
-            <span class="small-lime"></span>
-        </h1>
-        <h2>Materiais e produtos indicados pela Crica</h2>
-        <p>
-            Explore materiais, embalagens e acessórios para suas ideias.
-            <br />
-            Aqui, a compra acontece em outras plataformas.
-        </p>
-    </section>
+    <div class="suppliers-hero">
+        <section class="supplier-intro">
+            <span class="eyebrow supplier-kicker">
+                <i></i>
+                PARA QUEM TAMBÉM CRIA
+            </span>
+            <h1>
+                Fornecedores
+                <span class="small-lime"></span>
+            </h1>
+            <h2>Materiais e produtos indicados pela Crica</h2>
+            <p>
+                Explore materiais, embalagens e acessórios para suas ideias.
+                <br />
+                Aqui, a compra acontece em outras plataformas.
+            </p>
+        </section>
+        @if (featuredAffiliate; as product) {
+        <section
+            class="hero-art supplier-featured-art"
+            aria-label="Fornecedor em destaque"
+            (mouseenter)="stopCarousel()"
+            (mouseleave)="startCarousel()">
+            @if (featuredUrl(product); as url) {
+            <a
+                class="hero-featured"
+                [href]="url"
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                [attr.aria-label]="'Ver indicação de ' + product.name">
+                <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+                <span class="hero-label">Em destaque</span>
+                <span class="hero-product-name">{{ product.name }}</span>
+            </a>
+            } @else {
+            <button
+                class="hero-featured"
+                type="button"
+                (click)="details.openAffiliate(product)"
+                [attr.aria-label]="'Ver indicação de ' + product.name">
+                <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+                <span class="hero-label">Em destaque</span>
+                <span class="hero-product-name">{{ product.name }}</span>
+            </button>
+            }
+            @if (catalog.featuredAffiliates().length > 1) {
+            <div class="hero-carousel-controls" aria-label="Destaques dos fornecedores">
+                <button type="button" (click)="previousFeatured()" aria-label="Destaque anterior">←</button>
+                <div class="hero-carousel-dots">
+                    @for (item of catalog.featuredAffiliates(); track item.id; let i = $index) {
+                    <button
+                        type="button"
+                        [class.active]="i === featuredIndex"
+                        (click)="selectFeatured(i)"
+                        [attr.aria-label]="'Ver destaque ' + (i + 1)"
+                        [attr.aria-current]="i === featuredIndex ? 'true' : null"></button>
+                    }
+                </div>
+                <button type="button" (click)="nextFeatured()" aria-label="Próximo destaque">→</button>
+            </div>
+            }
+        </section>
+        }
+    </div>
     <section aria-label="Produtos indicados">
         <crica-filters
             [options]="['Todos', 'Shopee', 'Mercado Livre', 'TikTok Shop', 'AliExpress', 'Outra']"

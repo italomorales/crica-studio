@@ -23,6 +23,7 @@ export interface Product extends ManagedFields {
     characteristics: string[];
     personalization: string[];
     demo: boolean;
+    featured?: boolean;
     priceMode?: PriceMode;
     price?: number;
 }
@@ -36,6 +37,7 @@ export interface AffiliateProduct extends ManagedFields {
     url?: string;
     seller?: string;
     demoListing?: boolean;
+    featured?: boolean;
 }
 export interface CatalogState {
     version: 1;

@@ -112,6 +112,7 @@ export class AdminCatalogService {
             priceMode: product.priceMode,
             price: product.price,
             demo: product.demo,
+            featured: product.featured ?? false,
             characteristics: product.characteristics,
             personalization: product.personalization,
             images: product.images,
@@ -124,6 +125,7 @@ export class AdminCatalogService {
             typeId: product.typeId, name: product.name, description: product.description,
             platform: product.platform, image: product.image, url: product.url, seller: product.seller,
             demoListing: product.demoListing, status: product.status, order: product.order,
+            featured: product.featured ?? false,
         });
     }
     async saveType(type: CatalogType) { await this.write('types', type.id, type); }
