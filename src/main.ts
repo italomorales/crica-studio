@@ -11,6 +11,7 @@ import { LoginComponent } from './app/admin/login';
 import { AdminComponent, unsavedGuard } from './app/admin/admin';
 import { authGuard } from './app/services/auth.service';
 import { ConstructionComponent } from './app/construction';
+import { SeoService } from './app/services/seo.service';
 import appTemplate from './app.html?raw';
 
 @Component({
@@ -20,8 +21,10 @@ import appTemplate from './app.html?raw';
     template: appTemplate,
 })
 class AppComponent {
-    readonly showConstruction = import.meta.env.PROD || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'construction');
-    // readonly showConstruction = false;
+    readonly seo = inject(SeoService);
+    // Keep the public routes available in production. The temporary landing page can be enabled
+    // only for an intentional deployment with VITE_SHOW_CONSTRUCTION=true.
+    readonly showConstruction = import.meta.env.VITE_SHOW_CONSTRUCTION === 'true';
     
     router = inject(Router);
     get isAdmin() {
@@ -33,13 +36,21 @@ bootstrapApplication(AppComponent, {
         provideRouter(
             [
                 { path: '', redirectTo: 'loja', pathMatch: 'full' },
-                { path: 'loja', component: ShopComponent, title: 'Loja Crica | Crica Studio' },
+                {
+                    path: 'loja',
+                    component: ShopComponent,
+                    title: 'Canecas e Bottons Personalizados | Crica Studio',
+                },
                 {
                     path: 'fornecedores',
                     component: SuppliersComponent,
-                    title: 'Fornecedores | Crica Studio',
+                    title: 'Máquinas de Bottons e Canecas para Personalizar | Crica Studio',
                 },
-                { path: 'vitrine', component: StorefrontComponent, title: 'Vitrines | Crica Studio' },
+                {
+                    path: 'vitrine',
+                    component: StorefrontComponent,
+                    title: 'Vitrines da Crica Studio | Produtos Personalizados',
+                },
                 { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
                 { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
                 ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({

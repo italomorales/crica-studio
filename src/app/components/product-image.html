@@ -2,7 +2,7 @@
     @if (src && !failed) {
     <img
         [src]="src"
-        [alt]="alt + ' — imagem ilustrativa'"
+        [alt]="alt"
         (error)="failed = true"
         loading="lazy"
         width="640"
