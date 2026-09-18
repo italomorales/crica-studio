@@ -39,12 +39,12 @@
             [options]="categories"
             [selected]="category"
             [query]="query"
-            (selection)="category = $event"
-            (search)="query = $event" />
+            (selection)="select($event)"
+            (search)="search($event)" />
         <div class="results-row">
             <p aria-live="polite">
-                @if (catalog.loading()) { Carregando modelos... } @else if (catalog.error()) {
-                Catálogo indisponível } @else { {{ filtered.length }} {{ filtered.length === 1 ?
+                @if (catalog.productsLoading() && !catalog.products().length) { Carregando modelos... } @else if (catalog.productsError()) {
+                Catálogo indisponível } @else { {{ catalog.productsTotal() }} {{ catalog.productsTotal() === 1 ?
                 'modelo' : 'modelos' }} para personalizar }
             </p>
             @if (query || category !== 'Todos') {
@@ -52,18 +52,18 @@
             }
         </div>
         <div class="product-grid">
-            @if (catalog.loading()) {
+            @if (catalog.productsLoading() && !catalog.products().length) {
             <div class="empty" aria-live="polite">
                 <h3>Carregando catálogo</h3>
                 <p>Estamos buscando os modelos disponíveis.</p>
             </div>
-            } @else if (catalog.error()) {
-            <div class="empty" role="alert">
-                <h3>Não foi possível carregar o catálogo</h3>
-                <p>{{ catalog.error() }}</p>
-                <button class="secondary" (click)="catalog.load()">Tentar novamente</button>
-            </div>
-            } @else { @for (product of filtered; track product.id) {
+            } @else if (catalog.productsError() && !catalog.products().length) {
+                <div class="empty" role="alert">
+                    <h3>Não foi possível carregar o catálogo</h3>
+                <p>{{ catalog.productsError() }}</p>
+                <button class="secondary" (click)="refresh()">Tentar novamente</button>
+                </div>
+            } @else { @for (product of catalog.products(); track product.id) {
             <crica-product-card
                 [product]="product"
                 (details)="details.open($event)"
@@ -76,6 +76,17 @@
             </div>
             } }
         </div>
+        @if (catalog.products().length && catalog.hasMoreProducts) {
+        <div class="load-more">
+            <span>Exibindo {{ catalog.products().length }} de {{ catalog.productsTotal() }} modelos</span>
+            @if (catalog.productsError()) {
+            <span role="alert">{{ catalog.productsError() }}</span>
+            }
+            <button class="secondary" (click)="loadMore()" [disabled]="catalog.productsLoading()">
+                {{ catalog.productsLoading() ? 'Carregando...' : 'Carregar mais produtos' }}
+            </button>
+        </div>
+        }
     </section>
     <section class="how-section">
         <div class="container">

@@ -1,6 +1,5 @@
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { PublicCatalogService } from './services/public-catalog.service';
-import { normalize } from './services/contact';
 import { FiltersComponent } from './components/shared';
 import { ProductCardComponent, AffiliateCardComponent } from './components/cards';
 import { DetailsComponent } from './components/details';
@@ -15,24 +14,48 @@ import { SITE_CONFIG } from './data/site.config';
     imports: [FiltersComponent, ProductCardComponent, DetailsComponent],
     template: shopTemplate,
 })
-export class ShopComponent {
+export class ShopComponent implements OnInit, OnDestroy {
     catalog = inject(PublicCatalogService);
     category = 'Todos';
     query = '';
+    private searchTimer?: ReturnType<typeof setTimeout>;
     get categories() {
-        return ['Todos', ...new Set(this.catalog.products().map((p) => p.category))];
+        return [
+            'Todos',
+            ...this.catalog
+                .types()
+                .filter((type) => type.scope === 'shop' || type.scope === 'both')
+                .map((type) => type.name),
+        ];
     }
-    get filtered() {
-        const q = normalize(this.query);
-        return this.catalog.products().filter(
-            (p) =>
-                (this.category === 'Todos' || p.category === this.category) &&
-                normalize(p.name + ' ' + p.description).includes(q),
-        );
+    ngOnInit() {
+        void this.refresh();
+    }
+    ngOnDestroy() {
+        clearTimeout(this.searchTimer);
+    }
+    select(category: string) {
+        this.category = category;
+        void this.refresh();
+    }
+    search(query: string) {
+        this.query = query;
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => void this.refresh(), 300);
+    }
+    refresh() {
+        const typeId = this.catalog.types().find((type) => type.name === this.category)?.id;
+        return this.catalog.loadShop({ query: this.query, typeId });
+    }
+    loadMore() {
+        const typeId = this.catalog.types().find((type) => type.name === this.category)?.id;
+        return this.catalog.loadShop({ query: this.query, typeId }, true);
     }
     clear() {
+        clearTimeout(this.searchTimer);
         this.category = 'Todos';
         this.query = '';
+        void this.refresh();
     }
 }
 @Component({
@@ -41,21 +64,43 @@ export class ShopComponent {
     imports: [FiltersComponent, AffiliateCardComponent, DetailsComponent],
     template: suppliersTemplate,
 })
-export class SuppliersComponent {
+export class SuppliersComponent implements OnInit, OnDestroy {
     catalog = inject(PublicCatalogService);
     platform = 'Todos';
     query = '';
-    get filtered() {
-        const q = normalize(this.query);
-        return this.catalog.affiliates().filter(
-            (p) =>
-                (this.platform === 'Todos' || p.platform === this.platform) &&
-                normalize(p.name).includes(q),
+    private searchTimer?: ReturnType<typeof setTimeout>;
+    ngOnInit() {
+        void this.refresh();
+    }
+    ngOnDestroy() {
+        clearTimeout(this.searchTimer);
+    }
+    select(platform: string) {
+        this.platform = platform;
+        void this.refresh();
+    }
+    search(query: string) {
+        this.query = query;
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => void this.refresh(), 300);
+    }
+    refresh() {
+        return this.catalog.loadAffiliates({
+            query: this.query,
+            platform: this.platform === 'Todos' ? undefined : this.platform,
+        });
+    }
+    loadMore() {
+        return this.catalog.loadAffiliates(
+            { query: this.query, platform: this.platform === 'Todos' ? undefined : this.platform },
+            true,
         );
     }
     clear() {
+        clearTimeout(this.searchTimer);
         this.platform = 'Todos';
         this.query = '';
+        void this.refresh();
     }
 }
 @Component({

@@ -391,22 +391,35 @@
                 <div class="admin-filters">
                     <label class="admin-search">
                         <span class="sr-only">Buscar cadastros</span>
-                        <input type="search" placeholder="Buscar por título" [(ngModel)]="query" />
+                        <input
+                            type="search"
+                            placeholder="Buscar por título"
+                            [(ngModel)]="query"
+                            (ngModelChange)="resetPage()" />
                     </label>
-                    <select aria-label="Filtrar por tipo" [(ngModel)]="typeFilter">
+                    <select
+                        aria-label="Filtrar por tipo"
+                        [(ngModel)]="typeFilter"
+                        (ngModelChange)="resetPage()">
                         <option value="all">Todos os tipos</option>
                         @for (t of sectionTypes; track t.id) {
                         <option [value]="t.id">{{ t.name }}</option>
                         }
                     </select>
-                    <select aria-label="Filtrar por status" [(ngModel)]="status">
+                    <select
+                        aria-label="Filtrar por status"
+                        [(ngModel)]="status"
+                        (ngModelChange)="resetPage()">
                         <option value="all">Todos os status</option>
                         <option value="published">Publicados</option>
                         <option value="draft">Rascunhos</option>
                         <option value="inactive">Inativos</option>
                     </select>
                     @if (section === 'fornecedores') {
-                    <select aria-label="Filtrar por plataforma" [(ngModel)]="platformFilter">
+                    <select
+                        aria-label="Filtrar por plataforma"
+                        [(ngModel)]="platformFilter"
+                        (ngModelChange)="resetPage()">
                         <option value="all">Todas as plataformas</option>
                         @for (p of platforms; track p) {
                         <option [value]="p">{{ p }}</option>
@@ -417,6 +430,7 @@
                 <div class="admin-results">
                     <span aria-live="polite">
                         {{ filtered.length }} {{ filtered.length === 1 ? 'cadastro' : 'cadastros' }}
+                        @if (filtered.length) { · Exibindo {{ firstVisibleItem }}–{{ lastVisibleItem }} }
                     </span>
                     @if (query || status !== 'all' || typeFilter !== 'all' || platformFilter !==
                     'all') {
@@ -429,7 +443,7 @@
                     <span>Status</span>
                     <span>{{ readOnly ? 'Modo' : 'Ações' }}</span>
                 </div>
-                @for (item of filtered; track item.id) {
+                @for (item of paginated; track item.id) {
                 <article class="admin-product-row">
                     <div class="row-product">
                         @if (itemImage(item)) {
@@ -478,6 +492,20 @@
                     <p>Tente outro título ou limpe os filtros.</p>
                     <button class="secondary" (click)="clear()">Limpar filtros</button>
                 </div>
+                }
+                @if (filtered.length > pageSize) {
+                <nav class="admin-pagination" aria-label="Paginação de cadastros">
+                    <button type="button" (click)="setPage(page - 1)" [disabled]="page === 1">
+                        Anterior
+                    </button>
+                    <span aria-live="polite">Página {{ page }} de {{ pageCount }}</span>
+                    <button
+                        type="button"
+                        (click)="setPage(page + 1)"
+                        [disabled]="page === pageCount">
+                        Próxima
+                    </button>
+                </nav>
                 }
             </section>
             } <p class="admin-footnote">

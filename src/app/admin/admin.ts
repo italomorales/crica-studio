@@ -22,6 +22,7 @@ import adminTemplate from './admin.html?raw';
     template: adminTemplate,
 })
 export class AdminComponent {
+    readonly pageSize = 20;
     catalog = inject(AdminCatalogService);
     auth = inject(AuthService);
     router = inject(Router);
@@ -32,6 +33,7 @@ export class AdminComponent {
     status = 'all';
     typeFilter = 'all';
     platformFilter = 'all';
+    page = 1;
     notice = '';
     errors: string[] = [];
     editing = false;
@@ -87,6 +89,19 @@ export class AdminComponent {
                 (this.platformFilter === 'all' ||
                     (p as AffiliateProduct).platform === this.platformFilter),
         );
+    }
+    get pageCount() {
+        return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
+    }
+    get paginated() {
+        const start = (Math.min(this.page, this.pageCount) - 1) * this.pageSize;
+        return this.filtered.slice(start, start + this.pageSize);
+    }
+    get firstVisibleItem() {
+        return this.filtered.length ? (Math.min(this.page, this.pageCount) - 1) * this.pageSize + 1 : 0;
+    }
+    get lastVisibleItem() {
+        return Math.min(this.firstVisibleItem + this.pageSize - 1, this.filtered.length);
     }
     get sectionTypes() {
         return this.catalog.types.filter(
@@ -346,6 +361,13 @@ export class AdminComponent {
         this.status = 'all';
         this.typeFilter = 'all';
         this.platformFilter = 'all';
+        this.resetPage();
+    }
+    resetPage() {
+        this.page = 1;
+    }
+    setPage(page: number) {
+        this.page = Math.min(Math.max(page, 1), this.pageCount);
     }
     logout() {
         if (!this.canLeave()) return;

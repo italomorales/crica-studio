@@ -583,6 +583,14 @@ footer {
     max-width: 750px;
     margin-bottom: 32px;
 }
+.load-more {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    margin-top: 36px;
+    color: var(--muted);
+    font-size: 13px;
+}
 .supplier-intro h1 {
     font-size: 48px;
     display: flex;

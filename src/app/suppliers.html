@@ -22,12 +22,12 @@
             searchLabel="Buscar indicações"
             [selected]="platform"
             [query]="query"
-            (selection)="platform = $event"
-            (search)="query = $event" />
+            (selection)="select($event)"
+            (search)="search($event)" />
         <div class="results-row">
             <p aria-live="polite">
-                @if (catalog.loading()) { Carregando indicações... } @else if (catalog.error()) {
-                Catálogo indisponível } @else { {{ filtered.length }} {{ filtered.length === 1 ?
+                @if (catalog.affiliatesLoading() && !catalog.affiliates().length) { Carregando indicações... } @else if (catalog.affiliatesError()) {
+                Catálogo indisponível } @else { {{ catalog.affiliatesTotal() }} {{ catalog.affiliatesTotal() === 1 ?
                 'indicação' : 'indicações' }} }
             </p>
             @if (query || platform !== 'Todos') {
@@ -35,18 +35,18 @@
             }
         </div>
         <div class="product-grid suppliers-grid">
-            @if (catalog.loading()) {
+            @if (catalog.affiliatesLoading() && !catalog.affiliates().length) {
             <div class="empty" aria-live="polite">
                 <h3>Carregando indicações</h3>
                 <p>Estamos buscando os produtos indicados.</p>
             </div>
-            } @else if (catalog.error()) {
-            <div class="empty" role="alert">
-                <h3>Não foi possível carregar as indicações</h3>
-                <p>{{ catalog.error() }}</p>
-                <button class="secondary" (click)="catalog.load()">Tentar novamente</button>
-            </div>
-            } @else { @for (product of filtered; track product.id) {
+            } @else if (catalog.affiliatesError() && !catalog.affiliates().length) {
+                <div class="empty" role="alert">
+                    <h3>Não foi possível carregar as indicações</h3>
+                <p>{{ catalog.affiliatesError() }}</p>
+                <button class="secondary" (click)="refresh()">Tentar novamente</button>
+                </div>
+            } @else { @for (product of catalog.affiliates(); track product.id) {
             <crica-affiliate-card [product]="product" (demo)="details.openAffiliate($event)" />
             } @empty {
             <div class="empty">
@@ -56,6 +56,17 @@
             </div>
             } }
         </div>
+        @if (catalog.affiliates().length && catalog.hasMoreAffiliates) {
+        <div class="load-more">
+            <span>Exibindo {{ catalog.affiliates().length }} de {{ catalog.affiliatesTotal() }} indicações</span>
+            @if (catalog.affiliatesError()) {
+            <span role="alert">{{ catalog.affiliatesError() }}</span>
+            }
+            <button class="secondary" (click)="loadMore()" [disabled]="catalog.affiliatesLoading()">
+                {{ catalog.affiliatesLoading() ? 'Carregando...' : 'Carregar mais indicações' }}
+            </button>
+        </div>
+        }
     </section>
 </main>
 <crica-details #details />

@@ -19,7 +19,6 @@
         <div class="detail-grid">
             <div class="detail-photo">
                 <crica-product-image [src]="product.images[imageIndex]" [alt]="product.name" />
-                <small>Imagem ilustrativa · Modelo de demonstração</small>
                 @if (product.images.length > 1) {
                 <div class="thumbs">
                     @for (src of product.images; track src; let i = $index) {
