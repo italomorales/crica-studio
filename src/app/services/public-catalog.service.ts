@@ -6,7 +6,9 @@ const API_URL = (
     import.meta.env.VITE_API_URL ||
     (import.meta.env.DEV ? '' : 'https://api.cricastudio.com')
 ).replace(/\/$/, '');
-const PAGE_SIZE = 12;
+const DESKTOP_PAGE_SIZE = 12;
+const MOBILE_PAGE_SIZE = 6;
+const MOBILE_BREAKPOINT = 600;
 
 type ApiProduct = Omit<Product, 'category' | 'typeId'> & { typeId: string };
 type ApiAffiliate = Omit<AffiliateProduct, 'category' | 'typeId'> & { typeId: string };
@@ -31,6 +33,8 @@ export class PublicCatalogService {
     readonly affiliatesError = signal('');
     private productsPage = 0;
     private affiliatesPage = 0;
+    private productsPageSize = DESKTOP_PAGE_SIZE;
+    private affiliatesPageSize = DESKTOP_PAGE_SIZE;
     private productsRequest = 0;
     private affiliatesRequest = 0;
     private metaPromise?: Promise<void>;
@@ -49,6 +53,7 @@ export class PublicCatalogService {
         if (!append) {
             this.products.set([]);
             this.productsTotal.set(0);
+            this.productsPageSize = this.pageSize();
         }
         this.productsLoading.set(true);
         this.productsError.set('');
@@ -56,7 +61,7 @@ export class PublicCatalogService {
             await Promise.all([this.ensureMeta(), this.ensureSettings()]);
             const result = await this.fetchPage<ApiProduct>('products', {
                 page,
-                pageSize: PAGE_SIZE,
+                pageSize: this.productsPageSize,
                 query: normalize(filters.query),
                 typeId: filters.typeId,
                 featured: false,
@@ -104,6 +109,7 @@ export class PublicCatalogService {
         if (!append) {
             this.affiliates.set([]);
             this.affiliatesTotal.set(0);
+            this.affiliatesPageSize = this.pageSize();
         }
         this.affiliatesLoading.set(true);
         this.affiliatesError.set('');
@@ -111,7 +117,7 @@ export class PublicCatalogService {
             await this.ensureMeta();
             const result = await this.fetchPage<ApiAffiliate>('affiliates', {
                 page,
-                pageSize: PAGE_SIZE,
+                pageSize: this.affiliatesPageSize,
                 query: normalize(filters.query),
                 platform: filters.platform,
                 featured: false,
@@ -162,6 +168,12 @@ export class PublicCatalogService {
             })
             .finally(() => (this.metaPromise = undefined));
         return this.metaPromise;
+    }
+
+    private pageSize() {
+        return typeof window !== 'undefined' && window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches
+            ? MOBILE_PAGE_SIZE
+            : DESKTOP_PAGE_SIZE;
     }
 
     private async ensureSettings() {

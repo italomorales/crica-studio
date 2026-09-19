@@ -9,7 +9,7 @@ export function validQuantity(value: number): boolean {
     return Number.isSafeInteger(value) && value >= 1;
 }
 export function buildMessage(name: string, quantity: number, idea: string): string {
-    if (!validQuantity(quantity)) throw new Error('Informe uma quantidade inteira a partir de 1.');
+    if (!validQuantity(quantity)) throw new Error('Informe uma quantidade inteira à partir de 1.');
     return (
         `Olá! Vi ${name} no site da Crica Studio e gostaria de um orçamento. Quantidade: ${quantity}.` +
         (idea.trim() ? ` Minha ideia: ${idea.trim()}` : '')

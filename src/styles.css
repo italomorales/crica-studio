@@ -775,6 +775,7 @@ footer {
     margin-inline: auto;
 }
 .storefront-card {
+    position: relative;
     display: flex;
     min-height: 340px;
     flex-direction: column;
@@ -792,6 +793,16 @@ footer {
     height: 72px;
     place-items: center;
     margin-bottom: 24px;
+}
+.storefront-mobile-label {
+    top: 12px;
+    left: 16px;
+}
+.storefront-mobile-link {
+    display: none;
+}
+.storefront-desktop-disabled {
+    cursor: not-allowed;
 }
 .storefront-logo img {
     max-width: 56px;
@@ -999,6 +1010,9 @@ footer {
 }
 .detail-info p {
     font-size: 13px;
+}
+.detail-info .personalization-options span {
+    display: block;
 }
 .detail-info small {
     display: block;
@@ -1284,6 +1298,13 @@ crica-affiliate-card {
     .storefront-card {
         min-height: 250px;
         padding: 28px;
+    }
+    .storefront-mobile-label,
+    .storefront-desktop-disabled {
+        display: none;
+    }
+    .storefront-mobile-link {
+        display: inline-block;
     }
     .storefront-logo {
         margin-bottom: 20px;

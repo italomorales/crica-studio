@@ -36,17 +36,20 @@
                 <strong class="consult">{{ price(product) }}</strong>
                 @if (!preview) {
                 <div class="detail-info">
-                    <h3>Sobre o modelo</h3>
+                    <h3>Características</h3>
                     <ul>
                         @for (item of product.characteristics; track item) {
                         <li>{{ item }}</li>
                         }
                     </ul>
                     <h3>Possibilidades de personalização</h3>
-                    <p>{{ product.personalization.join(' · ') }}</p>
+                    <p class="personalization-options">
+                        @for (option of product.personalization; track option) {
+                        <span>{{ option }}</span>
+                        }
+                    </p>
                     <small>
-                        Materiais, medidas, cores e disponibilidade serão confirmados no
-                        atendimento.
+                        Os preços podem sofrer alterações conforme o modelo e o material escolhidos.
                     </small>
                 </div>
                 <form (ngSubmit)="order()">
@@ -62,7 +65,7 @@
                         [(ngModel)]="quantity"
                         [attr.aria-invalid]="!valid"
                         aria-describedby="quantity-hint" />
-                    <small id="quantity-hint">Informe um número inteiro a partir de 1.</small>
+                    <small id="quantity-hint">Informe um número inteiro à partir de 1.</small>
                     <label for="idea">
                         Conte sua ideia
                         <span>(opcional)</span>

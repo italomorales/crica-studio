@@ -10,6 +10,9 @@
     <section class="storefront-grid" aria-label="Vitrines da Crica Studio">
         @for (storefront of storefronts; track storefront.id) {
         <article class="storefront-card">
+            @if (storefront.id === 'tiktok') {
+            <span class="hero-label storefront-mobile-label">Somente pelo celular</span>
+            }
             <div class="storefront-logo" aria-hidden="true">
                 @switch (storefront.id) {
                     @case ('shopee') {
@@ -28,9 +31,14 @@
                 <p>{{ storefront.description }}</p>
             </div>
             @if (storefront.url) {
-            <a class="storefront-link" [href]="storefront.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na ' + storefront.name + ' (nova aba)'">
+            <a class="storefront-link" [class.storefront-mobile-link]="storefront.id === 'tiktok'" [href]="storefront.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na ' + storefront.name + ' (nova aba)'">
                 Visitar vitrine <span aria-hidden="true">↗</span>
             </a>
+            @if (storefront.id === 'tiktok') {
+            <span class="storefront-pending storefront-desktop-disabled" role="link" aria-disabled="true" aria-label="Visitar vitrine na TikTok Shop: somente pelo celular">
+                Visitar vitrine <span aria-hidden="true">↗</span>
+            </span>
+            }
             } @else {
             <span class="storefront-pending">Disponível em breve</span>
             }

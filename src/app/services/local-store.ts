@@ -2,13 +2,13 @@ import type { CatalogState, Product, AffiliateProduct, CatalogType } from '../da
 import { normalize, externalUrl } from './contact.ts';
 export const STORAGE_KEY = 'crica.catalog.v1';
 export const PLATFORMS = ['Shopee', 'Mercado Livre', 'TikTok Shop', 'AliExpress', 'Outra'] as const;
-export const PRICE_LABELS = { consult: 'Sob consulta', fixed: 'Preço fixo', from: 'A partir de' };
+export const PRICE_LABELS = { consult: 'Sob consulta', fixed: 'Preço fixo', from: 'À partir de' };
 export function priceLabel(p: Product): string {
     if (!p.priceMode || p.priceMode === 'consult' || p.price === undefined) return 'Sob consulta';
     const value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
         p.price,
     );
-    return (p.priceMode === 'from' ? 'A partir de ' : '') + value;
+    return (p.priceMode === 'from' ? 'À partir de ' : '') + value;
 }
 export function safeImage(url: string): boolean {
     return (
@@ -30,7 +30,7 @@ export function validateItem(
         errors.push('Escolha um tipo disponível para este cadastro.');
     else if (!type.active && previous?.typeId !== type.id) errors.push('Escolha um tipo ativo.');
     if (!Number.isSafeInteger(item.order) || item.order! < 0)
-        errors.push('A ordem deve ser um número inteiro a partir de zero.');
+        errors.push('A ordem deve ser um número inteiro à partir de zero.');
     if (!['draft', 'published', 'inactive'].includes(item.status || ''))
         errors.push('Selecione um status válido.');
     if (item.status === 'published' && !item.description.trim())
