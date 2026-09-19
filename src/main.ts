@@ -25,7 +25,8 @@ class AppComponent {
     readonly seo = inject(SeoService);
     // Keep the public routes available in production. The temporary landing page can be enabled
     // only for an intentional deployment with VITE_SHOW_CONSTRUCTION=true.
-    readonly showConstruction = import.meta.env.VITE_SHOW_CONSTRUCTION === 'true';
+    // readonly showConstruction = import.meta.env.VITE_SHOW_CONSTRUCTION === 'true';
+    readonly showConstruction = false;
     
     router = inject(Router);
     get floatingWhatsappUrl() {
