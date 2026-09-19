@@ -993,6 +993,37 @@ footer {
     font-size: 15px;
     margin-top: 16px;
 }
+.floating-whatsapp {
+    position: fixed;
+    right: calc(24px + env(safe-area-inset-right, 0px));
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    z-index: 15;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 56px;
+    padding: 14px 20px;
+    border-radius: 999px;
+    background: #128c46;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+}
+.floating-whatsapp:hover {
+    background: #0e7038;
+}
+.floating-whatsapp:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 4px;
+}
+body:has(dialog[open]) .floating-whatsapp {
+    display: none;
+}
+body:has(.floating-whatsapp) footer {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
 .detail-info {
     border-top: 1px solid var(--line);
     margin-top: 20px;
@@ -1180,6 +1211,16 @@ crica-affiliate-card {
     }
 }
 @media (max-width: 600px) {
+    .floating-whatsapp {
+        right: calc(16px + env(safe-area-inset-right, 0px));
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        width: 56px;
+        height: 56px;
+        padding: 14px;
+    }
+    .floating-whatsapp span {
+        display: none;
+    }
     .container {
         width: calc(100% - 40px);
     }

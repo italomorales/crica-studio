@@ -7,6 +7,15 @@
 <router-outlet />
 @if (!isAdmin) {
 <crica-footer />
+<a
+    class="floating-whatsapp"
+    [href]="floatingWhatsappUrl"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Fale com a Crica pelo WhatsApp (nova aba)">
+    <img src="/assets/construction/whatsapp.svg" alt="" width="28" height="28" />
+    <span>Fale com a Crica</span>
+</a>
 }
 
 }
