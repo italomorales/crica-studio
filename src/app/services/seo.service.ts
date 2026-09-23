@@ -3,7 +3,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
-const SITE_URL = 'https://cricastudio.com';
+const SITE_URL = 'https://www.cricastudio.com.br';
 
 type PageSeo = {
     title: string;

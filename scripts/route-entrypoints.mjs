@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
-const siteUrl = 'https://cricastudio.com';
+const siteUrl = 'https://www.cricastudio.com.br';
 const defaultPage = {
     title: 'Canecas e Bottons Personalizados | Crica Studio',
     description:
