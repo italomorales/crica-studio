@@ -23,7 +23,7 @@ import appTemplate from './app.html?raw';
 })
 class AppComponent {
     readonly seo = inject(SeoService);
-    readonly showConstruction = false;
+    readonly showConstruction = true;
     
     router = inject(Router);
     get floatingWhatsappUrl() {
