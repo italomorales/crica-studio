@@ -32,6 +32,7 @@ export interface AffiliateProduct extends ManagedFields {
     name: string;
     description: string;
     image?: string;
+    images?: string[];
     platform: Platform;
     category: string;
     url?: string;

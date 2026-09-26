@@ -124,7 +124,7 @@ export class AdminCatalogService {
     async saveAffiliate(product: AffiliateProduct) {
         await this.write('affiliates', product.id, {
             typeId: product.typeId, name: product.name, description: product.description,
-            platform: product.platform, image: product.image, url: product.url, seller: product.seller,
+            platform: product.platform, image: product.image, images: product.images ?? (product.image ? [product.image] : []), url: product.url, seller: product.seller,
             demoListing: product.demoListing, status: product.status, order: product.order,
             featured: product.featured ?? false,
         });

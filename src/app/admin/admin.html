@@ -215,13 +215,13 @@
                         }
                     </section>
                     <section class="admin-panel">
-                        <h2>{{ section === 'loja' ? 'Fotos do produto' : 'Foto principal' }}</h2>
+                        <h2>{{ section === 'loja' ? 'Fotos do produto' : 'Fotos do fornecedor' }}</h2>
                         <p>A primeira imagem aparece no card.</p>
                         <crica-image-picker
                             [images]="images"
-                            [limit]="section === 'loja' ? 5 : 1"
+                            [limit]="5"
                             [category]="section === 'loja' ? 'products' : 'affiliates'"
-                            (changed)="images = $event" />
+                            (changed)="images = $event" (uploading)="uploadingImages = $event" />
                     </section>
                     @if (section === 'loja') {
                     <section class="admin-panel">
@@ -329,11 +329,11 @@
                         <p class="field-help">
                             Somente os publicados aparecem no site deste navegador.
                         </p>
-                        <button class="primary full" type="submit">Salvar alterações</button>
-                        <button class="secondary full" type="button" (click)="save('draft')">
+                        <button class="primary full" type="submit" [disabled]="uploadingImages">Salvar alterações</button>
+                        <button class="secondary full" type="button" (click)="save('draft')" [disabled]="uploadingImages">
                             Salvar rascunho
                         </button>
-                        <button class="secondary full" type="button" (click)="save('published')">
+                        <button class="secondary full" type="button" (click)="save('published')" [disabled]="uploadingImages">
                             Publicar
                         </button>
                         <button class="text-link full" type="button" (click)="cancel()">

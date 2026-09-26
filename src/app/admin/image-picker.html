@@ -1,63 +1,160 @@
-<div class="image-editor">
-    <div class="image-previews">
+<div
+    class="photo-manager"
+    (dragover)="overFiles($event)"
+    (dragleave)="leaveFiles($event)"
+    (drop)="dropFiles($event)">
+    <div class="photo-dropzone" [class.drag-over]="draggingFiles" [class.full]="!available || busy">
+        <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true">
+            <path d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" />
+        </svg>
+        <strong>
+            {{ busy ? 'Enviando suas fotos…' : !available ? 'Todas as fotos adicionadas' : 'Arraste
+            suas fotos para cá' }}
+        </strong>
+        <span>
+            {{ !available ? 'Remova uma foto para adicionar outra.' : 'Ou selecione vários arquivos
+            de uma vez' }}
+        </span>
+        <button
+            class="secondary"
+            type="button"
+            [disabled]="busy || !available"
+            (click)="fileInput.click()">
+            Selecionar fotos
+        </button>
+        <input
+            #fileInput
+            type="file"
+            hidden
+            multiple
+            accept="image/png,image/jpeg,image/webp"
+            [disabled]="busy || !available"
+            (change)="upload($event)" />
+        <small>JPG, PNG ou WebP • Até 5 MB por foto • Máximo de {{ limit }} fotos</small>
+    </div>
+    <div class="photo-summary">
+        <strong>{{ images.length }} de {{ limit }} fotos</strong>
+        <span>A primeira foto é a capa</span>
+    </div>
+    @if (images.length || uploads.length) {
+    <ol class="photo-grid" aria-label="Fotos na ordem de exibição">
         @for (image of images; track $index; let i = $index) {
-        <div>
-            <img
-                [src]="image"
-                alt="Imagem cadastrada"
-                (error)="$any($event.target).style.visibility = 'hidden'" />
-            <span>{{ i === 0 ? 'Principal' : 'Foto ' + (i + 1) }}</span>
-            <button type="button" (click)="remove(i)" [attr.aria-label]="'Remover foto ' + (i + 1)">
-                ×
+        <li
+            class="photo-card"
+            [class.drop-target]="overIndex === i"
+            [attr.draggable]="!busy"
+            (dragstart)="startDrag($event, i)"
+            (dragover)="overPhoto($event, i)"
+            (drop)="dropPhoto($event, i)"
+            (dragend)="endDrag()">
+            <div class="photo-frame">
+                @if (failedImages.has(image)) {
+                <span class="photo-unavailable">Prévia indisponível</span>
+                } @else {
+                <img
+                    [src]="image"
+                    [alt]="'Foto ' + (i + 1)"
+                    draggable="false"
+                    (error)="failedImages.add(image)" />
+                }
+                <span class="photo-badge" [class.cover]="i === 0">
+                    {{ i === 0 ? 'Capa' : 'Foto ' + (i + 1) }}
+                </span>
+            </div>
+            <div class="photo-actions">
+                <button
+                    type="button"
+                    [disabled]="busy || i === 0"
+                    (click)="move(i, i - 1)"
+                    [attr.aria-label]="'Mover foto ' + (i + 1) + ' para antes'"
+                    title="Mover para antes">
+                    ←
+                </button>
+                <button
+                    type="button"
+                    [disabled]="busy || i === images.length - 1"
+                    (click)="move(i, i + 1)"
+                    [attr.aria-label]="'Mover foto ' + (i + 1) + ' para depois'"
+                    title="Mover para depois">
+                    →
+                </button>
+                <button
+                    class="photo-remove"
+                    type="button"
+                    [disabled]="busy"
+                    (click)="remove(i)"
+                    [attr.aria-label]="'Remover foto ' + (i + 1)"
+                    title="Remover foto">
+                    ×
+                </button>
+            </div>
+            <button
+                class="photo-cover"
+                type="button"
+                [disabled]="busy || i === 0"
+                (click)="move(i, 0)">
+                {{ i === 0 ? 'Foto principal' : 'Usar como capa' }}
+            </button>
+        </li>
+        } @for (upload of uploads; track upload) {
+        <li class="photo-card upload-card" [class.failed]="upload.state === 'error'">
+            <div class="photo-frame">
+                <img [src]="upload.preview" alt="Prévia da foto selecionada" />
+            </div>
+            <div class="photo-upload-status">
+                <strong [title]="upload.file.name">{{ upload.file.name }}</strong>
+                @if (upload.state !== 'error') {
+                <span>{{ upload.state === 'waiting' ? 'Na fila' : 'Preparando e enviando…' }}</span>
+                <progress aria-label="Envio da foto em andamento"></progress>
+                } @else {
+                <p role="alert">{{ upload.error }}</p>
+                <button class="secondary" type="button" [disabled]="busy" (click)="retry(upload)">
+                    Tentar novamente
+                </button>
+                <button
+                    class="photo-cover"
+                    type="button"
+                    [disabled]="busy"
+                    (click)="discard(upload)">
+                    Remover da fila
+                </button>
+                }
+            </div>
+        </li>
+        }
+    </ol>
+    <p class="photo-hint">
+        Arraste as fotos para ordenar ou use as setas. Escolha “Usar como capa” para destacar uma
+        foto.
+    </p>
+    }
+    <details class="photo-url">
+        <summary>Adicionar por endereço de imagem</summary>
+        <div class="image-url">
+            <input
+                aria-label="Endereço da imagem"
+                placeholder="https://…"
+                [(ngModel)]="url"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="busy" />
+            <button
+                class="secondary"
+                type="button"
+                [disabled]="busy || !available || !url.trim()"
+                (click)="add(url)">
+                Adicionar
             </button>
         </div>
-        } @empty {
-        <div class="no-image">
-            Adicione uma foto
-            <br />
-            <small>ou escolha um exemplo abaixo</small>
-        </div>
-        }
-    </div>
-    <div class="image-controls">
-        <label class="secondary upload-control">
-            {{ busy ? 'Preparando foto…' : 'Selecionar arquivo' }}
-            <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                [disabled]="busy || images.length >= limit"
-                (change)="upload($event)" />
-        </label>
-        <button class="secondary" type="button" (click)="showExamples = !showExamples">
-            Imagens de demonstração
-        </button>
-    </div>
-    @if (showExamples) {
-    <div class="example-images">
-        @for (n of [1, 2, 3, 4, 5, 6, 7, 8]; track n) {
-        <button
-            type="button"
-            [disabled]="images.length >= limit"
-            (click)="add('/assets/product-' + n + '.webp')"
-            [attr.aria-label]="'Usar imagem de demonstração ' + n">
-            <img [src]="'/assets/product-' + n + '.webp'" alt="" />
-        </button>
-        }
-    </div>
-    }
-    <div class="image-url">
-        <input
-            aria-label="URL de imagem"
-            placeholder="Ou cole uma URL HTTPS de imagem"
-            [(ngModel)]="url"
-            [ngModelOptions]="{ standalone: true }" />
-        <button class="secondary" type="button" (click)="add(url)">Adicionar</button>
-    </div>
-    <small>
-        Até {{ limit }} {{ limit === 1 ? 'foto' : 'fotos' }}. PNG, JPG ou WebP; até 5 MB por
-        arquivo. Fotos enviadas são reduzidas e armazenadas no catálogo.
-    </small>
+    </details>
     @if (error) {
     <p class="error-text" role="alert">{{ error }}</p>
     }
+    <p class="photo-announcement" role="status" aria-live="polite">{{ announcement }}</p>
 </div>

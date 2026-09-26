@@ -62,6 +62,7 @@ export class AdminComponent {
         featured: false,
     };
     images: string[] = [];
+    uploadingImages = false;
     characteristics = '';
     personalization = '';
     typeDraft: CatalogType = { id: '', name: '', scope: 'both', active: true };
@@ -158,7 +159,7 @@ export class AdminComponent {
         ).length;
     }
     itemImage(item: Product | AffiliateProduct) {
-        return 'images' in item ? item.images[0] : (item as AffiliateProduct).image;
+        return item.images?.length ? item.images[0] : (item as AffiliateProduct).image;
     }
     snapshot() {
         return JSON.stringify(
@@ -179,10 +180,10 @@ export class AdminComponent {
         );
     }
     canLeave() {
-        return !this.dirty || window.confirm('Há alterações não salvas. Deseja sair sem salvar?');
+        return !(this.dirty || this.uploadingImages) || window.confirm('Há alterações não salvas. Deseja sair sem salvar?');
     }
     @HostListener('window:beforeunload', ['$event']) beforeUnload(event: BeforeUnloadEvent) {
-        if (this.dirty) {
+        if (this.dirty || this.uploadingImages) {
             event.preventDefault();
             event.returnValue = '';
         }
@@ -251,7 +252,7 @@ export class AdminComponent {
             demo: true,
             ...structuredClone(item),
         };
-        this.images = 'images' in item ? [...item.images] : item.image ? [item.image] : [];
+        this.images = item.images?.length ? [...item.images] : (item as AffiliateProduct).image ? [(item as AffiliateProduct).image!] : [];
         this.characteristics = this.draft.characteristics.join('\n');
         this.personalization = this.draft.personalization.join('\n');
         this.baseline = this.snapshot();
@@ -273,6 +274,7 @@ export class AdminComponent {
     cancel() {
         if (!this.canLeave()) return;
         this.editing = false;
+        this.uploadingImages = false;
         this.errors = [];
         this.dismissNotice();
     }
@@ -293,6 +295,7 @@ export class AdminComponent {
         if (this.editing) setTimeout(() => document.getElementById('form-errors')?.focus());
     }
     async save(status?: ItemStatus) {
+        if (this.uploadingImages) return;
         this.errors = [];
         const d = { ...structuredClone(this.draft), status: status ?? this.draft.status };
         const item =
@@ -309,11 +312,12 @@ export class AdminComponent {
                           .map((s) => s.trim())
                           .filter(Boolean),
                   }
-                : { ...d, image: this.images[0] || undefined };
+                : { ...d, images: [...this.images], image: this.images[0] || undefined };
         try {
             if (this.section === 'loja') await this.catalog.saveProduct(item as Product);
             else await this.catalog.saveAffiliate(item as AffiliateProduct);
             this.editing = false;
+        this.uploadingImages = false;
             this.showNotice(
                 d.status === 'published'
                     ? 'Cadastro publicado. Ele já aparece no catálogo deste navegador.'
@@ -416,6 +420,7 @@ export class AdminComponent {
         try {
             await this.catalog.saveType(this.typeDraft);
             this.editing = false;
+        this.uploadingImages = false;
             this.errors = [];
             this.showNotice('Tipo salvo. Os cadastros vinculados acompanham o nome atualizado.');
         } catch (e) {
@@ -471,6 +476,7 @@ export class AdminComponent {
     logout() {
         if (!this.canLeave()) return;
         this.editing = false;
+        this.uploadingImages = false;
         this.whatsapp = this.catalog.whatsappNumber;
         this.auth.logout();
         this.router.navigateByUrl('/login');
