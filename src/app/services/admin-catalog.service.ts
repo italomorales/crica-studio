@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import type { AffiliateProduct, CatalogState, CatalogType, Product } from '../data/models';
 import { API_URL, AuthService } from './auth.service';
+import { catalogWriteMethod, isExistingCatalogId } from './catalog-id';
 
 type ApiProduct = Omit<Product, 'category' | 'typeId' | 'status' | 'order'> & {
     typeId: string;
@@ -49,14 +50,14 @@ export class AdminCatalogService {
         return this.state().settings.whatsappNumber;
     }
 
-    async load() {
+    async load(showLoading = true) {
         const token = this.auth.accessToken();
         if (!token) {
-            this.loading.set(false);
+            if (showLoading) this.loading.set(false);
             return;
         }
 
-        this.loading.set(true);
+        if (showLoading) this.loading.set(true);
         this.error.set('');
         try {
             const headers = { Authorization: `Bearer ${token}` };
@@ -99,7 +100,7 @@ export class AdminCatalogService {
                     : 'Não foi possível carregar os dados administrativos. Tente novamente.',
             );
         } finally {
-            this.loading.set(false);
+            if (showLoading) this.loading.set(false);
         }
     }
 
@@ -130,6 +131,9 @@ export class AdminCatalogService {
     }
     async saveType(type: CatalogType) { await this.write('types', type.id, type); }
     async saveSettings(number: string) { await this.write('settings', undefined, { whatsappNumber: number }, 'PUT'); }
+    async deleteProduct(id: string) { await this.remove('products', id); }
+    async deleteAffiliate(id: string) { await this.remove('affiliates', id); }
+    async deleteType(id: string) { await this.remove('types', id); }
     async uploadImage(file: Blob, category: 'products' | 'affiliates') {
         const token = this.auth.accessToken();
         if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
@@ -148,9 +152,9 @@ export class AdminCatalogService {
     private async write(resource: string, id: string | undefined, body: unknown, fixedMethod?: string) {
         const token = this.auth.accessToken();
         if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
-        const known = !!id && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+        const known = isExistingCatalogId(id);
         const response = await fetch(`${API_URL}/api/admin/catalog/${resource}${known ? '/' + id : ''}`, {
-            method: fixedMethod ?? (known ? 'PUT' : 'POST'),
+            method: catalogWriteMethod(id, fixedMethod),
             headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
         });
@@ -159,6 +163,20 @@ export class AdminCatalogService {
             const problem = await response.json().catch(() => null) as { errors?: Record<string, string[]> } | null;
             throw new Error(problem?.errors ? Object.values(problem.errors).flat().join(' ') : 'Não foi possível salvar.');
         }
-        await this.load();
+        await this.load(false);
+    }
+    private async remove(resource: string, id: string) {
+        const token = this.auth.accessToken();
+        if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
+        if (!isExistingCatalogId(id)) throw new Error('Este cadastro não possui uma identificação válida para exclusão.');
+        const response = await fetch(`${API_URL}/api/admin/catalog/${resource}/${id}`, {
+            method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.status === 401) { this.auth.logout(); throw new Error('Sua sessão expirou. Entre novamente.'); }
+        if (!response.ok) {
+            const problem = await response.json().catch(() => null) as { errors?: Record<string, string[]>; detail?: string } | null;
+            throw new Error(problem?.errors ? Object.values(problem.errors).flat().join(' ') : problem?.detail || 'Não foi possível excluir.');
+        }
+        await this.load(false);
     }
 }

@@ -8,6 +8,7 @@ import {
     priceLabel,
     STORAGE_KEY,
 } from '../src/app/services/local-store.ts';
+import { catalogWriteMethod, isExistingCatalogId } from '../src/app/services/catalog-id.ts';
 const state: any = {
     version: 1,
     types: [{ id: 'caneca', name: 'Caneca', scope: 'both', active: true }],
@@ -126,4 +127,12 @@ test('persistência mantém alterações e links após leitura e falha sem ocult
     );
     data = '{corrupted';
     assert.throws(() => readState(storage));
+});
+
+test('salvar rascunho ou produto sob consulta existente usa atualização', () => {
+    const id = '20000000-0000-0000-0000-000000000001';
+    assert.equal(isExistingCatalogId(id), true);
+    assert.equal(catalogWriteMethod(id), 'PUT');
+    assert.equal(isExistingCatalogId('item-criado-no-formulario'), false);
+    assert.equal(catalogWriteMethod('item-criado-no-formulario'), 'POST');
 });

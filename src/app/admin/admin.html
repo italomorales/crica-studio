@@ -61,8 +61,12 @@
                 }
             </div>
             @if (notice) {
-            <div class="success-notice" role="status">{{ notice }}</div>
-            } @if (errors.length) {
+            <div class="admin-snackbar" [class.error]="noticeTone === 'error'" [attr.role]="noticeTone === 'error' ? 'alert' : 'status'">
+                <span class="snackbar-icon" aria-hidden="true">{{ noticeTone === 'error' ? '!' : '✓' }}</span>
+                <span>{{ notice }}</span>
+                <button type="button" (click)="dismissNotice()" aria-label="Fechar notificação">×</button>
+            </div>
+            } @if (editing && errors.length) {
             <div class="error-summary" role="alert" tabindex="-1" id="form-errors">
                 <strong>Confira antes de salvar</strong>
                 <ul>
@@ -361,15 +365,26 @@
                                 'item vinculado' : 'itens vinculados' }}
                             </p>
                         </div>
-                        <span class="status-pill" [class.published]="t.active">
-                            {{ t.active ? 'Ativo' : 'Inativo' }}
-                        </span>
-                        @if (!readOnly) { <div class="row-actions">
-                            <button (click)="editType(t)">Editar</button>
-                            <button (click)="toggleType(t)">
-                                {{ t.active ? 'Desativar' : 'Ativar' }}
+                        @if (!readOnly) {
+                        <button
+                            type="button"
+                            class="status-toggle"
+                            (click)="toggleType(t)"
+                            [attr.aria-label]="(t.active ? 'Desativar tipo ' : 'Ativar tipo ') + t.name"
+                            [attr.aria-pressed]="t.active"
+                            [class.is-active]="t.active"
+                            [title]="t.active ? 'Desativar' : 'Ativar'">
+                            <span class="status-toggle-track" aria-hidden="true"><span></span></span>
+                        </button>
+                        <div class="row-actions">
+                            <button type="button" class="icon-action" (click)="editType(t)" [attr.aria-label]="'Editar tipo ' + t.name" title="Editar">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4Zm12.7-13.3 1.6-1.6a1.4 1.4 0 0 1 2 2l-1.6 1.6-2-2Z" /></svg>
                             </button>
-                        </div> }
+                            <button type="button" class="icon-action destructive-action" (click)="requestTypeRemoval(t)" [attr.aria-label]="'Excluir tipo ' + t.name" title="Excluir">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm4 0v6h2v-6h-2Zm4 0v6h2v-6h-2Z" /></svg>
+                            </button>
+                        </div>
+                        } @else { <span></span> <div class="row-actions"><span>Somente leitura</span></div> }
                     </article>
                     } @empty {
                     <div class="empty">
@@ -442,15 +457,29 @@
                         {{ filtered.length }} {{ filtered.length === 1 ? 'cadastro' : 'cadastros' }}
                         @if (filtered.length) { · Exibindo {{ firstVisibleItem }}–{{ lastVisibleItem }} }
                     </span>
-                    @if (query || status !== 'all' || typeFilter !== 'all' || platformFilter !==
-                    'all') {
-                    <button class="text-link" (click)="clear()">Limpar filtros</button>
-                    }
+                    <div class="admin-results-actions">
+                        <label class="page-size">
+                            <span>Por página</span>
+                            <select
+                                aria-label="Cadastros por página"
+                                [(ngModel)]="pageSize"
+                                (ngModelChange)="setPageSize($event)">
+                                <option [ngValue]="20">20</option>
+                                <option [ngValue]="50">50</option>
+                                <option [ngValue]="100">100</option>
+                            </select>
+                        </label>
+                        @if (query || status !== 'all' || typeFilter !== 'all' || platformFilter !==
+                        'all') {
+                        <button class="text-link" (click)="clear()">Limpar filtros</button>
+                        }
+                    </div>
                 </div>
                 <div class="admin-table-header">
                     <span>Produto</span>
                     <span>{{ section === 'loja' ? 'Preço' : 'Plataforma' }}</span>
                     <span>Status</span>
+                    <span>Ativo</span>
                     <span>{{ readOnly ? 'Modo' : 'Ações' }}</span>
                 </div>
                 @for (item of paginated; track item.id) {
@@ -478,21 +507,48 @@
                         [class.draft]="item.status === 'draft'">
                         {{ statusLabel(item.status) }}
                     </span>
-                    @if (readOnly) { <div class="row-actions"><span>Somente leitura</span></div> } @else { <div class="row-actions">
-                        <button (click)="edit(item)" [attr.aria-label]="'Editar ' + item.name">
-                            Editar
-                        </button>
-                        <button
-                            (click)="duplicate(item)"
-                            [attr.aria-label]="'Duplicar ' + item.name">
-                            Duplicar
-                        </button>
-                        <button
-                            (click)="toggle(item)"
-                            [attr.aria-label]="
+                    @if (readOnly) {
+                    <span>{{ item.status === 'inactive' ? 'Não' : 'Sim' }}</span>
+                    } @else {
+                    <button
+                        type="button"
+                        class="status-toggle"
+                        (click)="toggle(item)"
+                        [attr.aria-label]="
                     (item.status === 'inactive' ? 'Ativar ' : 'Desativar ') + item.name
-                  ">
-                            {{ item.status === 'inactive' ? 'Ativar' : 'Desativar' }}
+                  "
+                        [attr.aria-pressed]="item.status !== 'inactive'"
+                        [class.is-active]="item.status !== 'inactive'"
+                        [title]="item.status === 'inactive' ? 'Ativar' : 'Desativar'">
+                        <span class="status-toggle-track" aria-hidden="true"><span></span></span>
+                    </button>
+                    }
+                    @if (readOnly) { <div class="row-actions"><span>Somente leitura</span></div> } @else { <div class="row-actions">
+                        <button
+                            type="button"
+                            class="featured-toggle"
+                            [class.is-featured]="item.featured"
+                            (click)="toggleFeatured(item)"
+                            [attr.aria-pressed]="!!item.featured"
+                            [attr.aria-label]="item.featured ? 'Remover ' + item.name + ' dos destaques' : 'Colocar ' + item.name + ' em destaque'"
+                            [title]="item.featured ? 'Remover dos destaques' : 'Colocar em destaque'">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m12 3 2.78 5.63 6.22.9-4.5 4.39 1.06 6.2L12 17.2l-5.56 2.92 1.06-6.2L3 9.53l6.22-.9L12 3Z" />
+                            </svg>
+                        </button>
+                        <button type="button" class="icon-action" (click)="edit(item)" [attr.aria-label]="'Editar ' + item.name" title="Editar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4Zm12.7-13.3 1.6-1.6a1.4 1.4 0 0 1 2 2l-1.6 1.6-2-2Z" /></svg>
+                        </button>
+                        <button
+                            type="button"
+                            class="icon-action"
+                            (click)="duplicate(item)"
+                            [attr.aria-label]="'Duplicar ' + item.name"
+                            title="Duplicar">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h3Zm2-2v2h5a2 2 0 0 1 2 2v5h2V5h-9ZM5 9v10h10V9H5Z" /></svg>
+                        </button>
+                        <button type="button" class="icon-action destructive-action" (click)="requestRemoval(item)" [attr.aria-label]="'Excluir ' + item.name" title="Excluir">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm4 3v6h2v-6h-2Zm4 0v6h2v-6h-2Z" /></svg>
                         </button>
                     </div> }
                 </article>
@@ -526,3 +582,33 @@
         </main>
     </div>
 </div>
+<dialog
+    #deleteDialog
+    class="delete-dialog"
+    aria-labelledby="delete-dialog-title"
+    (cancel)="onDeleteDialogCancel($event)"
+    (close)="onDeleteDialogClose()"
+    (click)="onDeleteDialogBackdrop($event)">
+    @if (deletionTarget) {
+    <section class="delete-dialog-shell">
+        <div class="delete-dialog-icon" aria-hidden="true">!</div>
+        <span class="eyebrow">AÇÃO PERMANENTE</span>
+        <h2 id="delete-dialog-title">Excluir {{ deletionTarget.kind }}?</h2>
+        <p>
+            Você está prestes a excluir <strong>{{ deletionTarget.name }}</strong>. Este cadastro
+            será removido do catálogo e não poderá ser recuperado.
+        </p>
+        @if (deletionError) {
+        <p class="delete-dialog-error" role="alert">{{ deletionError }}</p>
+        }
+        <div class="delete-dialog-actions">
+            <button class="secondary" type="button" autofocus [disabled]="deleting" (click)="cancelDeletion()">
+                Cancelar
+            </button>
+            <button class="delete-confirm" type="button" [disabled]="deleting" (click)="confirmDeletion()">
+                {{ deleting ? 'Excluindo…' : 'Excluir definitivamente' }}
+            </button>
+        </div>
+    </section>
+    }
+</dialog>

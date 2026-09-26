@@ -1,4 +1,4 @@
-import { Component, inject, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     ActivatedRoute,
@@ -15,6 +15,12 @@ import type { Product, AffiliateProduct, CatalogType, ItemStatus } from '../data
 import { ImagePickerComponent } from './image-picker';
 import adminTemplate from './admin.html?raw';
 
+type DeletionTarget = {
+    id: string;
+    name: string;
+    kind: 'produto' | 'fornecedor' | 'tipo';
+};
+
 @Component({
     selector: 'crica-admin',
     standalone: true,
@@ -22,7 +28,8 @@ import adminTemplate from './admin.html?raw';
     template: adminTemplate,
 })
 export class AdminComponent {
-    readonly pageSize = 20;
+    @ViewChild('deleteDialog', { static: true }) deleteDialog!: ElementRef<HTMLDialogElement>;
+    pageSize = 20;
     catalog = inject(AdminCatalogService);
     auth = inject(AuthService);
     router = inject(Router);
@@ -35,6 +42,8 @@ export class AdminComponent {
     platformFilter = 'all';
     page = 1;
     notice = '';
+    noticeTone: 'success' | 'error' = 'success';
+    private noticeTimer?: number;
     errors: string[] = [];
     editing = false;
     isNew = false;
@@ -56,6 +65,9 @@ export class AdminComponent {
     characteristics = '';
     personalization = '';
     typeDraft: CatalogType = { id: '', name: '', scope: 'both', active: true };
+    deletionTarget?: DeletionTarget;
+    deleting = false;
+    deletionError = '';
     get title() {
         return (
             {
@@ -177,7 +189,7 @@ export class AdminComponent {
     }
     create() {
         this.errors = [];
-        this.notice = '';
+        this.dismissNotice();
         this.isNew = true;
         this.editing = true;
         if (this.section === 'tipos') {
@@ -229,7 +241,7 @@ export class AdminComponent {
     }
     edit(item: Product | AffiliateProduct) {
         this.errors = [];
-        this.notice = '';
+        this.dismissNotice();
         this.isNew = false;
         this.editing = true;
         this.draft = {
@@ -256,17 +268,29 @@ export class AdminComponent {
         this.draft.status = 'draft';
         this.isNew = true;
         this.baseline = this.snapshot();
-        this.notice = 'Cópia preparada como rascunho. Ajuste os dados e salve para cadastrá-la.';
+        this.showNotice('Cópia preparada como rascunho. Ajuste os dados e salve para cadastrá-la.');
     }
     cancel() {
         if (!this.canLeave()) return;
         this.editing = false;
         this.errors = [];
+        this.dismissNotice();
+    }
+    showNotice(message: string, tone: 'success' | 'error' = 'success') {
+        this.notice = message;
+        this.noticeTone = tone;
+        window.clearTimeout(this.noticeTimer);
+        this.noticeTimer = window.setTimeout(() => this.dismissNotice(), 5000);
+    }
+    dismissNotice() {
+        window.clearTimeout(this.noticeTimer);
         this.notice = '';
     }
     error(error: unknown) {
-        this.errors = [error instanceof Error ? error.message : 'Não foi possível salvar.'];
-        setTimeout(() => document.getElementById('form-errors')?.focus());
+        const message = error instanceof Error ? error.message : 'Não foi possível salvar.';
+        this.errors = [message];
+        this.showNotice(message, 'error');
+        if (this.editing) setTimeout(() => document.getElementById('form-errors')?.focus());
     }
     async save(status?: ItemStatus) {
         this.errors = [];
@@ -290,12 +314,13 @@ export class AdminComponent {
             if (this.section === 'loja') await this.catalog.saveProduct(item as Product);
             else await this.catalog.saveAffiliate(item as AffiliateProduct);
             this.editing = false;
-            this.notice =
+            this.showNotice(
                 d.status === 'published'
                     ? 'Cadastro publicado. Ele já aparece no catálogo deste navegador.'
                     : d.status === 'inactive'
                       ? 'Cadastro salvo como inativo.'
-                      : 'Rascunho salvo. Ele ainda não aparece no catálogo.';
+                      : 'Rascunho salvo. Ele ainda não aparece no catálogo.',
+            );
             window.scrollTo(0, 0);
         } catch (e) {
             this.error(e);
@@ -311,12 +336,72 @@ export class AdminComponent {
             this.section === 'loja'
                 ? await this.catalog.saveProduct(updated as Product)
                 : await this.catalog.saveAffiliate(updated as AffiliateProduct);
-            this.notice =
+            this.showNotice(
                 updated.status === 'draft'
                     ? 'Cadastro reativado como rascunho. Revise e publique quando estiver pronto.'
-                    : 'Cadastro desativado e retirado do catálogo.';
+                    : 'Cadastro desativado e retirado do catálogo.',
+            );
         } catch (e) {
             this.error(e);
+        }
+    }
+    async toggleFeatured(item: Product | AffiliateProduct) {
+        if (item.status !== 'published') {
+            this.error(new Error('Publique o cadastro antes de colocá-lo em destaque.'));
+            return;
+        }
+        this.errors = [];
+        try {
+            const updated = { ...item, featured: !item.featured };
+            if (this.section === 'loja') await this.catalog.saveProduct(updated as Product);
+            else await this.catalog.saveAffiliate(updated as AffiliateProduct);
+            this.showNotice(updated.featured ? 'Cadastro adicionado aos destaques.' : 'Cadastro removido dos destaques.');
+        } catch (e) {
+            this.error(e);
+        }
+    }
+    requestRemoval(item: Product | AffiliateProduct) {
+        this.openDeletion({
+            id: item.id,
+            name: item.name,
+            kind: this.section === 'loja' ? 'produto' : 'fornecedor',
+        });
+    }
+    private openDeletion(target: DeletionTarget) {
+        this.deletionTarget = target;
+        this.deletionError = '';
+        this.deleteDialog.nativeElement.showModal();
+        setTimeout(() => this.deleteDialog.nativeElement.querySelector<HTMLElement>('[autofocus]')?.focus());
+    }
+    cancelDeletion() {
+        if (!this.deleting) this.deleteDialog.nativeElement.close();
+    }
+    onDeleteDialogClose() {
+        this.deletionTarget = undefined;
+        this.deletionError = '';
+        this.deleting = false;
+    }
+    onDeleteDialogCancel(event: Event) {
+        if (this.deleting) event.preventDefault();
+    }
+    onDeleteDialogBackdrop(event: MouseEvent) {
+        if (event.target === this.deleteDialog.nativeElement) this.cancelDeletion();
+    }
+    async confirmDeletion() {
+        const target = this.deletionTarget;
+        if (!target) return;
+        this.deleting = true;
+        this.deletionError = '';
+        try {
+            if (target.kind === 'produto') await this.catalog.deleteProduct(target.id);
+            else if (target.kind === 'fornecedor') await this.catalog.deleteAffiliate(target.id);
+            else await this.catalog.deleteType(target.id);
+            this.showNotice(`${target.kind === 'tipo' ? 'Tipo' : target.kind === 'produto' ? 'Produto' : 'Fornecedor'} excluído.`);
+            this.deleting = false;
+            this.deleteDialog.nativeElement.close();
+        } catch (e) {
+            this.deletionError = e instanceof Error ? e.message : 'Não foi possível excluir.';
+            this.deleting = false;
         }
     }
     editType(t: CatalogType) {
@@ -324,7 +409,7 @@ export class AdminComponent {
         this.isNew = false;
         this.typeDraft = structuredClone(t);
         this.errors = [];
-        this.notice = '';
+        this.dismissNotice();
         this.baseline = this.snapshot();
     }
     async saveType() {
@@ -332,7 +417,7 @@ export class AdminComponent {
             await this.catalog.saveType(this.typeDraft);
             this.editing = false;
             this.errors = [];
-            this.notice = 'Tipo salvo. Os cadastros vinculados acompanham o nome atualizado.';
+            this.showNotice('Tipo salvo. Os cadastros vinculados acompanham o nome atualizado.');
         } catch (e) {
             this.error(e);
         }
@@ -341,19 +426,27 @@ export class AdminComponent {
         try {
             await this.catalog.saveType({ ...t, active: !t.active });
             this.errors = [];
-            this.notice = t.active
+            this.showNotice(t.active
                 ? 'Tipo desativado para novos cadastros. Os itens existentes foram preservados.'
-                : 'Tipo ativado.';
+                : 'Tipo ativado.');
         } catch (e) {
             this.error(e);
         }
+    }
+    requestTypeRemoval(t: CatalogType) {
+        const linkedItems = this.usage(t.id);
+        if (linkedItems) {
+            this.error(new Error(`Este tipo possui ${linkedItems} ${linkedItems === 1 ? 'cadastro vinculado' : 'cadastros vinculados'} e não pode ser excluído.`));
+            return;
+        }
+        this.openDeletion({ id: t.id, name: t.name, kind: 'tipo' });
     }
     async saveSettings() {
         try {
             await this.catalog.saveSettings(this.whatsapp.trim());
             this.whatsapp = this.catalog.whatsappNumber;
             this.errors = [];
-            this.notice = 'Configurações salvas neste navegador.';
+            this.showNotice('Configurações salvas neste navegador.');
         } catch (e) {
             this.error(e);
         }
@@ -370,6 +463,10 @@ export class AdminComponent {
     }
     setPage(page: number) {
         this.page = Math.min(Math.max(page, 1), this.pageCount);
+    }
+    setPageSize(size: number) {
+        this.pageSize = [20, 50, 100].includes(Number(size)) ? Number(size) : 20;
+        this.resetPage();
     }
     logout() {
         if (!this.canLeave()) return;
