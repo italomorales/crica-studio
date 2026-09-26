@@ -8,7 +8,7 @@ import { ShopComponent, SuppliersComponent, StorefrontComponent } from './app/pa
 import './styles.css';
 import './admin.css';
 import { LoginComponent } from './app/admin/login';
-import { AdminComponent, unsavedGuard } from './app/admin/admin';
+import type { AdminComponent } from './app/admin/admin';
 import { authGuard } from './app/services/auth.service';
 import { ConstructionComponent } from './app/construction';
 import { SeoService } from './app/services/seo.service';
@@ -63,9 +63,9 @@ bootstrapApplication(AppComponent, {
                 { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
                 ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({
                     path: 'admin/' + section,
-                    component: AdminComponent,
+                    loadComponent: () => import('./app/admin/admin').then(module => module.AdminComponent),
                     canActivate: [authGuard],
-                    canDeactivate: [unsavedGuard],
+                    canDeactivate: [(component: AdminComponent) => component.canLeave()],
                     data: { section },
                     title: 'Administração | Crica Studio',
                 })),

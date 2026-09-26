@@ -1,7 +1,11 @@
 <div class="admin-layout">
     <aside class="admin-sidebar">
         <a routerLink="/admin/loja" class="admin-brand">
-            <img src="/assets/crica-studio-logo-transparent.png" alt="Crica Studio" width="140" height="51" />
+            <img
+                src="/assets/crica-studio-logo-transparent.png"
+                alt="Crica Studio"
+                width="140"
+                height="51" />
         </a>
         <span class="sidebar-label">ADMINISTRAÇÃO</span>
         <nav aria-label="Administração">
@@ -53,18 +57,39 @@
                     <h1>{{ editing ? (isNew ? 'Novo cadastro' : 'Editar cadastro') : title }}</h1>
                     <p>{{ subtitle }}</p>
                 </div>
-                @if (!editing && section !== 'configuracoes' && !readOnly) {
-                <button class="primary" (click)="create()">
-                    + {{ section === 'tipos' ? 'Novo tipo' : section === 'loja' ? 'Novo produto' :
-                    'Nova indicação' }}
-                </button>
+                @if (!editing && !organizing && section !== 'configuracoes' && !readOnly) {
+                <div class="catalog-heading-actions">
+                    @if (section === 'loja' || section === 'fornecedores') {
+                    <button
+                        type="button"
+                        class="secondary organize-button"
+                        (click)="startOrganizing()"
+                        [disabled]="items.length < 2 || catalog.loading() || !!catalog.error()">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8 3v18m-4-4 4 4 4-4M16 21V3m-4 4 4-4 4 4" />
+                        </svg>
+                        Organizar exibição
+                    </button>
+                    }
+                    <button class="primary" (click)="create()">
+                        + {{ section === 'tipos' ? 'Novo tipo' : section === 'loja' ? 'Novo produto'
+                        : 'Nova indicação' }}
+                    </button>
+                </div>
                 }
             </div>
             @if (notice) {
-            <div class="admin-snackbar" [class.error]="noticeTone === 'error'" [attr.role]="noticeTone === 'error' ? 'alert' : 'status'">
-                <span class="snackbar-icon" aria-hidden="true">{{ noticeTone === 'error' ? '!' : '✓' }}</span>
+            <div
+                class="admin-snackbar"
+                [class.error]="noticeTone === 'error'"
+                [attr.role]="noticeTone === 'error' ? 'alert' : 'status'">
+                <span class="snackbar-icon" aria-hidden="true">
+                    {{ noticeTone === 'error' ? '!' : '✓' }}
+                </span>
                 <span>{{ notice }}</span>
-                <button type="button" (click)="dismissNotice()" aria-label="Fechar notificação">×</button>
+                <button type="button" (click)="dismissNotice()" aria-label="Fechar notificação">
+                    ×
+                </button>
             </div>
             } @if (editing && errors.length) {
             <div class="error-summary" role="alert" tabindex="-1" id="form-errors">
@@ -81,7 +106,9 @@
             <div class="error-summary" role="alert">
                 <strong>Não foi possível carregar a administração</strong>
                 <p>{{ catalog.error() }}</p>
-                <button class="secondary" type="button" (click)="catalog.load()">Tentar novamente</button>
+                <button class="secondary" type="button" (click)="catalog.load()">
+                    Tentar novamente
+                </button>
             </div>
             } @else { @if (section === 'configuracoes' && readOnly) {
             <section class="admin-panel settings-panel">
@@ -91,7 +118,10 @@
             </section>
             <section class="admin-panel settings-panel">
                 <h2>Administração conectada</h2>
-                <p>Os dados exibidos aqui vêm do banco de dados. A edição será habilitada na próxima fase.</p>
+                <p>
+                    Os dados exibidos aqui vêm do banco de dados. A edição será habilitada na
+                    próxima fase.
+                </p>
             </section>
             } @else if (section === 'configuracoes') {
             <section class="admin-panel settings-panel">
@@ -180,17 +210,6 @@
                                     }
                                 </select>
                             </div>
-                            <div>
-                                <label for="item-order">Ordem de exibição</label>
-                                <input
-                                    id="item-order"
-                                    name="order"
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    [(ngModel)]="draft.order"
-                                    required />
-                            </div>
                         </div>
                         <label for="short-description">Descrição curta</label>
                         <textarea
@@ -215,13 +234,16 @@
                         }
                     </section>
                     <section class="admin-panel">
-                        <h2>{{ section === 'loja' ? 'Fotos do produto' : 'Fotos do fornecedor' }}</h2>
+                        <h2>
+                            {{ section === 'loja' ? 'Fotos do produto' : 'Fotos do fornecedor' }}
+                        </h2>
                         <p>A primeira imagem aparece no card.</p>
                         <crica-image-picker
                             [images]="images"
                             [limit]="5"
                             [category]="section === 'loja' ? 'products' : 'affiliates'"
-                            (changed)="images = $event" (uploading)="uploadingImages = $event" />
+                            (changed)="images = $event"
+                            (uploading)="uploadingImages = $event" />
                     </section>
                     @if (section === 'loja') {
                     <section class="admin-panel">
@@ -329,11 +351,21 @@
                         <p class="field-help">
                             Somente os publicados aparecem no site deste navegador.
                         </p>
-                        <button class="primary full" type="submit" [disabled]="uploadingImages">Salvar alterações</button>
-                        <button class="secondary full" type="button" (click)="save('draft')" [disabled]="uploadingImages">
+                        <button class="primary full" type="submit" [disabled]="uploadingImages">
+                            Salvar alterações
+                        </button>
+                        <button
+                            class="secondary full"
+                            type="button"
+                            (click)="save('draft')"
+                            [disabled]="uploadingImages">
                             Salvar rascunho
                         </button>
-                        <button class="secondary full" type="button" (click)="save('published')" [disabled]="uploadingImages">
+                        <button
+                            class="secondary full"
+                            type="button"
+                            (click)="save('published')"
+                            [disabled]="uploadingImages">
                             Publicar
                         </button>
                         <button class="text-link full" type="button" (click)="cancel()">
@@ -374,17 +406,38 @@
                             [attr.aria-pressed]="t.active"
                             [class.is-active]="t.active"
                             [title]="t.active ? 'Desativar' : 'Ativar'">
-                            <span class="status-toggle-track" aria-hidden="true"><span></span></span>
+                            <span class="status-toggle-track" aria-hidden="true">
+                                <span></span>
+                            </span>
                         </button>
                         <div class="row-actions">
-                            <button type="button" class="icon-action" (click)="editType(t)" [attr.aria-label]="'Editar tipo ' + t.name" title="Editar">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4Zm12.7-13.3 1.6-1.6a1.4 1.4 0 0 1 2 2l-1.6 1.6-2-2Z" /></svg>
+                            <button
+                                type="button"
+                                class="icon-action"
+                                (click)="editType(t)"
+                                [attr.aria-label]="'Editar tipo ' + t.name"
+                                title="Editar">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path
+                                        d="M4 20h4l10-10-4-4L4 16v4Zm12.7-13.3 1.6-1.6a1.4 1.4 0 0 1 2 2l-1.6 1.6-2-2Z" />
+                                </svg>
                             </button>
-                            <button type="button" class="icon-action destructive-action" (click)="requestTypeRemoval(t)" [attr.aria-label]="'Excluir tipo ' + t.name" title="Excluir">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm4 0v6h2v-6h-2Zm4 0v6h2v-6h-2Z" /></svg>
+                            <button
+                                type="button"
+                                class="icon-action destructive-action"
+                                (click)="requestTypeRemoval(t)"
+                                [attr.aria-label]="'Excluir tipo ' + t.name"
+                                title="Excluir">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path
+                                        d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm4 0v6h2v-6h-2Zm4 0v6h2v-6h-2Z" />
+                                </svg>
                             </button>
                         </div>
-                        } @else { <span></span> <div class="row-actions"><span>Somente leitura</span></div> }
+                        } @else {
+                        <span></span>
+                        <div class="row-actions"><span>Somente leitura</span></div>
+                        }
                     </article>
                     } @empty {
                     <div class="empty">
@@ -394,6 +447,135 @@
                     }
                 </div>
             </div>
+            } @else { @if (organizing) {
+            <section
+                class="admin-panel order-panel"
+                aria-labelledby="order-title"
+                [attr.aria-busy]="savingOrder">
+                <div class="order-heading">
+                    <div>
+                        <span class="eyebrow">ORDEM NO SITE</span>
+                        <h2 id="order-title">Organizar exibição</h2>
+                        <p>
+                            Arraste pelo puxador à esquerda. Para mover mais longe, selecione um
+                            item e escolha a posição.
+                        </p>
+                    </div>
+                    <span class="order-count">{{ orderDraft.length }} cadastros</span>
+                </div>
+                <p class="order-context">
+                    Exibindo todos os cadastros, sem filtros. Apenas os publicados aparecem no site,
+                    respeitando esta sequência.
+                </p>
+                <div class="order-toolbar">
+                    <label class="order-item-select">
+                        Item selecionado
+                        <select
+                            aria-label="Item para reposicionar"
+                            [ngModel]="selectedOrderId"
+                            (ngModelChange)="selectOrderItem($event); catalogGrid?.reveal($event)"
+                            [disabled]="savingOrder">
+                            @for (item of orderDraft; track item.id; let i = $index) {
+                            <option [value]="item.id">{{ i + 1 }}. {{ item.name }}</option>
+                            }
+                        </select>
+                    </label>
+                    <div class="order-shortcuts">
+                        <button
+                            type="button"
+                            class="secondary"
+                            (click)="moveOrder(1)"
+                            [disabled]="savingOrder || selectedOrderIndex <= 0"
+                            title="Mover para o início">
+                            Início
+                        </button>
+                        <button
+                            type="button"
+                            class="secondary"
+                            (click)="moveOrder(selectedOrderIndex)"
+                            [disabled]="savingOrder || selectedOrderIndex <= 0"
+                            aria-label="Mover item uma posição acima">
+                            ↑
+                        </button>
+                        <button
+                            type="button"
+                            class="secondary"
+                            (click)="moveOrder(selectedOrderIndex + 2)"
+                            [disabled]="savingOrder || selectedOrderIndex >= orderDraft.length - 1"
+                            aria-label="Mover item uma posição abaixo">
+                            ↓
+                        </button>
+                        <button
+                            type="button"
+                            class="secondary"
+                            (click)="moveOrder(orderDraft.length)"
+                            [disabled]="savingOrder || selectedOrderIndex >= orderDraft.length - 1"
+                            title="Mover para o fim">
+                            Fim
+                        </button>
+                    </div>
+                    <div class="order-position">
+                        <label for="target-position">Posição</label>
+                        <div>
+                            <input
+                                id="target-position"
+                                type="number"
+                                min="1"
+                                [max]="orderDraft.length"
+                                step="1"
+                                [(ngModel)]="targetPosition"
+                                [disabled]="savingOrder"
+                                (keydown.enter)="moveOrder(targetPosition)" />
+                            <button
+                                type="button"
+                                class="secondary"
+                                (click)="moveOrder(targetPosition)"
+                                [disabled]="savingOrder">
+                                Mover
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <crica-catalog-grid
+                    [rows]="orderDraft"
+                    [suppliers]="section === 'fornecedores'"
+                    [organizing]="true"
+                    [busy]="savingOrder"
+                    [selectedId]="selectedOrderId"
+                    (selected)="selectOrderItem($event)"
+                    (reordered)="reordered($event)" />
+                <div class="order-savebar">
+                    <div>
+                        <strong>
+                            {{ savingOrder ? 'Salvando a sequência…' : orderDirty ? 'Alterações
+                            ainda não salvas' : 'A sequência está atualizada' }}
+                        </strong>
+                        <span>Salvar aplica a ordem completa no catálogo.</span>
+                    </div>
+                    <div class="catalog-heading-actions">
+                        <button
+                            type="button"
+                            class="secondary"
+                            (click)="cancelOrganizing()"
+                            [disabled]="savingOrder">
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            class="primary"
+                            (click)="saveOrder()"
+                            [disabled]="savingOrder || !orderDirty">
+                            {{ savingOrder ? 'Salvando…' : 'Salvar ordem' }}
+                        </button>
+                    </div>
+                </div>
+                @if (orderError) {
+                <p class="order-error" role="alert">{{ orderError }}</p>
+                }
+                <span class="sr-only" role="status" aria-live="polite">
+                    {{ orderAnnouncement }}
+                </span>
+            </section>
             } @else {
             <div class="admin-stats">
                 <div>
@@ -455,7 +637,6 @@
                 <div class="admin-results">
                     <span aria-live="polite">
                         {{ filtered.length }} {{ filtered.length === 1 ? 'cadastro' : 'cadastros' }}
-                        @if (filtered.length) { · Exibindo {{ firstVisibleItem }}–{{ lastVisibleItem }} }
                     </span>
                     <div class="admin-results-actions">
                         <label class="page-size">
@@ -475,106 +656,18 @@
                         }
                     </div>
                 </div>
-                <div class="admin-table-header">
-                    <span>Produto</span>
-                    <span>{{ section === 'loja' ? 'Preço' : 'Plataforma' }}</span>
-                    <span>Status</span>
-                    <span>Ativo</span>
-                    <span>{{ readOnly ? 'Modo' : 'Ações' }}</span>
-                </div>
-                @for (item of paginated; track item.id) {
-                <article class="admin-product-row">
-                    <div class="row-product">
-                        @if (itemImage(item)) {
-                        <img
-                            [src]="itemImage(item)"
-                            alt=""
-                            (error)="$any($event.target).style.visibility = 'hidden'" />
-                        } @else {
-                        <div class="row-image-placeholder" aria-hidden="true">C</div>
-                        }
-                        <div>
-                            <span class="row-title">{{ item.name }}</span>
-                            <p>{{ catalog.typeName(item.typeId) }} · Ordem {{ item.order }}</p>
-                        </div>
-                    </div>
-                    <div class="row-meta">
-                        {{ section === 'loja' ? price(item) : $any(item).platform }}
-                    </div>
-                    <span
-                        class="status-pill"
-                        [class.published]="item.status === 'published'"
-                        [class.draft]="item.status === 'draft'">
-                        {{ statusLabel(item.status) }}
-                    </span>
-                    @if (readOnly) {
-                    <span>{{ item.status === 'inactive' ? 'Não' : 'Sim' }}</span>
-                    } @else {
-                    <button
-                        type="button"
-                        class="status-toggle"
-                        (click)="toggle(item)"
-                        [attr.aria-label]="
-                    (item.status === 'inactive' ? 'Ativar ' : 'Desativar ') + item.name
-                  "
-                        [attr.aria-pressed]="item.status !== 'inactive'"
-                        [class.is-active]="item.status !== 'inactive'"
-                        [title]="item.status === 'inactive' ? 'Ativar' : 'Desativar'">
-                        <span class="status-toggle-track" aria-hidden="true"><span></span></span>
-                    </button>
-                    }
-                    @if (readOnly) { <div class="row-actions"><span>Somente leitura</span></div> } @else { <div class="row-actions">
-                        <button
-                            type="button"
-                            class="featured-toggle"
-                            [class.is-featured]="item.featured"
-                            (click)="toggleFeatured(item)"
-                            [attr.aria-pressed]="!!item.featured"
-                            [attr.aria-label]="item.featured ? 'Remover ' + item.name + ' dos destaques' : 'Colocar ' + item.name + ' em destaque'"
-                            [title]="item.featured ? 'Remover dos destaques' : 'Colocar em destaque'">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="m12 3 2.78 5.63 6.22.9-4.5 4.39 1.06 6.2L12 17.2l-5.56 2.92 1.06-6.2L3 9.53l6.22-.9L12 3Z" />
-                            </svg>
-                        </button>
-                        <button type="button" class="icon-action" (click)="edit(item)" [attr.aria-label]="'Editar ' + item.name" title="Editar">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4Zm12.7-13.3 1.6-1.6a1.4 1.4 0 0 1 2 2l-1.6 1.6-2-2Z" /></svg>
-                        </button>
-                        <button
-                            type="button"
-                            class="icon-action"
-                            (click)="duplicate(item)"
-                            [attr.aria-label]="'Duplicar ' + item.name"
-                            title="Duplicar">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h3Zm2-2v2h5a2 2 0 0 1 2 2v5h2V5h-9ZM5 9v10h10V9H5Z" /></svg>
-                        </button>
-                        <button type="button" class="icon-action destructive-action" (click)="requestRemoval(item)" [attr.aria-label]="'Excluir ' + item.name" title="Excluir">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm4 3v6h2v-6h-2Zm4 0v6h2v-6h-2Z" /></svg>
-                        </button>
-                    </div> }
-                </article>
-                } @empty {
-                <div class="empty">
-                    <h3>Nenhum cadastro encontrado</h3>
-                    <p>Tente outro título ou limpe os filtros.</p>
-                    <button class="secondary" (click)="clear()">Limpar filtros</button>
-                </div>
-                }
-                @if (filtered.length > pageSize) {
-                <nav class="admin-pagination" aria-label="Paginação de cadastros">
-                    <button type="button" (click)="setPage(page - 1)" [disabled]="page === 1">
-                        Anterior
-                    </button>
-                    <span aria-live="polite">Página {{ page }} de {{ pageCount }}</span>
-                    <button
-                        type="button"
-                        (click)="setPage(page + 1)"
-                        [disabled]="page === pageCount">
-                        Próxima
-                    </button>
-                </nav>
-                }
+                <crica-catalog-grid
+                    [rows]="filtered"
+                    [suppliers]="section === 'fornecedores'"
+                    [pageSize]="pageSize"
+                    (action)="gridAction($event)" />
+                <p class="catalog-grid-hint">
+                    Clique no título de uma coluna para consultar em outra ordem. Use “Organizar
+                    exibição” para mudar a sequência no site.
+                </p>
             </section>
-            } <p class="admin-footnote">
+            } }
+            <p class="admin-footnote">
                 Os dados publicados aparecem no catálogo público; rascunhos ficam apenas na
                 administração.
             </p>
@@ -595,17 +688,27 @@
         <span class="eyebrow">AÇÃO PERMANENTE</span>
         <h2 id="delete-dialog-title">Excluir {{ deletionTarget.kind }}?</h2>
         <p>
-            Você está prestes a excluir <strong>{{ deletionTarget.name }}</strong>. Este cadastro
-            será removido do catálogo e não poderá ser recuperado.
+            Você está prestes a excluir
+            <strong>{{ deletionTarget.name }}</strong>
+            . Este cadastro será removido do catálogo e não poderá ser recuperado.
         </p>
         @if (deletionError) {
         <p class="delete-dialog-error" role="alert">{{ deletionError }}</p>
         }
         <div class="delete-dialog-actions">
-            <button class="secondary" type="button" autofocus [disabled]="deleting" (click)="cancelDeletion()">
+            <button
+                class="secondary"
+                type="button"
+                autofocus
+                [disabled]="deleting"
+                (click)="cancelDeletion()">
                 Cancelar
             </button>
-            <button class="delete-confirm" type="button" [disabled]="deleting" (click)="confirmDeletion()">
+            <button
+                class="delete-confirm"
+                type="button"
+                [disabled]="deleting"
+                (click)="confirmDeletion()">
                 {{ deleting ? 'Excluindo…' : 'Excluir definitivamente' }}
             </button>
         </div>

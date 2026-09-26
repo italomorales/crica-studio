@@ -61,16 +61,25 @@ export class AdminCatalogService {
         this.error.set('');
         try {
             const headers = { Authorization: `Bearer ${token}` };
-            const [typesResponse, productsResponse, affiliatesResponse, settingsResponse] = await Promise.all(
-                ['types', 'products', 'affiliates', 'settings'].map((resource) =>
-                    fetch(`${API_URL}/api/admin/catalog/${resource}`, { headers }),
-                ),
-            );
-            if ([typesResponse, productsResponse, affiliatesResponse, settingsResponse].some((r) => r.status === 401)) {
+            const [typesResponse, productsResponse, affiliatesResponse, settingsResponse] =
+                await Promise.all(
+                    ['types', 'products', 'affiliates', 'settings'].map((resource) =>
+                        fetch(`${API_URL}/api/admin/catalog/${resource}`, { headers }),
+                    ),
+                );
+            if (
+                [typesResponse, productsResponse, affiliatesResponse, settingsResponse].some(
+                    (r) => r.status === 401,
+                )
+            ) {
                 this.auth.logout();
                 throw new Error('session');
             }
-            if (![typesResponse, productsResponse, affiliatesResponse, settingsResponse].every((r) => r.ok))
+            if (
+                ![typesResponse, productsResponse, affiliatesResponse, settingsResponse].every(
+                    (r) => r.ok,
+                )
+            )
                 throw new Error('api');
 
             const [types, products, affiliates, settings] = (await Promise.all([
@@ -104,6 +113,35 @@ export class AdminCatalogService {
         }
     }
 
+    async reorder(
+        resource: 'products' | 'affiliates',
+        ids: string[],
+        expected: { id: string; order: number }[],
+    ) {
+        const token = this.auth.accessToken();
+        if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
+        const response = await fetch(`${API_URL}/api/admin/catalog/${resource}/order`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids, expected }),
+        });
+        if (response.status === 401) {
+            this.auth.logout();
+            throw new Error('Sua sessão expirou. Entre novamente.');
+        }
+        if (!response.ok) {
+            const problem = await response.json().catch(() => null);
+            throw new Error(problem?.detail || 'Não foi possível salvar a ordem. Tente novamente.');
+        }
+        const positions = new Map(ids.map((id, index) => [id, index + 1]));
+        this.state.update((state) => ({
+            ...state,
+            [resource]: state[resource].map((item) => ({
+                ...item,
+                order: positions.get(item.id) ?? item.order,
+            })),
+        }));
+    }
     async saveProduct(product: Product) {
         await this.write('products', product.id, {
             typeId: product.typeId,
@@ -123,59 +161,122 @@ export class AdminCatalogService {
     }
     async saveAffiliate(product: AffiliateProduct) {
         await this.write('affiliates', product.id, {
-            typeId: product.typeId, name: product.name, description: product.description,
-            platform: product.platform, image: product.image, images: product.images ?? (product.image ? [product.image] : []), url: product.url, seller: product.seller,
-            demoListing: product.demoListing, status: product.status, order: product.order,
+            typeId: product.typeId,
+            name: product.name,
+            description: product.description,
+            platform: product.platform,
+            image: product.image,
+            images: product.images ?? (product.image ? [product.image] : []),
+            url: product.url,
+            seller: product.seller,
+            demoListing: product.demoListing,
+            status: product.status,
+            order: product.order,
             featured: product.featured ?? false,
         });
     }
-    async saveType(type: CatalogType) { await this.write('types', type.id, type); }
-    async saveSettings(number: string) { await this.write('settings', undefined, { whatsappNumber: number }, 'PUT'); }
-    async deleteProduct(id: string) { await this.remove('products', id); }
-    async deleteAffiliate(id: string) { await this.remove('affiliates', id); }
-    async deleteType(id: string) { await this.remove('types', id); }
+    async saveType(type: CatalogType) {
+        await this.write('types', type.id, type);
+    }
+    async saveSettings(number: string) {
+        await this.write('settings', undefined, { whatsappNumber: number }, 'PUT');
+    }
+    async deleteProduct(id: string) {
+        await this.remove('products', id);
+    }
+    async deleteAffiliate(id: string) {
+        await this.remove('affiliates', id);
+    }
+    async deleteType(id: string) {
+        await this.remove('types', id);
+    }
     async uploadImage(file: Blob, category: 'products' | 'affiliates') {
         const token = this.auth.accessToken();
         if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
         const form = new FormData();
-        form.append('file', file, `catalog-image.${file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : 'webp'}`);
+        form.append(
+            'file',
+            file,
+            `catalog-image.${file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : 'webp'}`,
+        );
         const response = await fetch(`${API_URL}/api/admin/catalog/media/${category}`, {
-            method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form,
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: form,
         });
-        if (response.status === 401) { this.auth.logout(); throw new Error('Sua sessão expirou. Entre novamente.'); }
-        if (!response.ok) {
-            const problem = await response.json().catch(() => null) as { errors?: Record<string, string[]>; detail?: string } | null;
-            throw new Error(problem?.errors ? Object.values(problem.errors).flat().join(' ') : problem?.detail || 'Não foi possível enviar a imagem.');
+        if (response.status === 401) {
+            this.auth.logout();
+            throw new Error('Sua sessão expirou. Entre novamente.');
         }
-        return (await response.json() as { url: string }).url;
+        if (!response.ok) {
+            const problem = (await response.json().catch(() => null)) as {
+                errors?: Record<string, string[]>;
+                detail?: string;
+            } | null;
+            throw new Error(
+                problem?.errors
+                    ? Object.values(problem.errors).flat().join(' ')
+                    : problem?.detail || 'Não foi possível enviar a imagem.',
+            );
+        }
+        return ((await response.json()) as { url: string }).url;
     }
-    private async write(resource: string, id: string | undefined, body: unknown, fixedMethod?: string) {
+    private async write(
+        resource: string,
+        id: string | undefined,
+        body: unknown,
+        fixedMethod?: string,
+    ) {
         const token = this.auth.accessToken();
         if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
         const known = isExistingCatalogId(id);
-        const response = await fetch(`${API_URL}/api/admin/catalog/${resource}${known ? '/' + id : ''}`, {
-            method: catalogWriteMethod(id, fixedMethod),
-            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
-        if (response.status === 401) { this.auth.logout(); throw new Error('Sua sessão expirou. Entre novamente.'); }
+        const response = await fetch(
+            `${API_URL}/api/admin/catalog/${resource}${known ? '/' + id : ''}`,
+            {
+                method: catalogWriteMethod(id, fixedMethod),
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            },
+        );
+        if (response.status === 401) {
+            this.auth.logout();
+            throw new Error('Sua sessão expirou. Entre novamente.');
+        }
         if (!response.ok) {
-            const problem = await response.json().catch(() => null) as { errors?: Record<string, string[]> } | null;
-            throw new Error(problem?.errors ? Object.values(problem.errors).flat().join(' ') : 'Não foi possível salvar.');
+            const problem = (await response.json().catch(() => null)) as {
+                errors?: Record<string, string[]>;
+            } | null;
+            throw new Error(
+                problem?.errors
+                    ? Object.values(problem.errors).flat().join(' ')
+                    : 'Não foi possível salvar.',
+            );
         }
         await this.load(false);
     }
     private async remove(resource: string, id: string) {
         const token = this.auth.accessToken();
         if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
-        if (!isExistingCatalogId(id)) throw new Error('Este cadastro não possui uma identificação válida para exclusão.');
+        if (!isExistingCatalogId(id))
+            throw new Error('Este cadastro não possui uma identificação válida para exclusão.');
         const response = await fetch(`${API_URL}/api/admin/catalog/${resource}/${id}`, {
-            method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
         });
-        if (response.status === 401) { this.auth.logout(); throw new Error('Sua sessão expirou. Entre novamente.'); }
+        if (response.status === 401) {
+            this.auth.logout();
+            throw new Error('Sua sessão expirou. Entre novamente.');
+        }
         if (!response.ok) {
-            const problem = await response.json().catch(() => null) as { errors?: Record<string, string[]>; detail?: string } | null;
-            throw new Error(problem?.errors ? Object.values(problem.errors).flat().join(' ') : problem?.detail || 'Não foi possível excluir.');
+            const problem = (await response.json().catch(() => null)) as {
+                errors?: Record<string, string[]>;
+                detail?: string;
+            } | null;
+            throw new Error(
+                problem?.errors
+                    ? Object.values(problem.errors).flat().join(' ')
+                    : problem?.detail || 'Não foi possível excluir.',
+            );
         }
         await this.load(false);
     }

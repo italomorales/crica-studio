@@ -13,6 +13,8 @@ import { normalize } from '../services/contact';
 import { priceLabel, PLATFORMS, validateItem, validateType } from '../services/local-store';
 import type { Product, AffiliateProduct, CatalogType, ItemStatus } from '../data/models';
 import { ImagePickerComponent } from './image-picker';
+import { CatalogGridComponent, type CatalogRow, type CatalogAction } from './catalog-grid';
+import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
 import adminTemplate from './admin.html?raw';
 
 type DeletionTarget = {
@@ -24,12 +26,104 @@ type DeletionTarget = {
 @Component({
     selector: 'crica-admin',
     standalone: true,
-    imports: [FormsModule, RouterLink, RouterLinkActive, ImagePickerComponent],
+    imports: [
+        FormsModule,
+        RouterLink,
+        RouterLinkActive,
+        ImagePickerComponent,
+        CatalogGridComponent,
+    ],
     template: adminTemplate,
 })
 export class AdminComponent {
     @ViewChild('deleteDialog', { static: true }) deleteDialog!: ElementRef<HTMLDialogElement>;
+    @ViewChild(CatalogGridComponent) catalogGrid?: CatalogGridComponent;
+    organizing = false;
+    savingOrder = false;
+    orderDraft: CatalogRow[] = [];
+    orderBaseline: CatalogRow[] = [];
+    selectedOrderId = '';
+    targetPosition = 1;
+    orderAnnouncement = '';
+    orderError = '';
     pageSize = 20;
+    get orderDirty() {
+        return this.organizing && !sameCatalogOrder(this.orderDraft, this.orderBaseline);
+    }
+    get selectedOrderItem() {
+        return this.orderDraft.find((item) => item.id === this.selectedOrderId);
+    }
+    get selectedOrderIndex() {
+        return this.orderDraft.findIndex((item) => item.id === this.selectedOrderId);
+    }
+    startOrganizing() {
+        this.orderBaseline = structuredClone(this.items);
+        this.orderDraft = [...this.orderBaseline];
+        this.organizing = true;
+        this.orderError = '';
+        this.orderAnnouncement = '';
+        this.selectOrderItem(this.orderDraft[0]?.id || '');
+        this.dismissNotice();
+    }
+    selectOrderItem(id: string) {
+        this.selectedOrderId = id;
+        this.targetPosition = this.selectedOrderIndex + 1;
+    }
+    reordered(rows: CatalogRow[]) {
+        if (this.savingOrder) return;
+        this.orderDraft = rows;
+        this.targetPosition = this.selectedOrderIndex + 1;
+        this.orderAnnouncement = `${this.selectedOrderItem?.name || 'Item'} na posição ${this.targetPosition}. Salve para aplicar no site.`;
+    }
+    moveOrder(position: number) {
+        if (this.savingOrder) return;
+        if (!Number.isInteger(position) || position < 1 || position > this.orderDraft.length) {
+            this.orderError = `Informe uma posição entre 1 e ${this.orderDraft.length}.`;
+            return;
+        }
+        this.orderError = '';
+        this.reordered(moveCatalogItem(this.orderDraft, this.selectedOrderId, position - 1));
+        setTimeout(() => this.catalogGrid?.reveal(this.selectedOrderId));
+    }
+    cancelOrganizing() {
+        if (this.savingOrder) return;
+        this.organizing = false;
+        this.orderDraft = [];
+        this.orderError = '';
+    }
+    async saveOrder() {
+        if (this.savingOrder || !this.orderDirty) return;
+        this.savingOrder = true;
+        this.orderError = '';
+        try {
+            await this.catalog.reorder(
+                this.section === 'loja' ? 'products' : 'affiliates',
+                this.orderDraft.map((item) => item.id),
+                this.orderBaseline.map((item) => ({ id: item.id, order: item.order ?? 0 })),
+            );
+            this.organizing = false;
+            this.showNotice(
+                'Ordem salva. A sequência dos itens publicados já foi atualizada no site.',
+            );
+        } catch (error) {
+            this.orderError =
+                error instanceof Error
+                    ? error.message
+                    : 'Não foi possível salvar a ordem. Tente novamente.';
+        } finally {
+            this.savingOrder = false;
+        }
+    }
+    gridAction(event: CatalogAction) {
+        const handlers = {
+            edit: () => this.edit(event.item),
+            duplicate: () => this.duplicate(event.item),
+            delete: () => this.requestRemoval(event.item),
+            toggle: () => this.toggle(event.item),
+            feature: () => this.toggleFeatured(event.item),
+        };
+        void handlers[event.kind]();
+    }
     catalog = inject(AdminCatalogService);
     auth = inject(AuthService);
     router = inject(Router);
@@ -112,7 +206,9 @@ export class AdminComponent {
         return this.filtered.slice(start, start + this.pageSize);
     }
     get firstVisibleItem() {
-        return this.filtered.length ? (Math.min(this.page, this.pageCount) - 1) * this.pageSize + 1 : 0;
+        return this.filtered.length
+            ? (Math.min(this.page, this.pageCount) - 1) * this.pageSize + 1
+            : 0;
     }
     get lastVisibleItem() {
         return Math.min(this.firstVisibleItem + this.pageSize - 1, this.filtered.length);
@@ -175,12 +271,17 @@ export class AdminComponent {
     }
     get dirty() {
         return (
+            this.orderDirty ||
             (this.editing && this.baseline !== this.snapshot()) ||
             (this.section === 'configuracoes' && this.whatsapp !== this.catalog.whatsappNumber)
         );
     }
     canLeave() {
-        return !(this.dirty || this.uploadingImages) || window.confirm('Há alterações não salvas. Deseja sair sem salvar?');
+        if (this.savingOrder) return false;
+        return (
+            !(this.dirty || this.uploadingImages) ||
+            window.confirm('Há alterações não salvas. Deseja sair sem salvar?')
+        );
     }
     @HostListener('window:beforeunload', ['$event']) beforeUnload(event: BeforeUnloadEvent) {
         if (this.dirty || this.uploadingImages) {
@@ -252,7 +353,11 @@ export class AdminComponent {
             demo: true,
             ...structuredClone(item),
         };
-        this.images = item.images?.length ? [...item.images] : (item as AffiliateProduct).image ? [(item as AffiliateProduct).image!] : [];
+        this.images = item.images?.length
+            ? [...item.images]
+            : (item as AffiliateProduct).image
+              ? [(item as AffiliateProduct).image!]
+              : [];
         this.characteristics = this.draft.characteristics.join('\n');
         this.personalization = this.draft.personalization.join('\n');
         this.baseline = this.snapshot();
@@ -317,7 +422,7 @@ export class AdminComponent {
             if (this.section === 'loja') await this.catalog.saveProduct(item as Product);
             else await this.catalog.saveAffiliate(item as AffiliateProduct);
             this.editing = false;
-        this.uploadingImages = false;
+            this.uploadingImages = false;
             this.showNotice(
                 d.status === 'published'
                     ? 'Cadastro publicado. Ele já aparece no catálogo deste navegador.'
@@ -359,7 +464,11 @@ export class AdminComponent {
             const updated = { ...item, featured: !item.featured };
             if (this.section === 'loja') await this.catalog.saveProduct(updated as Product);
             else await this.catalog.saveAffiliate(updated as AffiliateProduct);
-            this.showNotice(updated.featured ? 'Cadastro adicionado aos destaques.' : 'Cadastro removido dos destaques.');
+            this.showNotice(
+                updated.featured
+                    ? 'Cadastro adicionado aos destaques.'
+                    : 'Cadastro removido dos destaques.',
+            );
         } catch (e) {
             this.error(e);
         }
@@ -375,7 +484,9 @@ export class AdminComponent {
         this.deletionTarget = target;
         this.deletionError = '';
         this.deleteDialog.nativeElement.showModal();
-        setTimeout(() => this.deleteDialog.nativeElement.querySelector<HTMLElement>('[autofocus]')?.focus());
+        setTimeout(() =>
+            this.deleteDialog.nativeElement.querySelector<HTMLElement>('[autofocus]')?.focus(),
+        );
     }
     cancelDeletion() {
         if (!this.deleting) this.deleteDialog.nativeElement.close();
@@ -400,7 +511,9 @@ export class AdminComponent {
             if (target.kind === 'produto') await this.catalog.deleteProduct(target.id);
             else if (target.kind === 'fornecedor') await this.catalog.deleteAffiliate(target.id);
             else await this.catalog.deleteType(target.id);
-            this.showNotice(`${target.kind === 'tipo' ? 'Tipo' : target.kind === 'produto' ? 'Produto' : 'Fornecedor'} excluído.`);
+            this.showNotice(
+                `${target.kind === 'tipo' ? 'Tipo' : target.kind === 'produto' ? 'Produto' : 'Fornecedor'} excluído.`,
+            );
             this.deleting = false;
             this.deleteDialog.nativeElement.close();
         } catch (e) {
@@ -420,7 +533,7 @@ export class AdminComponent {
         try {
             await this.catalog.saveType(this.typeDraft);
             this.editing = false;
-        this.uploadingImages = false;
+            this.uploadingImages = false;
             this.errors = [];
             this.showNotice('Tipo salvo. Os cadastros vinculados acompanham o nome atualizado.');
         } catch (e) {
@@ -431,9 +544,11 @@ export class AdminComponent {
         try {
             await this.catalog.saveType({ ...t, active: !t.active });
             this.errors = [];
-            this.showNotice(t.active
-                ? 'Tipo desativado para novos cadastros. Os itens existentes foram preservados.'
-                : 'Tipo ativado.');
+            this.showNotice(
+                t.active
+                    ? 'Tipo desativado para novos cadastros. Os itens existentes foram preservados.'
+                    : 'Tipo ativado.',
+            );
         } catch (e) {
             this.error(e);
         }
@@ -441,7 +556,11 @@ export class AdminComponent {
     requestTypeRemoval(t: CatalogType) {
         const linkedItems = this.usage(t.id);
         if (linkedItems) {
-            this.error(new Error(`Este tipo possui ${linkedItems} ${linkedItems === 1 ? 'cadastro vinculado' : 'cadastros vinculados'} e não pode ser excluído.`));
+            this.error(
+                new Error(
+                    `Este tipo possui ${linkedItems} ${linkedItems === 1 ? 'cadastro vinculado' : 'cadastros vinculados'} e não pode ser excluído.`,
+                ),
+            );
             return;
         }
         this.openDeletion({ id: t.id, name: t.name, kind: 'tipo' });
