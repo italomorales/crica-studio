@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify tests and media protection
+        run: npm test
+
       - name: Build Angular
         run: npm run build
 
@@ -37,7 +40,9 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync dist/ s3://${{ vars.S3_BUCKET }}/ --delete
+          # Uploaded catalog media shares this bucket and is not part of dist/.
+          # Excluded keys are also protected from --delete.
+          aws s3 sync dist/ s3://${{ vars.S3_BUCKET }}/ --delete --exclude 'catalog/*'
 
       - name: Invalidate CloudFront cache
         run: |
