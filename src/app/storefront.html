@@ -10,6 +10,19 @@
     <section class="storefront-grid" aria-label="Vitrines da Crica Studio">
         @for (storefront of storefronts; track storefront.id) {
         <article class="storefront-card">
+            <button
+                class="share-product storefront-share"
+                type="button"
+                (click)="shareStorefront(storefront)"
+                [attr.aria-label]="'Compartilhar vitrine ' + storefront.name">
+                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                    <circle cx="18" cy="5" r="2.5" />
+                    <circle cx="6" cy="12" r="2.5" />
+                    <circle cx="18" cy="19" r="2.5" />
+                    <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
+                </svg>
+                <span class="sr-only">Compartilhar</span>
+            </button>
             @if (storefront.id === 'tiktok') {
             <span class="hero-label storefront-mobile-label">Somente pelo celular</span>
             }

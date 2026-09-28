@@ -45,6 +45,19 @@
                 <span class="hero-product-name">{{ product.name }}</span>
             </button>
             }
+            <button
+                class="share-product hero-share"
+                type="button"
+                (click)="shareFeatured(product)"
+                [attr.aria-label]="'Compartilhar ' + product.name">
+                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                    <circle cx="18" cy="5" r="2.5" />
+                    <circle cx="6" cy="12" r="2.5" />
+                    <circle cx="18" cy="19" r="2.5" />
+                    <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
+                </svg>
+                <span class="sr-only">Compartilhar</span>
+            </button>
             @if (catalog.featuredAffiliates().length > 1) {
             <div class="hero-carousel-controls" aria-label="Destaques dos fornecedores">
                 <button type="button" (click)="previousFeatured()" aria-label="Destaque anterior">←</button>

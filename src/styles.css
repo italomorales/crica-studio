@@ -734,6 +734,9 @@ footer {
     display: block;
     height: 100%;
 }
+.supplier-featured-art:after {
+    display: none;
+}
 .supplier-featured-art .product-visual {
     aspect-ratio: 1;
 }
@@ -901,6 +904,11 @@ footer {
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 1.9;
+}
+.hero-share,
+.storefront-share {
+    top: 16px;
+    right: 16px;
 }
 .image-placeholder {
     height: 100%;

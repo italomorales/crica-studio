@@ -9,6 +9,7 @@ import storefrontTemplate from './storefront.html?raw';
 import { SITE_CONFIG } from './data/site.config';
 import type { AffiliateProduct, Product } from './data/models';
 import { externalUrl } from './services/contact';
+import { shareLink } from './services/share';
 
 @Component({
     selector: 'crica-shop',
@@ -114,6 +115,14 @@ export class SuppliersComponent implements OnInit, OnDestroy {
     featuredUrl(product: AffiliateProduct) {
         return externalUrl(SITE_CONFIG.affiliateLinks[product.id] ?? product.url);
     }
+    async shareFeatured(product: AffiliateProduct) {
+        const url = this.featuredUrl(product) ?? window.location.href;
+        await shareLink(
+            product.name,
+            `Confira esta indicação da Crica Studio: ${product.name}`,
+            url,
+        );
+    }
     previousFeatured() {
         const products = this.catalog.featuredAffiliates();
         this.featuredIndex = (this.featuredIndex - 1 + products.length) % products.length;
@@ -169,4 +178,12 @@ export class SuppliersComponent implements OnInit, OnDestroy {
 })
 export class StorefrontComponent {
     readonly storefronts = SITE_CONFIG.storefronts;
+    async shareStorefront(storefront: (typeof SITE_CONFIG.storefronts)[number]) {
+        const url = storefront.url ?? window.location.href;
+        await shareLink(
+            storefront.name,
+            `Confira a vitrine da Crica Studio na ${storefront.name}.`,
+            url,
+        );
+    }
 }

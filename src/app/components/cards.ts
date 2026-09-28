@@ -4,6 +4,7 @@ import { ProductImageComponent } from './shared';
 import { SITE_CONFIG } from '../data/site.config';
 import { priceLabel } from '../services/local-store';
 import { externalUrl } from '../services/contact';
+import { shareLink } from '../services/share';
 import productCardTemplate from './product-card.html?raw';
 import affiliateCardTemplate from './affiliate-card.html?raw';
 
@@ -37,18 +38,6 @@ export class AffiliateCardComponent {
     async share() {
         const url = this.url ?? window.location.href;
         const text = `Confira esta indicação da Crica Studio: ${this.product.name}`;
-        if (navigator.share) {
-            try {
-                await navigator.share({ title: this.product.name, text, url });
-            } catch {
-                // Cancelar o painel de compartilhamento não exige nenhuma ação adicional.
-            }
-            return;
-        }
-        window.open(
-            `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
-            '_blank',
-            'noopener,noreferrer',
-        );
+        await shareLink(this.product.name, text, url);
     }
 }
