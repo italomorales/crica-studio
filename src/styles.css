@@ -869,6 +869,39 @@ footer {
 .affiliate-card .product-visual {
     aspect-ratio: 1;
 }
+.affiliate-card-media {
+    position: relative;
+}
+.share-product {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid rgb(23 48 79 / 16%);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 94%);
+    color: var(--blue);
+    box-shadow: 0 2px 8px rgb(23 48 79 / 14%);
+    transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.share-product:hover {
+    background: var(--white);
+    box-shadow: 0 4px 12px rgb(2 85 165 / 18%);
+    transform: translateY(-1px);
+}
+.share-product svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.9;
+}
 .image-placeholder {
     height: 100%;
     display: flex;

@@ -1,5 +1,20 @@
 <article class="product-card affiliate-card">
-    <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+    <div class="affiliate-card-media">
+        <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+        <button
+            class="share-product"
+            type="button"
+            (click)="share()"
+            [attr.aria-label]="'Compartilhar ' + product.name">
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                <circle cx="18" cy="5" r="2.5" />
+                <circle cx="6" cy="12" r="2.5" />
+                <circle cx="18" cy="19" r="2.5" />
+                <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
+            </svg>
+            <span class="sr-only">Compartilhar</span>
+        </button>
+    </div>
     <div class="card-body">
         <span
             class="platform"

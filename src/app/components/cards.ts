@@ -34,4 +34,21 @@ export class AffiliateCardComponent {
     get preposition() {
         return this.product.platform === 'Shopee' ? 'na' : 'no';
     }
+    async share() {
+        const url = this.url ?? window.location.href;
+        const text = `Confira esta indicação da Crica Studio: ${this.product.name}`;
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: this.product.name, text, url });
+            } catch {
+                // Cancelar o painel de compartilhamento não exige nenhuma ação adicional.
+            }
+            return;
+        }
+        window.open(
+            `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
+            '_blank',
+            'noopener,noreferrer',
+        );
+    }
 }
