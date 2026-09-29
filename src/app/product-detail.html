@@ -1,5 +1,18 @@
 <main id="main" class="product-page container">
-    <a class="back-link" routerLink="/loja">← Voltar para a loja</a>
+    <div class="product-page-toolbar">
+        <a class="back-link" routerLink="/loja">← Voltar para a loja</a>
+        @if (product && !loading && !unavailable) {
+        <button type="button" class="product-share" (click)="share()" aria-label="Compartilhar link deste produto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <circle cx="18" cy="5" r="2.5" />
+                <circle cx="6" cy="12" r="2.5" />
+                <circle cx="18" cy="19" r="2.5" />
+                <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
+            </svg>
+            Compartilhar
+        </button>
+        }
+    </div>
     @if (loading) {
     <section class="empty product-page-state" aria-live="polite">
         <h1>Carregando produto</h1>
@@ -18,7 +31,7 @@
             @if (product.images.length > 1) {
             <div class="thumbs" aria-label="Fotos do produto">
                 @for (src of product.images; track src; let i = $index) {
-                <button type="button" [class.selected]="imageIndex === i" [attr.aria-label]="'Ver imagem ' + (i + 1)" (click)="imageIndex = i">
+                <button type="button" [class.selected]="imageIndex === i" [attr.aria-pressed]="imageIndex === i" [attr.aria-label]="'Ver imagem ' + (i + 1)" (click)="imageIndex = i">
                     <img [src]="src" alt="" />
                 </button>
                 }
@@ -42,7 +55,10 @@
                 }
                 <small>Os preços podem sofrer alterações conforme o modelo e o material escolhidos.</small>
             </div>
-            <form (ngSubmit)="order()">
+            <form class="product-order" (ngSubmit)="order()">
+                <span class="eyebrow">DO SEU JEITO</span>
+                <h2>Vamos criar o seu?</h2>
+                <p>Conte sua ideia e combine os detalhes com a Crica.</p>
                 <label for="quantity">Quantidade desejada</label>
                 <input id="quantity" name="quantity" class="quantity" type="number" min="1" step="1" required [(ngModel)]="quantity" [attr.aria-invalid]="!valid" aria-describedby="quantity-hint" />
                 <small id="quantity-hint">Informe um número inteiro a partir de 1.</small>

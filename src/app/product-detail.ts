@@ -6,6 +6,8 @@ import { PublicCatalogService } from './services/public-catalog.service';
 import { buildMessage, validQuantity, whatsappUrl } from './services/contact';
 import { priceLabel } from './services/local-store';
 import { SeoService } from './services/seo.service';
+import { shareLink } from './services/share';
+import { productPath } from './services/product-url';
 import type { Product } from './data/models';
 import productDetailTemplate from './product-detail.html?raw';
 
@@ -38,6 +40,12 @@ export class ProductDetailComponent {
 
     get valid() {
         return validQuantity(this.quantity);
+    }
+
+    async share() {
+        if (!this.product) return;
+        const url = new URL(productPath(this.product), window.location.origin).href;
+        await shareLink(this.product.name, `Confira este produto da Crica Studio: ${this.product.name}`, url);
     }
 
     async load(slug: string) {
