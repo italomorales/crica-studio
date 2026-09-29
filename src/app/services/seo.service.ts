@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import type { Product } from '../data/models';
+import { productPath } from './product-url';
 
 const SITE_URL = 'https://www.cricastudio.com.br';
 
@@ -54,6 +56,15 @@ export class SeoService {
             .subscribe((event) => this.update(event.urlAfterRedirects));
     }
 
+    setProduct(product: Product) {
+        const page: PageSeo = {
+            title: `${product.name} | Crica Studio`,
+            description: product.fullDescription || product.description,
+            path: productPath(product),
+        };
+        this.apply(page, product.images[0]);
+    }
+
     private update(url: string) {
         const path = '/' + url.split(/[?#]/)[0].replace(/^\/+/, '');
         const page = path.startsWith('/admin')
@@ -64,6 +75,10 @@ export class SeoService {
                   indexable: false,
               }
             : PAGES[path] ?? DEFAULT_PAGE;
+        this.apply(page);
+    }
+
+    private apply(page: PageSeo, image?: string) {
         const canonical = `${SITE_URL}${page.path}`;
         const robots = page.indexable === false ? 'noindex,nofollow' : 'index,follow';
 
@@ -75,7 +90,7 @@ export class SeoService {
         this.setProperty('og:title', page.title);
         this.setProperty('og:description', page.description);
         this.setProperty('og:url', canonical);
-        this.setProperty('og:image', `${SITE_URL}/assets/hero.webp`);
+        this.setProperty('og:image', image?.startsWith('http') ? image : `${SITE_URL}${image || '/assets/hero.webp'}`);
         this.setName('twitter:card', 'summary_large_image');
 
         let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');

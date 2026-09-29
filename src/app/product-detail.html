@@ -1,0 +1,68 @@
+<main id="main" class="product-page container">
+    <a class="back-link" routerLink="/loja">← Voltar para a loja</a>
+    @if (loading) {
+    <section class="empty product-page-state" aria-live="polite">
+        <h1>Carregando produto</h1>
+        <p>Estamos preparando os detalhes deste modelo.</p>
+    </section>
+    } @else if (unavailable || !product) {
+    <section class="empty product-page-state">
+        <h1>Produto não encontrado</h1>
+        <p>Este produto pode ter sido removido ou ainda não estar disponível.</p>
+        <a class="secondary" routerLink="/loja">Ver produtos da loja</a>
+    </section>
+    } @else {
+    <section class="product-page-grid" [attr.aria-labelledby]="'product-title-' + product.id">
+        <div class="product-page-photo">
+            <crica-product-image [src]="product.images[imageIndex]" [alt]="product.name" />
+            @if (product.images.length > 1) {
+            <div class="thumbs" aria-label="Fotos do produto">
+                @for (src of product.images; track src; let i = $index) {
+                <button type="button" [class.selected]="imageIndex === i" [attr.aria-label]="'Ver imagem ' + (i + 1)" (click)="imageIndex = i">
+                    <img [src]="src" alt="" />
+                </button>
+                }
+            </div>
+            }
+        </div>
+        <div class="product-page-content">
+            <span class="eyebrow category">{{ product.category }}</span>
+            <h1 [id]="'product-title-' + product.id">{{ product.name }}</h1>
+            <p class="product-page-description">{{ product.fullDescription || product.description }}</p>
+            <strong class="consult">{{ price(product) }}</strong>
+            @if (!preview) {
+            <div class="detail-info">
+                @if (product.characteristics.length) {
+                <h2>Características</h2>
+                <ul>@for (item of product.characteristics; track item) { <li>{{ item }}</li> }</ul>
+                }
+                @if (product.personalization.length) {
+                <h2>Possibilidades de personalização</h2>
+                <p class="personalization-options">@for (option of product.personalization; track option) { <span>{{ option }}</span> }</p>
+                }
+                <small>Os preços podem sofrer alterações conforme o modelo e o material escolhidos.</small>
+            </div>
+            <form (ngSubmit)="order()">
+                <label for="quantity">Quantidade desejada</label>
+                <input id="quantity" name="quantity" class="quantity" type="number" min="1" step="1" required [(ngModel)]="quantity" [attr.aria-invalid]="!valid" aria-describedby="quantity-hint" />
+                <small id="quantity-hint">Informe um número inteiro a partir de 1.</small>
+                <label for="idea">Conte sua ideia <span>(opcional)</span></label>
+                <textarea id="idea" name="idea" maxlength="1500" rows="4" placeholder="Uma frase, uma ocasião, as cores que você imagina…" [(ngModel)]="idea"></textarea>
+                <button class="primary full" type="submit" [disabled]="!valid">Pedir pelo WhatsApp <span aria-hidden="true">↗</span></button>
+            </form>
+            } @else {
+            <section class="message-preview" aria-labelledby="contact-title">
+                <span class="demo-badge">Contato em configuração</span>
+                <h2 id="contact-title" tabindex="-1">Sua ideia já tem um começo.</h2>
+                <p>O WhatsApp da Crica ainda está em configuração. Você pode copiar a mensagem abaixo para guardar seu pedido de orçamento.</p>
+                <label for="message">Prévia da mensagem</label>
+                <textarea #messageField id="message" rows="6" readonly [value]="message"></textarea>
+                <button type="button" class="primary full" (click)="copy()">{{ copied ? 'Mensagem copiada' : 'Copiar mensagem' }}</button>
+                <p class="copy-status" role="status">{{ copyStatus }}</p>
+                <button type="button" class="secondary full" (click)="preview = false">Voltar aos detalhes</button>
+            </section>
+            }
+        </div>
+    </section>
+    }
+</main>

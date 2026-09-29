@@ -85,7 +85,7 @@
             [selected]="platform"
             [query]="query"
             (selection)="select($event)"
-            (search)="search($event)" />
+            (queryChange)="search($event)" />
         <div class="results-row">
             <p aria-live="polite">
                 @if (catalog.affiliatesLoading() && !catalog.affiliates().length) { Carregando indicações... } @else if (catalog.affiliatesError()) {

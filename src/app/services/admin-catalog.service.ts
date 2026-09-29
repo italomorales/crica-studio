@@ -146,6 +146,7 @@ export class AdminCatalogService {
         await this.write('products', product.id, {
             typeId: product.typeId,
             name: product.name,
+            slug: product.slug,
             description: product.description,
             fullDescription: product.fullDescription,
             priceMode: product.priceMode,

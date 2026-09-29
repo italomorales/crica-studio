@@ -25,6 +25,6 @@
             type="search"
             [placeholder]="searchLabel"
             [value]="query"
-            (input)="search.emit($any($event.target).value)" />
+            (input)="queryChange.emit($any($event.target).value)" />
     </label>
 </div>

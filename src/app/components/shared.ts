@@ -31,7 +31,7 @@ export class FiltersComponent {
     @Input() label = 'Categorias';
     @Input() searchLabel = 'Buscar produtos';
     @Output() selection = new EventEmitter<string>();
-    @Output() search = new EventEmitter<string>();
+    @Output() queryChange = new EventEmitter<string>();
 }
 @Component({
     selector: 'crica-product-image',

@@ -15,6 +15,7 @@ import type { Product, AffiliateProduct, CatalogType, ItemStatus } from '../data
 import { ImagePickerComponent } from './image-picker';
 import { CatalogGridComponent, type CatalogRow, type CatalogAction } from './catalog-grid';
 import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
+import { friendlySlug } from '../services/product-url';
 import adminTemplate from './admin.html?raw';
 
 type DeletionTarget = {
@@ -172,6 +173,10 @@ export class AdminComponent {
                 configuracoes: 'Configurações',
             } as Record<string, string>
         )[this.section];
+    }
+    get productUrlPreview() {
+        const slug = this.draft.slug || friendlySlug(this.draft.name);
+        return slug ? `https://www.cricastudio.com.br/loja/${slug}` : 'Digite o título para gerar a URL.';
     }
     get subtitle() {
         return this.editing

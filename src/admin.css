@@ -308,6 +308,15 @@
     width: 100%;
     background: #f9fafc;
 }
+.friendly-url {
+    display: block;
+    overflow-wrap: anywhere;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #f7f9fc;
+    color: var(--blue);
+}
 .admin-filters select {
     max-width: 190px;
 }

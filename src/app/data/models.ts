@@ -16,6 +16,7 @@ export interface ManagedFields {
 export interface Product extends ManagedFields {
     id: string;
     name: string;
+    slug?: string;
     category: Category;
     description: string;
     fullDescription?: string;

@@ -194,6 +194,11 @@
                             required
                             maxlength="120"
                             placeholder="Como o produto aparecerá no catálogo" />
+                        @if (section === 'loja') {
+                        <label>URL da página do produto</label>
+                        <output class="field-help friendly-url">{{ productUrlPreview }}</output>
+                        <small>Esta URL é criada a partir do título e permanece estável após a publicação.</small>
+                        }
                         <div class="form-two">
                             <div>
                                 <label for="item-type">Tipo *</label>

@@ -27,7 +27,7 @@
             <button
                 class="hero-featured"
                 type="button"
-                (click)="details.open(product)"
+                (click)="openProduct(product)"
                 [attr.aria-label]="'Ver detalhes de ' + product.name">
                 <img [src]="product.images[0]" [alt]="product.name" width="640" height="640" />
                 <span class="hero-label">Em destaque</span>
@@ -71,7 +71,7 @@
             [selected]="category"
             [query]="query"
             (selection)="select($event)"
-            (search)="search($event)" />
+            (queryChange)="search($event)" />
         <div class="results-row">
             <p aria-live="polite">
                 @if (catalog.productsLoading() && !catalog.products().length) { Carregando modelos... } @else if (catalog.productsError()) {
@@ -97,8 +97,8 @@
             } @else { @for (product of catalog.products(); track product.id) {
             <crica-product-card
                 [product]="product"
-                (details)="details.open($event)"
-                (order)="details.open($event, true)" />
+                (details)="openProduct($event)"
+                (order)="orderProduct($event)" />
             } @empty {
             <div class="empty">
                 <h3>Nenhum produto encontrado</h3>
@@ -165,4 +165,3 @@
         </div>
     </section>
 </main>
-<crica-details #details />

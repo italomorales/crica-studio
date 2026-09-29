@@ -103,6 +103,18 @@ export class PublicCatalogService {
         }
     }
 
+    async getProduct(slug: string) {
+        await Promise.all([this.ensureMeta(), this.ensureSettings()]);
+        const response = await fetch(`${API_URL}/api/catalog/products/${encodeURIComponent(slug)}`);
+        if (response.status === 404) return undefined;
+        if (!response.ok) throw new Error('api');
+        const product = (await response.json()) as ApiProduct;
+        return {
+            ...product,
+            category: this.types().find((type) => type.id === product.typeId)?.name ?? 'Sem tipo',
+        } as Product;
+    }
+
     async loadAffiliates(filters: AffiliateFilters, append = false) {
         const request = ++this.affiliatesRequest;
         const page = append ? this.affiliatesPage + 1 : 1;

@@ -1,4 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PublicCatalogService } from './services/public-catalog.service';
 import { FiltersComponent, ProductImageComponent } from './components/shared';
 import { ProductCardComponent, AffiliateCardComponent } from './components/cards';
@@ -10,15 +11,17 @@ import { SITE_CONFIG } from './data/site.config';
 import type { AffiliateProduct, Product } from './data/models';
 import { externalUrl } from './services/contact';
 import { shareLink } from './services/share';
+import { productPath } from './services/product-url';
 
 @Component({
     selector: 'crica-shop',
     standalone: true,
-    imports: [FiltersComponent, ProductCardComponent, DetailsComponent],
+    imports: [FiltersComponent, ProductCardComponent],
     template: shopTemplate,
 })
 export class ShopComponent implements OnInit, OnDestroy {
     catalog = inject(PublicCatalogService);
+    private router = inject(Router);
     category = 'Todos';
     query = '';
     private searchTimer?: ReturnType<typeof setTimeout>;
@@ -67,6 +70,12 @@ export class ShopComponent implements OnInit, OnDestroy {
     select(category: string) {
         this.category = category;
         void this.refresh();
+    }
+    openProduct(product: Product) {
+        void this.router.navigateByUrl(productPath(product));
+    }
+    orderProduct(product: Product) {
+        void this.router.navigateByUrl(productPath(product));
     }
     search(query: string) {
         this.query = query;

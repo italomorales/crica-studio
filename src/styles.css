@@ -978,6 +978,57 @@ footer {
 .empty p {
     margin-bottom: 24px;
 }
+.product-page {
+    padding-block: 40px 72px;
+}
+.back-link {
+    display: inline-flex;
+    margin-bottom: 24px;
+    color: var(--blue);
+    font-size: 14px;
+    font-weight: 700;
+}
+.product-page-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+    align-items: start;
+    overflow: hidden;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+.product-page-photo {
+    min-height: 100%;
+    padding: 28px;
+    background: #f8f7f4;
+}
+.product-page-photo .product-visual {
+    border-radius: 8px;
+}
+.product-page-photo .thumbs {
+    margin-top: 12px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+.thumbs button.selected {
+    border: 2px solid var(--blue);
+}
+.product-page-content {
+    padding: 40px;
+}
+.product-page-content h1 {
+    margin: 8px 0 14px;
+    font-size: clamp(30px, 4vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -1.2px;
+}
+.product-page-description {
+    max-width: 60ch;
+    line-height: 1.7;
+}
+.product-page-state {
+    min-height: 360px;
+}
 .detail-dialog {
     border: 0;
     border-radius: 12px;
@@ -1259,6 +1310,15 @@ crica-affiliate-card {
     }
     .detail-dialog {
         width: calc(100% - 32px);
+    }
+    .product-page-grid {
+        grid-template-columns: 1fr;
+    }
+    .product-page-photo {
+        padding: 20px;
+    }
+    .product-page-content {
+        padding: 28px 20px;
     }
     .detail-content {
         padding-inline: 24px;

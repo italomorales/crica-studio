@@ -5,6 +5,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Router, RouterOutlet, withInMemoryScrolling } from '@angular/router';
 import { HeaderComponent, FooterComponent } from './app/components/shared';
 import { ShopComponent, SuppliersComponent, StorefrontComponent } from './app/pages';
+import { ProductDetailComponent } from './app/product-detail';
 import './styles.css';
 import './admin.css';
 import { LoginComponent } from './app/admin/login';
@@ -48,6 +49,11 @@ bootstrapApplication(AppComponent, {
                     path: 'loja',
                     component: ShopComponent,
                     title: 'Canecas e Bottons Personalizados | Crica Studio',
+                },
+                {
+                    path: 'loja/:slug',
+                    component: ProductDetailComponent,
+                    title: 'Produto personalizado | Crica Studio',
                 },
                 {
                     path: 'fornecedores',
