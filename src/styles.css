@@ -1122,6 +1122,40 @@ footer {
 .product-page-state {
     min-height: 360px;
 }
+.product-skeleton {
+    opacity: 0;
+}
+.product-skeleton.is-visible {
+    opacity: 1;
+    transition: opacity 160ms ease;
+}
+.skeleton-block {
+    background: #e9edf2;
+    border-radius: 8px;
+}
+.skeleton-photo {
+    aspect-ratio: 1;
+}
+.skeleton-category {
+    width: 35%;
+    height: 28px;
+    margin-bottom: 20px;
+}
+.skeleton-title {
+    width: 85%;
+    height: 88px;
+    margin-bottom: 24px;
+}
+.skeleton-line {
+    height: 16px;
+    margin-bottom: 16px;
+}
+.skeleton-form {
+    height: 360px;
+    margin-top: 28px;
+    background: var(--pale);
+    border-radius: 16px;
+}
 .detail-dialog {
     border: 0;
     border-radius: 12px;

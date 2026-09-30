@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import type { AffiliateProduct, CatalogType, Product } from '../data/models';
 import { normalize } from './contact';
+import { friendlySlug } from './product-url';
 
 const API_URL = (
     import.meta.env.VITE_API_URL ||
@@ -101,6 +102,12 @@ export class PublicCatalogService {
         } catch {
             this.featuredProducts.set([]);
         }
+    }
+
+    cachedProduct(slug: string) {
+        return [...this.products(), ...this.featuredProducts()].find(
+            (product) => (product.slug || friendlySlug(product.name)) === slug,
+        );
     }
 
     async getProduct(slug: string) {

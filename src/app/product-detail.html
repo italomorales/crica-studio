@@ -14,9 +14,22 @@
         }
     </div>
     @if (loading) {
-    <section class="empty product-page-state" aria-live="polite">
-        <h1>Carregando produto</h1>
-        <p>Estamos preparando os detalhes deste modelo.</p>
+    <section class="product-page-grid product-skeleton" [class.is-visible]="showSkeleton" aria-busy="true" aria-label="Carregando produto">
+        <div class="product-page-photo" aria-hidden="true"><div class="skeleton-photo skeleton-block"></div></div>
+        <div class="product-page-content" aria-hidden="true">
+            <div class="skeleton-category skeleton-block"></div>
+            <div class="skeleton-title skeleton-block"></div>
+            <div class="skeleton-line skeleton-block"></div>
+            <div class="skeleton-line skeleton-block"></div>
+            <div class="skeleton-category skeleton-block"></div>
+            <div class="skeleton-form skeleton-block"></div>
+        </div>
+    </section>
+    } @else if (loadError) {
+    <section class="empty product-page-state" role="alert">
+        <h1>Não foi possível carregar o produto</h1>
+        <p>Verifique sua conexão e tente novamente.</p>
+        <button type="button" class="secondary" (click)="retry()">Tentar novamente</button>
     </section>
     } @else if (unavailable || !product) {
     <section class="empty product-page-state">
