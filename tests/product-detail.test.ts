@@ -85,3 +85,32 @@ test('network errors preserve cached content, while confirmed removal clears it'
     assert.equal(removed.component.unavailable, true);
     removed.dispose();
 });
+
+test('orders track outbound contact only after quantity validation, without personalization text', (t) => {
+    const events: unknown[][] = [];
+    const opened: string[] = [];
+    const previous = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: {
+        location: { href: 'https://www.cricastudio.com.br/loja/caneca' },
+        gtag: (...args: unknown[]) => events.push(args),
+        open: (url: string) => opened.push(url),
+    } });
+    t.after(() => {
+        if (previous) Object.defineProperty(globalThis, 'window', previous);
+        else delete (globalThis as any).window;
+    });
+    const f = fixture(product, async () => product);
+    f.component.catalog.whatsappNumber = () => '5511963136152';
+    f.component.product = product;
+    f.component.quantity = 0;
+    f.component.order();
+    assert.equal(events.length, 0);
+    assert.equal(opened.length, 0);
+    f.component.quantity = 2;
+    f.component.idea = 'Texto privado do cliente';
+    f.component.order();
+    assert.equal(opened.length, 1);
+    assert.equal(events.length, 2);
+    assert.doesNotMatch(JSON.stringify(events), /Texto privado do cliente/);
+    f.dispose();
+});

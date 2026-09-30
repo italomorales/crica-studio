@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductImageComponent } from './components/shared';
 import { PublicCatalogService } from './services/public-catalog.service';
 import { buildMessage, validQuantity, whatsappUrl } from './services/contact';
+import { trackWhatsAppClick } from './services/whatsapp-tracking';
 import { priceLabel } from './services/local-store';
 import { SeoService } from './services/seo.service';
 import { shareLink } from './services/share';
@@ -102,6 +103,7 @@ export class ProductDetailComponent implements OnDestroy {
         this.message = buildMessage(this.product.name, this.quantity, this.idea);
         const url = whatsappUrl(this.catalog.whatsappNumber(), this.message);
         if (url) {
+            trackWhatsAppClick(url, { source: 'product', productId: this.product.id, quantity: this.quantity });
             window.open(url, '_blank', 'noopener,noreferrer');
             return;
         }

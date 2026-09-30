@@ -14,6 +14,7 @@ import { authGuard } from './app/services/auth.service';
 import { ConstructionComponent } from './app/construction';
 import { SeoService } from './app/services/seo.service';
 import { whatsappUrl } from './app/services/contact';
+import { installWhatsAppTracking } from './app/services/whatsapp-tracking';
 import appTemplate from './app.html?raw';
 
 @Component({
@@ -40,6 +41,7 @@ class AppComponent {
         return this.router.url.startsWith('/admin') || this.router.url.startsWith('/login');
     }
 }
+installWhatsAppTracking();
 bootstrapApplication(AppComponent, {
     providers: [
         provideRouter(
