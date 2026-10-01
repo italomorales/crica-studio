@@ -1,4 +1,5 @@
 <div class="filterbar">
+    <div class="filter-options">
     <div class="chips" [attr.aria-label]="label" role="group">
         @for (option of options; track option) {
         <button
@@ -9,6 +10,8 @@
             {{ option }}
         </button>
         }
+    </div>
+    <ng-content />
     </div>
     <label class="search">
         <svg

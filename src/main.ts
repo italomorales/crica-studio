@@ -69,7 +69,7 @@ bootstrapApplication(AppComponent, {
                 },
                 { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
                 { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
-                ...['loja', 'fornecedores', 'tipos', 'configuracoes'].map((section) => ({
+                ...['loja', 'fornecedores', 'tipos', 'temas', 'configuracoes'].map((section) => ({
                     path: 'admin/' + section,
                     loadComponent: () => import('./app/admin/admin').then(module => module.AdminComponent),
                     canActivate: [authGuard],

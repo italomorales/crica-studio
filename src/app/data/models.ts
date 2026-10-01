@@ -8,12 +8,19 @@ export interface CatalogType {
     scope: 'shop' | 'suppliers' | 'both';
     active: boolean;
 }
+export interface CatalogTheme {
+    id: string;
+    name: string;
+    active: boolean;
+    productCount?: number;
+}
 export interface ManagedFields {
     typeId?: string;
     status?: ItemStatus;
     order?: number;
 }
 export interface Product extends ManagedFields {
+    themeIds?: string[];
     id: string;
     name: string;
     slug?: string;
@@ -46,5 +53,6 @@ export interface CatalogState {
     products: Product[];
     affiliates: AffiliateProduct[];
     types: CatalogType[];
+    themes?: CatalogTheme[];
     settings: { whatsappNumber: string };
 }

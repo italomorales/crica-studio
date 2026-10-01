@@ -1658,3 +1658,16 @@ crica-type-grid {
   }
 }
 .catalog-list-panel .catalog-grid-hint { padding: 0 20px 14px; }
+.product-theme-picker { margin: 12px 0 16px; }
+
+.product-theme-autocomplete { position: relative; }
+.product-theme-picker .theme-chips { max-height: 104px; overflow-y: auto; overscroll-behavior: contain; padding: 2px; margin: 6px 0 0; }
+.product-theme-picker .theme-chips button { width: auto; margin: 0; font-size: 13px; min-height: 32px; padding: 4px 10px; }
+.product-theme-suggestions { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20; border: 1px solid var(--line); border-radius: 8px; background: white; box-shadow: 0 8px 24px #142a4526; overflow: hidden; }
+.product-theme-suggestions ul { list-style: none; margin: 0; padding: 4px; max-height: 224px; overflow-y: auto; overscroll-behavior: contain; }
+.product-theme-suggestions li { min-height: 44px; padding: 10px 12px; cursor: pointer; border-radius: 4px; overflow-wrap: anywhere; }
+.product-theme-suggestions li:hover, .product-theme-suggestions li[aria-selected='true'] { background: var(--pale); color: var(--blue); }
+.product-theme-suggestions .field-help { margin: 0; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 12px; }
+
+.product-theme-picker .theme-optional { font-weight: 400; color: var(--muted); font-size: 13px; }
+.product-theme-autocomplete input { margin-bottom: 0; }

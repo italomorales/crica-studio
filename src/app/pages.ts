@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, Scroll } from '@angular/router';
 import { PublicCatalogService } from './services/public-catalog.service';
 import { FiltersComponent, ProductImageComponent } from './components/shared';
 import { ProductCardComponent, AffiliateCardComponent } from './components/cards';
@@ -12,16 +12,25 @@ import type { AffiliateProduct, Product } from './data/models';
 import { externalUrl } from './services/contact';
 import { shareLink } from './services/share';
 import { productPath } from './services/product-url';
+import { ThemeFilterComponent } from './components/theme-filter';
+import { Subscription } from 'rxjs';
+import { parseShopFilters, shopFilterParams } from './services/theme-filters';
 
 @Component({
     selector: 'crica-shop',
     standalone: true,
-    imports: [FiltersComponent, ProductCardComponent],
+    imports: [FiltersComponent, ProductCardComponent, ThemeFilterComponent],
     template: shopTemplate,
 })
 export class ShopComponent implements OnInit, OnDestroy {
     catalog = inject(PublicCatalogService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private routeSubscription?: Subscription;
+    private scrollSubscription?: Subscription;
+    private filterScroll?: [number, number];
+    themeIds: string[] = [];
+    typeId?: string;
     category = 'Todos';
     query = '';
     private searchTimer?: ReturnType<typeof setTimeout>;
@@ -36,11 +45,35 @@ export class ShopComponent implements OnInit, OnDestroy {
         ];
     }
     ngOnInit() {
-        void this.refresh();
+        this.scrollSubscription = this.router.events.subscribe((event) => {
+            if (event instanceof Scroll && this.filterScroll) {
+                const position = this.filterScroll;
+                this.filterScroll = undefined;
+                // Apply after the router's default scroll handling for this navigation.
+                requestAnimationFrame(() => window.scrollTo(...position));
+            }
+        });
+        this.routeSubscription = this.route.queryParamMap.subscribe((params) => {
+            const filters = parseShopFilters(
+                params.get('q'),
+                params.get('tipo'),
+                params.get('temas'),
+            );
+            this.query = filters.query;
+            this.typeId = filters.typeId;
+            this.themeIds = filters.themeIds;
+            clearTimeout(this.searchTimer);
+            void this.refresh().then(() => {
+                this.category =
+                    this.catalog.types().find((type) => type.id === this.typeId)?.name ?? 'Todos';
+            });
+        });
         void this.catalog.loadFeaturedProducts().then(() => this.startCarousel());
     }
     ngOnDestroy() {
         clearTimeout(this.searchTimer);
+        this.routeSubscription?.unsubscribe();
+        this.scrollSubscription?.unsubscribe();
         this.stopCarousel();
     }
     featuredIndex = 0;
@@ -68,33 +101,66 @@ export class ShopComponent implements OnInit, OnDestroy {
         this.carouselTimer = undefined;
     }
     select(category: string) {
+        clearTimeout(this.searchTimer);
         this.category = category;
-        void this.refresh();
+        this.typeId = this.catalog.types().find((type) => type.name === category)?.id;
+        this.updateFilters();
     }
     openProduct(product: Product) {
-        void this.router.navigateByUrl(productPath(product));
+        void this.router.navigateByUrl(productPath(product), {
+            state: { shopUrl: this.router.url },
+        });
     }
     orderProduct(product: Product) {
-        void this.router.navigateByUrl(productPath(product));
+        this.openProduct(product);
     }
     search(query: string) {
         this.query = query;
         clearTimeout(this.searchTimer);
-        this.searchTimer = setTimeout(() => void this.refresh(), 300);
+        this.searchTimer = setTimeout(() => this.updateFilters(), 300);
+    }
+    selectThemes(ids: string[]) {
+        clearTimeout(this.searchTimer);
+        this.themeIds = ids;
+        this.updateFilters();
+    }
+    private updateFilters() {
+        this.filterScroll = [window.scrollX, window.scrollY];
+        void this.router
+            .navigate([], {
+                relativeTo: this.route,
+                queryParams: shopFilterParams({
+                    query: this.query,
+                    typeId: this.typeId,
+                    themeIds: this.themeIds,
+                }),
+                queryParamsHandling: 'merge',
+                preserveFragment: true,
+            })
+            .then((changed) => {
+                if (!changed) this.filterScroll = undefined;
+            });
     }
     refresh() {
-        const typeId = this.catalog.types().find((type) => type.name === this.category)?.id;
-        return this.catalog.loadShop({ query: this.query, typeId });
+        return this.catalog.loadShop({
+            query: this.query,
+            typeId: this.typeId,
+            themeIds: this.themeIds,
+        });
     }
     loadMore() {
-        const typeId = this.catalog.types().find((type) => type.name === this.category)?.id;
-        return this.catalog.loadShop({ query: this.query, typeId }, true);
+        return this.catalog.loadShop(
+            { query: this.query, typeId: this.typeId, themeIds: this.themeIds },
+            true,
+        );
     }
     clear() {
         clearTimeout(this.searchTimer);
         this.category = 'Todos';
         this.query = '';
-        void this.refresh();
+        this.typeId = undefined;
+        this.themeIds = [];
+        this.updateFilters();
     }
 }
 @Component({

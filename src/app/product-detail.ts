@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductImageComponent } from './components/shared';
 import { PublicCatalogService } from './services/public-catalog.service';
 import { buildMessage, validQuantity, whatsappUrl } from './services/contact';
@@ -22,7 +22,13 @@ export class ProductDetailComponent implements OnDestroy {
     readonly catalog = inject(PublicCatalogService);
     private readonly route = inject(ActivatedRoute);
     private readonly seo = inject(SeoService);
+    private readonly router = inject(Router, { optional: true });
     price = priceLabel;
+    get shopUrl() {
+        const value = typeof history !== 'undefined' ? history.state?.shopUrl : undefined;
+        return typeof value === 'string' && /^\/loja(?:\?|#|$)/.test(value) && this.router
+            ? this.router.parseUrl(value) : '/loja';
+    }
     product?: Product;
     loading = true;
     showSkeleton = false;

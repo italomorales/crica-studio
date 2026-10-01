@@ -1,5 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
-import type { AffiliateProduct, CatalogState, CatalogType, Product } from '../data/models';
+import type {
+    AffiliateProduct,
+    CatalogState,
+    CatalogType,
+    CatalogTheme,
+    Product,
+} from '../data/models';
 import { API_URL, AuthService } from './auth.service';
 import { catalogTypeRequest, catalogWriteMethod, isExistingCatalogId } from './catalog-id';
 
@@ -34,6 +40,9 @@ export class AdminCatalogService {
         void this.load();
     }
 
+    get themes() {
+        return this.state().themes ?? [];
+    }
     get types() {
         return this.state().types;
     }
@@ -61,37 +70,52 @@ export class AdminCatalogService {
         this.error.set('');
         try {
             const headers = { Authorization: `Bearer ${token}` };
-            const [typesResponse, productsResponse, affiliatesResponse, settingsResponse] =
-                await Promise.all(
-                    ['types', 'products', 'affiliates', 'settings'].map((resource) =>
-                        fetch(`${API_URL}/api/admin/catalog/${resource}`, { headers }),
-                    ),
-                );
+            const [
+                typesResponse,
+                productsResponse,
+                affiliatesResponse,
+                settingsResponse,
+                themesResponse,
+            ] = await Promise.all(
+                ['types', 'products', 'affiliates', 'settings', 'themes'].map((resource) =>
+                    fetch(`${API_URL}/api/admin/catalog/${resource}`, { headers }),
+                ),
+            );
             if (
-                [typesResponse, productsResponse, affiliatesResponse, settingsResponse].some(
-                    (r) => r.status === 401,
-                )
+                [
+                    typesResponse,
+                    productsResponse,
+                    affiliatesResponse,
+                    settingsResponse,
+                    themesResponse,
+                ].some((r) => r.status === 401)
             ) {
                 this.auth.logout();
                 throw new Error('session');
             }
             if (
-                ![typesResponse, productsResponse, affiliatesResponse, settingsResponse].every(
-                    (r) => r.ok,
-                )
+                ![
+                    typesResponse,
+                    productsResponse,
+                    affiliatesResponse,
+                    settingsResponse,
+                    themesResponse,
+                ].every((r) => r.ok)
             )
                 throw new Error('api');
 
-            const [types, products, affiliates, settings] = (await Promise.all([
+            const [types, products, affiliates, settings, themes] = (await Promise.all([
                 typesResponse.json(),
                 productsResponse.json(),
                 affiliatesResponse.json(),
                 settingsResponse.json(),
-            ])) as [CatalogType[], ApiProduct[], ApiAffiliate[], ApiSettings];
+                themesResponse.json(),
+            ])) as [CatalogType[], ApiProduct[], ApiAffiliate[], ApiSettings, CatalogTheme[]];
             const typeNames = new Map(types.map((type) => [type.id, type.name]));
             this.state.set({
                 version: 1,
                 types,
+                themes,
                 products: products.map((product) => ({
                     ...product,
                     category: typeNames.get(product.typeId) ?? 'Sem tipo',
@@ -145,6 +169,7 @@ export class AdminCatalogService {
     async saveProduct(product: Product) {
         await this.write('products', product.id, {
             typeId: product.typeId,
+            themeIds: product.themeIds ?? [],
             name: product.name,
             slug: product.slug,
             description: product.description,
@@ -175,6 +200,12 @@ export class AdminCatalogService {
             order: product.order,
             featured: product.featured ?? false,
         });
+    }
+    async saveTheme(theme: CatalogTheme) {
+        await this.write('themes', theme.id, { name: theme.name.trim(), active: theme.active });
+    }
+    async deleteTheme(id: string) {
+        await this.remove('themes', id);
     }
     async saveType(type: CatalogType) {
         await this.write('types', type.id, catalogTypeRequest(type));

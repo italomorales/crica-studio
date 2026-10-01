@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    HostListener,
+    ViewChild,
+    inject,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     ActivatedRoute,
@@ -11,10 +18,17 @@ import { AdminCatalogService } from '../services/admin-catalog.service';
 import { AuthService } from '../services/auth.service';
 import { normalize } from '../services/contact';
 import { priceLabel, PLATFORMS, validateItem, validateType } from '../services/local-store';
-import type { Product, AffiliateProduct, CatalogType, ItemStatus } from '../data/models';
+import type {
+    Product,
+    AffiliateProduct,
+    CatalogType,
+    CatalogTheme,
+    ItemStatus,
+} from '../data/models';
 import { ImagePickerComponent } from './image-picker';
 import { CatalogGridComponent, type CatalogRow, type CatalogAction } from './catalog-grid';
 import { TypeGridComponent, type TypeAction } from './type-grid';
+import { ThemeGridComponent, type ThemeAction } from './theme-grid';
 import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
 import { friendlySlug } from '../services/product-url';
 import adminTemplate from './admin.html?raw';
@@ -22,7 +36,7 @@ import adminTemplate from './admin.html?raw';
 type DeletionTarget = {
     id: string;
     name: string;
-    kind: 'produto' | 'fornecedor' | 'tipo';
+    kind: 'produto' | 'fornecedor' | 'tipo' | 'tema';
 };
 
 @Component({
@@ -35,12 +49,18 @@ type DeletionTarget = {
         ImagePickerComponent,
         CatalogGridComponent,
         TypeGridComponent,
+        ThemeGridComponent,
     ],
     template: adminTemplate,
 })
 export class AdminComponent {
     private changeDetector = inject(ChangeDetectorRef);
     savingType = false;
+    savingTheme = false;
+    themeQuery = '';
+    themeSuggestionsOpen = false;
+    themeSuggestionIndex = -1;
+    themeDraft: CatalogTheme = { id: '', name: '', active: true };
     @ViewChild('deleteDialog', { static: true }) deleteDialog!: ElementRef<HTMLDialogElement>;
     @ViewChild(CatalogGridComponent) catalogGrid?: CatalogGridComponent;
     organizing = false;
@@ -174,13 +194,16 @@ export class AdminComponent {
                 loja: 'Produtos da loja',
                 fornecedores: 'Fornecedores',
                 tipos: 'Tipos de produto',
+                temas: 'Temas da loja',
                 configuracoes: 'Configurações',
             } as Record<string, string>
         )[this.section];
     }
     get productUrlPreview() {
         const slug = this.draft.slug || friendlySlug(this.draft.name);
-        return slug ? `https://www.cricastudio.com.br/loja/${slug}` : 'Digite o título para gerar a URL.';
+        return slug
+            ? `https://www.cricastudio.com.br/loja/${slug}`
+            : 'Digite o título para gerar a URL.';
     }
     get subtitle() {
         return this.editing
@@ -190,6 +213,7 @@ export class AdminComponent {
                       loja: 'Cuide dos modelos que levam a ideia do cliente até a Crica.',
                       fornecedores: 'Cada indicação tem seu próprio cadastro e sua plataforma.',
                       tipos: 'Organize seus produtos com tipos simples e reutilizáveis.',
+                      temas: 'Agrupe produtos por ocasiões, estilos e assuntos.',
                       configuracoes: 'Contato e preferências da sua demonstração.',
                   } as Record<string, string>
               )[this.section];
@@ -276,14 +300,16 @@ export class AdminComponent {
     }
     snapshot() {
         return JSON.stringify(
-            this.section === 'tipos'
-                ? this.typeDraft
-                : {
-                      draft: this.draft,
-                      images: this.images,
-                      characteristics: this.characteristics,
-                      personalization: this.personalization,
-                  },
+            this.section === 'temas'
+                ? this.themeDraft
+                : this.section === 'tipos'
+                  ? this.typeDraft
+                  : {
+                        draft: this.draft,
+                        images: this.images,
+                        characteristics: this.characteristics,
+                        personalization: this.personalization,
+                    },
         );
     }
     get dirty() {
@@ -294,7 +320,7 @@ export class AdminComponent {
         );
     }
     canLeave() {
-        if (this.savingOrder || this.savingType) return false;
+        if (this.savingOrder || this.savingType || this.savingTheme) return false;
         return (
             !(this.dirty || this.uploadingImages) ||
             window.confirm('Há alterações não salvas. Deseja sair sem salvar?')
@@ -311,7 +337,10 @@ export class AdminComponent {
         this.dismissNotice();
         this.isNew = true;
         this.editing = true;
-        if (this.section === 'tipos') {
+        this.themeQuery = '';
+        if (this.section === 'temas') {
+            this.themeDraft = { id: '', name: '', active: true };
+        } else if (this.section === 'tipos') {
             this.typeDraft = {
                 id:
                     'item-' +
@@ -336,6 +365,7 @@ export class AdminComponent {
                 name: '',
                 category: '',
                 typeId: '',
+                themeIds: [],
                 description: '',
                 fullDescription: '',
                 images: [],
@@ -363,7 +393,9 @@ export class AdminComponent {
         this.dismissNotice();
         this.isNew = false;
         this.editing = true;
+        this.themeQuery = '';
         this.draft = {
+            themeIds: [],
             images: [],
             characteristics: [],
             personalization: [],
@@ -529,9 +561,10 @@ export class AdminComponent {
         try {
             if (target.kind === 'produto') await this.catalog.deleteProduct(target.id);
             else if (target.kind === 'fornecedor') await this.catalog.deleteAffiliate(target.id);
+            else if (target.kind === 'tema') await this.catalog.deleteTheme(target.id);
             else await this.catalog.deleteType(target.id);
             this.showNotice(
-                `${target.kind === 'tipo' ? 'Tipo' : target.kind === 'produto' ? 'Produto' : 'Fornecedor'} excluído.`,
+                `${target.kind === 'tema' ? 'Tema' : target.kind === 'tipo' ? 'Tipo' : target.kind === 'produto' ? 'Produto' : 'Fornecedor'} excluído.`,
             );
             this.deleting = false;
             this.deleteDialog.nativeElement.close();
@@ -539,6 +572,130 @@ export class AdminComponent {
             this.deletionError = e instanceof Error ? e.message : 'Não foi possível excluir.';
             this.deleting = false;
         }
+    }
+    get selectedThemes() {
+        return this.catalog.themes.filter((t) => this.draft.themeIds?.includes(t.id));
+    }
+    get availableThemes() {
+        return this.catalog.themes.filter(
+            (t) =>
+                t.active && !this.draft.themeIds?.includes(t.id) &&
+                normalize(t.name).includes(normalize(this.themeQuery)),
+        );
+    }
+    get themeSuggestions() {
+        return this.availableThemes.slice(0, 8);
+    }
+    searchProductThemes() {
+        this.themeSuggestionsOpen = true;
+        this.themeSuggestionIndex = -1;
+    }
+    addProductTheme(id: string) {
+        if (!this.draft.themeIds?.includes(id)) this.toggleProductTheme(id);
+        this.themeQuery = '';
+        this.themeSuggestionIndex = -1;
+        this.themeSuggestionsOpen = false;
+    }
+    themeSearchKeydown(event: KeyboardEvent) {
+        if (event.isComposing) return;
+        if (event.key === 'Escape') {
+            this.themeSuggestionsOpen = false;
+            this.themeSuggestionIndex = -1;
+            event.stopPropagation();
+            event.preventDefault();
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            const count = this.themeQuery.trim() ? this.themeSuggestions.length : 0;
+            if (!count) return;
+            this.themeSuggestionsOpen = true;
+            this.themeSuggestionIndex = this.themeSuggestionIndex < 0
+                ? (event.key === 'ArrowDown' ? 0 : count - 1)
+                : (this.themeSuggestionIndex + (event.key === 'ArrowDown' ? 1 : count - 1)) % count;
+            document.getElementById('theme-suggestion-' + this.themeSuggestionIndex)?.scrollIntoView({ block: 'nearest' });
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            const selected = this.themeSuggestions[this.themeSuggestionIndex];
+            if (this.themeSuggestionsOpen && this.themeQuery.trim() && selected) this.addProductTheme(selected.id);
+        }
+    }
+    toggleProductTheme(id: string) {
+        const ids = this.draft.themeIds ?? [];
+        this.draft.themeIds = ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
+    }
+    get filteredThemes() {
+        return this.catalog.themes.filter(
+            (t) =>
+                normalize(t.name).includes(normalize(this.query)) &&
+                (this.status === 'all' || t.active === (this.status === 'active')),
+        );
+    }
+    get themeRows() {
+        return this.filteredThemes.map(theme => ({ ...theme, usage: theme.productCount ?? 0 }));
+    }
+    themeGridAction(event: ThemeAction) {
+        if (event.kind === 'edit') this.editTheme(event.item);
+        else if (event.kind === 'toggle') void this.toggleTheme(event.item);
+        else this.requestThemeRemoval(event.item);
+    }
+    editTheme(theme: CatalogTheme) {
+        this.themeDraft = structuredClone(theme);
+        this.editing = true;
+        this.isNew = false;
+        this.errors = [];
+        this.dismissNotice();
+        this.baseline = this.snapshot();
+    }
+    async saveTheme() {
+        if (this.savingTheme) return;
+        const name = this.themeDraft.name.trim();
+        if (!name || name.length > 120) {
+            this.error(new Error('Informe um nome de tema com até 120 caracteres.'));
+            return;
+        }
+        if (
+            this.catalog.themes.some(
+                (t) => t.id !== this.themeDraft.id && normalize(t.name) === normalize(name),
+            )
+        ) {
+            this.error(new Error('Já existe um tema com esse nome.'));
+            return;
+        }
+        this.savingTheme = true;
+        try {
+            await this.catalog.saveTheme({ ...this.themeDraft, name });
+            this.editing = false;
+            this.errors = [];
+            this.clear();
+            this.showNotice('Tema salvo com sucesso.');
+        } catch (e) {
+            this.error(e);
+        } finally {
+            this.savingTheme = false;
+            this.changeDetector.markForCheck();
+        }
+    }
+    async toggleTheme(theme: CatalogTheme) {
+        try {
+            await this.catalog.saveTheme({ ...theme, active: !theme.active });
+            this.showNotice(
+                theme.active
+                    ? 'Tema desativado. Os produtos e seus vínculos foram preservados.'
+                    : 'Tema ativado.',
+            );
+        } catch (e) {
+            this.error(e);
+        }
+    }
+    requestThemeRemoval(theme: CatalogTheme) {
+        if (theme.productCount) {
+            this.error(
+                new Error(
+                    'Este tema possui produtos vinculados. Desative-o para preservar os vínculos.',
+                ),
+            );
+            return;
+        }
+        this.openDeletion({ id: theme.id, name: theme.name, kind: 'tema' });
     }
     editType(t: CatalogType) {
         this.editing = true;

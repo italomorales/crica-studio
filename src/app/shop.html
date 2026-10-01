@@ -71,14 +71,16 @@
             [selected]="category"
             [query]="query"
             (selection)="select($event)"
-            (queryChange)="search($event)" />
+            (queryChange)="search($event)">
+        <crica-theme-filter [themes]="catalog.themes()" [selected]="themeIds" (selection)="selectThemes($event)" />
+        </crica-filters>
         <div class="results-row">
             <p aria-live="polite">
                 @if (catalog.productsLoading() && !catalog.products().length) { Carregando modelos... } @else if (catalog.productsError()) {
                 Catálogo indisponível } @else { {{ catalog.productsTotal() }} {{ catalog.productsTotal() === 1 ?
                 'modelo' : 'modelos' }} para personalizar }
             </p>
-            @if (query || category !== 'Todos') {
+            @if (query || category !== 'Todos' || themeIds.length) {
             <button class="clear" (click)="clear()">Limpar filtros ×</button>
             }
         </div>

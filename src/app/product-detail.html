@@ -1,6 +1,6 @@
 <main id="main" class="product-page container">
     <div class="product-page-toolbar">
-        <a class="back-link" routerLink="/loja">← Voltar para a loja</a>
+        <a class="back-link" [routerLink]="shopUrl">← Voltar para a loja</a>
         @if (product && !loading && !unavailable) {
         <button type="button" class="product-share" (click)="share()" aria-label="Compartilhar link deste produto">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">

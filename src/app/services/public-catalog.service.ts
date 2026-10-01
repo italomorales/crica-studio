@@ -1,11 +1,10 @@
 import { Injectable, signal } from '@angular/core';
-import type { AffiliateProduct, CatalogType, Product } from '../data/models';
+import type { AffiliateProduct, CatalogType, CatalogTheme, Product } from '../data/models';
 import { normalize } from './contact';
 import { friendlySlug } from './product-url';
 
 const API_URL = (
-    import.meta.env.VITE_API_URL ||
-    (import.meta.env.DEV ? '' : 'https://api.cricastudio.com')
+    import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://api.cricastudio.com')
 ).replace(/\/$/, '');
 const DESKTOP_PAGE_SIZE = 12;
 const MOBILE_PAGE_SIZE = 6;
@@ -15,7 +14,7 @@ type ApiProduct = Omit<Product, 'category' | 'typeId'> & { typeId: string };
 type ApiAffiliate = Omit<AffiliateProduct, 'category' | 'typeId'> & { typeId: string };
 type ApiPage<T> = { items: T[]; total: number; page: number; pageSize: number };
 type ApiSettings = { whatsappNumber: string };
-type ShopFilters = { query: string; typeId?: string };
+export type ShopFilters = { query: string; typeId?: string; themeIds?: string[] };
 type AffiliateFilters = { query: string; platform?: string };
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +23,8 @@ export class PublicCatalogService {
     readonly featuredProducts = signal<Product[]>([]);
     readonly affiliates = signal<AffiliateProduct[]>([]);
     readonly featuredAffiliates = signal<AffiliateProduct[]>([]);
+    readonly themes = signal<CatalogTheme[]>([]);
+    private themesPromise?: Promise<void>;
     readonly types = signal<CatalogType[]>([]);
     readonly whatsappNumber = signal('');
     readonly productsTotal = signal(0);
@@ -59,12 +60,13 @@ export class PublicCatalogService {
         this.productsLoading.set(true);
         this.productsError.set('');
         try {
-            await Promise.all([this.ensureMeta(), this.ensureSettings()]);
+            await Promise.all([this.ensureMeta(), this.ensureSettings(), this.ensureThemes()]);
             const result = await this.fetchPage<ApiProduct>('products', {
                 page,
                 pageSize: this.productsPageSize,
                 query: normalize(filters.query),
                 typeId: filters.typeId,
+                themes: filters.themeIds?.join(','),
                 featured: false,
             });
             if (request !== this.productsRequest) return;
@@ -152,7 +154,9 @@ export class PublicCatalogService {
             this.affiliatesPage = result.page;
         } catch {
             if (request === this.affiliatesRequest)
-                this.affiliatesError.set('Não foi possível carregar as indicações. Tente novamente.');
+                this.affiliatesError.set(
+                    'Não foi possível carregar as indicações. Tente novamente.',
+                );
         } finally {
             if (request === this.affiliatesRequest) this.affiliatesLoading.set(false);
         }
@@ -178,6 +182,26 @@ export class PublicCatalogService {
         }
     }
 
+    async countShop(filters: ShopFilters) {
+        const result = await this.fetchPage<ApiProduct>('products', {
+            page: 1,
+            pageSize: 1,
+            featured: false,
+            query: normalize(filters.query),
+            typeId: filters.typeId,
+            themes: filters.themeIds?.join(','),
+        });
+        return result.total;
+    }
+    private async ensureThemes() {
+        this.themesPromise ??= fetch(API_URL + '/api/catalog/themes')
+            .then(async (response) => {
+                if (!response.ok) throw new Error('api');
+                this.themes.set((await response.json()) as CatalogTheme[]);
+            })
+            .finally(() => (this.themesPromise = undefined));
+        return this.themesPromise;
+    }
     private async ensureMeta() {
         if (this.types().length) return;
         this.metaPromise ??= fetch(`${API_URL}/api/catalog/types`)
@@ -190,7 +214,8 @@ export class PublicCatalogService {
     }
 
     private pageSize() {
-        return typeof window !== 'undefined' && window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches
+        return typeof window !== 'undefined' &&
+            window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches
             ? MOBILE_PAGE_SIZE
             : DESKTOP_PAGE_SIZE;
     }
@@ -207,7 +232,10 @@ export class PublicCatalogService {
         return this.settingsPromise;
     }
 
-    private async fetchPage<T>(resource: 'products' | 'affiliates', params: Record<string, string | number | boolean | undefined>) {
+    private async fetchPage<T>(
+        resource: 'products' | 'affiliates',
+        params: Record<string, string | number | boolean | undefined>,
+    ) {
         const search = new URLSearchParams();
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined && value !== '') search.set(key, String(value));

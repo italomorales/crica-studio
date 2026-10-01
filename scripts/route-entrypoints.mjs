@@ -38,6 +38,7 @@ const routes = [
     'admin/loja',
     'admin/fornecedores',
     'admin/tipos',
+    'admin/temas',
     'admin/configuracoes',
 ];
 

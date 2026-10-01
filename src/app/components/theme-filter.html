@@ -1,0 +1,41 @@
+@if (themes.length || selected.length) {
+<div class="shop-theme-filter">
+    <details #picker class="shop-theme-picker" (toggle)="onToggle($event)"
+        (focusout)="focusOut($event)" (keydown.escape)="close(true); $event.preventDefault(); $event.stopPropagation()">
+        <summary aria-controls="shop-theme-panel">
+            <svg class="shop-theme-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                <path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="white" /><circle cx="15" cy="17" r="2" fill="white" />
+            </svg>
+            Temas @if (selected.length) { <span class="shop-theme-badge">{{ selected.length }}</span> }
+            <svg class="shop-theme-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
+        </summary>
+        <div id="shop-theme-panel" class="shop-theme-panel">
+            <label class="sr-only" for="shop-theme-search">Buscar nos temas disponíveis</label>
+            <input id="shop-theme-search" type="search" autocomplete="off" placeholder="Buscar temas…"
+                [value]="search" (input)="searchThemes($event)" />
+            <fieldset class="shop-theme-options">
+                <legend class="sr-only">Escolha um ou mais temas</legend>
+                @for (theme of options; track theme.id) {
+                <label>
+                    <input type="checkbox" [checked]="selected.includes(theme.id)" (change)="toggle(theme.id)" />
+                    <span>{{ theme.name }}</span>
+                </label>
+                } @empty { <p role="status">Nenhum tema encontrado.</p> }
+            </fieldset>
+            <div class="shop-theme-panel-footer">
+                <button type="button" class="shop-theme-reset" (click)="selection.emit([])" [disabled]="!selected.length">Limpar</button>
+                <button type="button" class="shop-theme-done" (click)="close(true)">Ver produtos</button>
+            </div>
+        </div>
+    </details>
+    @if (selected.length && !expanded) {
+    <div class="theme-chips" aria-label="Temas aplicados">
+        @for (theme of chips; track theme.id) {
+        <button type="button" (click)="remove(theme.id)" [attr.aria-label]="'Remover filtro de tema ' + theme.name">
+            {{ theme.name }} <span aria-hidden="true">×</span>
+        </button>
+        }
+    </div>
+    }
+</div>
+}
