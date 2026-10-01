@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import type { AffiliateProduct, CatalogState, CatalogType, Product } from '../data/models';
 import { API_URL, AuthService } from './auth.service';
-import { catalogWriteMethod, isExistingCatalogId } from './catalog-id';
+import { catalogTypeRequest, catalogWriteMethod, isExistingCatalogId } from './catalog-id';
 
 type ApiProduct = Omit<Product, 'category' | 'typeId' | 'status' | 'order'> & {
     typeId: string;
@@ -177,7 +177,7 @@ export class AdminCatalogService {
         });
     }
     async saveType(type: CatalogType) {
-        await this.write('types', type.id, type);
+        await this.write('types', type.id, catalogTypeRequest(type));
     }
     async saveSettings(number: string) {
         await this.write('settings', undefined, { whatsappNumber: number }, 'PUT');
@@ -246,11 +246,12 @@ export class AdminCatalogService {
         if (!response.ok) {
             const problem = (await response.json().catch(() => null)) as {
                 errors?: Record<string, string[]>;
+                detail?: string;
             } | null;
             throw new Error(
                 problem?.errors
                     ? Object.values(problem.errors).flat().join(' ')
-                    : 'Não foi possível salvar.',
+                    : problem?.detail || 'Não foi possível salvar.',
             );
         }
         await this.load(false);
