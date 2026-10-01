@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     ActivatedRoute,
@@ -39,6 +39,8 @@ type DeletionTarget = {
     template: adminTemplate,
 })
 export class AdminComponent {
+    private changeDetector = inject(ChangeDetectorRef);
+    savingType = false;
     @ViewChild('deleteDialog', { static: true }) deleteDialog!: ElementRef<HTMLDialogElement>;
     @ViewChild(CatalogGridComponent) catalogGrid?: CatalogGridComponent;
     organizing = false;
@@ -292,7 +294,7 @@ export class AdminComponent {
         );
     }
     canLeave() {
-        if (this.savingOrder) return false;
+        if (this.savingOrder || this.savingType) return false;
         return (
             !(this.dirty || this.uploadingImages) ||
             window.confirm('Há alterações não salvas. Deseja sair sem salvar?')
@@ -403,10 +405,12 @@ export class AdminComponent {
         this.noticeTone = tone;
         window.clearTimeout(this.noticeTimer);
         this.noticeTimer = window.setTimeout(() => this.dismissNotice(), 5000);
+        this.changeDetector.markForCheck();
     }
     dismissNotice() {
         window.clearTimeout(this.noticeTimer);
         this.notice = '';
+        this.changeDetector.markForCheck();
     }
     error(error: unknown) {
         const message = error instanceof Error ? error.message : 'Não foi possível salvar.';
@@ -545,14 +549,25 @@ export class AdminComponent {
         this.baseline = this.snapshot();
     }
     async saveType() {
+        if (this.savingType) return;
+        this.savingType = true;
+        this.errors = [];
+        this.dismissNotice();
+        const type = { ...this.typeDraft };
         try {
-            await this.catalog.saveType(this.typeDraft);
+            await this.catalog.saveType(type);
             this.editing = false;
             this.uploadingImages = false;
             this.errors = [];
-            this.showNotice('Tipo salvo. Os cadastros vinculados acompanham o nome atualizado.');
+            this.clear();
+            this.showNotice('Tipo salvo com sucesso.');
         } catch (e) {
             this.error(e);
+        } finally {
+            this.savingType = false;
+            // Native async/fetch completions may run outside Angular's zone.
+            // Refresh both the editor/list state and the save feedback explicitly.
+            this.changeDetector.markForCheck();
         }
     }
     async toggleType(t: CatalogType) {
