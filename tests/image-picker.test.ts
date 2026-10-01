@@ -115,7 +115,8 @@ test('capacity and invalid files are enforced before upload', async () => {
         calls++;
         return 'https://example.com/photo.png';
     });
-    component.images = ['1', '2', '3', '4'];
+    component.limit = 6;
+    component.images = ['1', '2', '3', '4', '5'];
     const done = completed(component);
     component.enqueue([
         new File(['x'], 'invalid.txt', { type: 'text/plain' }),
@@ -124,7 +125,7 @@ test('capacity and invalid files are enforced before upload', async () => {
     ]);
     await done;
     assert.equal(calls, 1);
-    assert.equal(component.images.length, 5);
+    assert.equal(component.images.length, 6);
     assert.match(component.error, /invalid.txt/);
     assert.match(component.error, /b.png/);
     component.ngOnDestroy();

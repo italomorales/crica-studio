@@ -41,8 +41,8 @@ export function validateItem(
             errors.push('Selecione a forma de preço.');
         if (p.priceMode !== 'consult' && (!Number.isFinite(p.price) || p.price! <= 0))
             errors.push('Informe um preço maior que zero.');
-        if (p.images.length > 5 || p.images.some((i) => !safeImage(i)))
-            errors.push('Use até cinco imagens válidas: arquivo local ou endereço HTTPS.');
+        if (p.images.length > 6 || p.images.some((i) => !safeImage(i)))
+            errors.push('Use até seis imagens válidas: arquivo local ou endereço HTTPS.');
         if (item.status === 'published' && !p.images[0])
             errors.push('Inclua uma foto principal para publicar.');
     } else {
