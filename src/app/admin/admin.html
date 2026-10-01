@@ -380,7 +380,7 @@
                 </aside>
             </form>
             } @else if (section === 'tipos') {
-            <div class="admin-panel">
+            <section class="admin-panel catalog-list-panel">
                 <div class="admin-filters">
                     <label class="admin-search">
                         <span class="sr-only">Buscar tipos</span>
@@ -392,66 +392,31 @@
                         <option value="inactive">Inativos</option>
                     </select>
                 </div>
-                <div class="type-list">
-                    @for (t of filteredTypes; track t.id) {
-                    <article class="type-row">
-                        <div>
-                            <h3>{{ t.name }}</h3>
-                            <p>
-                                {{ scopeLabel(t.scope) }} · {{ usage(t.id) }} {{ usage(t.id) === 1 ?
-                                'item vinculado' : 'itens vinculados' }}
-                            </p>
-                        </div>
-                        @if (!readOnly) {
-                        <button
-                            type="button"
-                            class="status-toggle"
-                            (click)="toggleType(t)"
-                            [attr.aria-label]="(t.active ? 'Desativar tipo ' : 'Ativar tipo ') + t.name"
-                            [attr.aria-pressed]="t.active"
-                            [class.is-active]="t.active"
-                            [title]="t.active ? 'Desativar' : 'Ativar'">
-                            <span class="status-toggle-track" aria-hidden="true">
-                                <span></span>
-                            </span>
-                        </button>
-                        <div class="row-actions">
-                            <button
-                                type="button"
-                                class="icon-action"
-                                (click)="editType(t)"
-                                [attr.aria-label]="'Editar tipo ' + t.name"
-                                title="Editar">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path
-                                        d="M4 20h4l10-10-4-4L4 16v4Zm12.7-13.3 1.6-1.6a1.4 1.4 0 0 1 2 2l-1.6 1.6-2-2Z" />
-                                </svg>
-                            </button>
-                            <button
-                                type="button"
-                                class="icon-action destructive-action"
-                                (click)="requestTypeRemoval(t)"
-                                [attr.aria-label]="'Excluir tipo ' + t.name"
-                                title="Excluir">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path
-                                        d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm4 0v6h2v-6h-2Zm4 0v6h2v-6h-2Z" />
-                                </svg>
-                            </button>
-                        </div>
-                        } @else {
-                        <span></span>
-                        <div class="row-actions"><span>Somente leitura</span></div>
+                <div class="admin-results">
+                    <span aria-live="polite">
+                        {{ filteredTypes.length }} {{ filteredTypes.length === 1 ? 'tipo' : 'tipos' }}
+                    </span>
+                    <div class="admin-results-actions">
+                        <label class="page-size">
+                            <span>Por página</span>
+                            <select aria-label="Tipos por página" [(ngModel)]="pageSize"
+                                (ngModelChange)="setPageSize($event)">
+                                <option [ngValue]="20">20</option>
+                                <option [ngValue]="50">50</option>
+                                <option [ngValue]="100">100</option>
+                            </select>
+                        </label>
+                        @if (query || status !== 'all') {
+                        <button class="text-link" (click)="clear()">Limpar filtros</button>
                         }
-                    </article>
-                    } @empty {
-                    <div class="empty">
-                        <h3>Nenhum tipo encontrado</h3>
-                        <button class="secondary" (click)="clear()">Limpar filtros</button>
                     </div>
-                    }
                 </div>
-            </div>
+                <crica-type-grid [rows]="typeRows" [pageSize]="pageSize" [readOnly]="readOnly"
+                    (action)="typeGridAction($event)" />
+                <p class="catalog-grid-hint">
+                    Clique no título de uma coluna para consultar em outra ordem.
+                </p>
+            </section>
             } @else { @if (organizing) {
             <section
                 class="admin-panel order-panel"

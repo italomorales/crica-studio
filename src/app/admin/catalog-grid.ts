@@ -35,6 +35,34 @@ const paths = {
     delete: 'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',
     feature: 'm12 3 2.8 5.6 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.5l6.2-.9Z',
 };
+export const catalogGridTheme = themeQuartz.withParams({
+    accentColor: '#0865aa',
+    backgroundColor: '#ffffff',
+    foregroundColor: '#26384c',
+    headerBackgroundColor: '#f6f8fb',
+    headerTextColor: '#596a7e',
+    borderColor: '#e4eaf1',
+    rowHoverColor: '#f5f9fd',
+    fontFamily: 'inherit',
+    fontSize: 13,
+    headerFontSize: 12,
+    wrapperBorderRadius: 12,
+    cellHorizontalPadding: 16,
+});
+export const catalogGridLocale = {
+    noRowsToShow: 'Nenhum cadastro encontrado. Ajuste os filtros.',
+    page: 'Página',
+    of: 'de',
+    to: 'a',
+    more: 'mais',
+    nextPage: 'Próxima página',
+    lastPage: 'Última página',
+    firstPage: 'Primeira página',
+    previousPage: 'Página anterior',
+    pageSizeSelectorLabel: 'Por página',
+    ariaRowDrag: 'Arraste para alterar a posição',
+    ariaPageSizeSelectorLabel: 'Cadastros por página',
+};
 @Component({
     selector: 'crica-catalog-grid',
     standalone: true,
@@ -57,20 +85,7 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
     private displayed: CatalogRow[] = [];
     ngAfterViewInit() {
         this.api = createGrid<CatalogRow>(this.host.nativeElement, {
-            theme: themeQuartz.withParams({
-                accentColor: '#0865aa',
-                backgroundColor: '#ffffff',
-                foregroundColor: '#26384c',
-                headerBackgroundColor: '#f6f8fb',
-                headerTextColor: '#596a7e',
-                borderColor: '#e4eaf1',
-                rowHoverColor: '#f5f9fd',
-                fontFamily: 'inherit',
-                fontSize: 13,
-                headerFontSize: 12,
-                wrapperBorderRadius: 12,
-                cellHorizontalPadding: 16,
-            }),
+            theme: catalogGridTheme,
             columnDefs: this.columns(),
             rowData: this.rows,
             getRowId: (p) => p.data.id,
@@ -105,20 +120,7 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
                     this.reordered.emit(rows);
                 });
             },
-            localeText: {
-                noRowsToShow: 'Nenhum cadastro encontrado. Ajuste os filtros.',
-                page: 'Página',
-                of: 'de',
-                to: 'a',
-                more: 'mais',
-                nextPage: 'Próxima página',
-                lastPage: 'Última página',
-                firstPage: 'Primeira página',
-                previousPage: 'Página anterior',
-                pageSizeSelectorLabel: 'Por página',
-                ariaRowDrag: 'Arraste para alterar a posição',
-                ariaPageSizeSelectorLabel: 'Cadastros por página',
-            },
+            localeText: catalogGridLocale,
         });
         this.displayed = this.rows;
     }

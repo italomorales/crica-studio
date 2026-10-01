@@ -14,6 +14,7 @@ import { priceLabel, PLATFORMS, validateItem, validateType } from '../services/l
 import type { Product, AffiliateProduct, CatalogType, ItemStatus } from '../data/models';
 import { ImagePickerComponent } from './image-picker';
 import { CatalogGridComponent, type CatalogRow, type CatalogAction } from './catalog-grid';
+import { TypeGridComponent, type TypeAction } from './type-grid';
 import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
 import { friendlySlug } from '../services/product-url';
 import adminTemplate from './admin.html?raw';
@@ -33,6 +34,7 @@ type DeletionTarget = {
         RouterLinkActive,
         ImagePickerComponent,
         CatalogGridComponent,
+        TypeGridComponent,
     ],
     template: adminTemplate,
 })
@@ -233,6 +235,14 @@ export class AdminComponent {
                 normalize(t.name).includes(normalize(this.query)) &&
                 (this.status === 'all' || t.active === (this.status === 'active')),
         );
+    }
+    get typeRows() {
+        return this.filteredTypes.map((type) => ({ ...type, usage: this.usage(type.id) }));
+    }
+    typeGridAction(event: TypeAction) {
+        if (event.kind === 'edit') this.editType(event.item);
+        else if (event.kind === 'toggle') void this.toggleType(event.item);
+        else this.requestTypeRemoval(event.item);
     }
     count(status: ItemStatus) {
         return this.items.filter((p) => p.status === status).length;

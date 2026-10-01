@@ -1279,7 +1279,8 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-crica-catalog-grid {
+crica-catalog-grid,
+crica-type-grid {
   display: block;
   min-width: 0;
 }
