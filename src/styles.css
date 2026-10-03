@@ -963,6 +963,15 @@ footer {
     background: #fff0e9;
     color: #973d19;
 }
+.affiliate-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.platform.international {
+    background: #fee2e2;
+    color: #991b1b;
+}
 .platform.mercado {
     background: #fff5c8;
     color: #645000;

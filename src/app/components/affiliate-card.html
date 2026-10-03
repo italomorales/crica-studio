@@ -16,12 +16,17 @@
         </button>
     </div>
     <div class="card-body">
+        <div class="affiliate-tags">
         <span
             class="platform"
             [class.shopee]="product.platform === 'Shopee'"
             [class.mercado]="product.platform === 'Mercado Livre'">
             {{ product.platform }}
         </span>
+        @if (product.international) {
+        <span class="platform international">Internacional</span>
+        }
+        </div>
         <h3>{{ product.name }}</h3>
         <p>{{ product.description }}</p>
         @if (url) {

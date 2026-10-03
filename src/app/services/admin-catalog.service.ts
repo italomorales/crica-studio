@@ -191,6 +191,7 @@ export class AdminCatalogService {
             name: product.name,
             description: product.description,
             platform: product.platform,
+            international: product.international ?? false,
             image: product.image,
             images: product.images ?? (product.image ? [product.image] : []),
             url: product.url,

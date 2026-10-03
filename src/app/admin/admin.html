@@ -427,6 +427,13 @@
                             [(ngModel)]="draft.seller"
                             maxlength="120"
                             placeholder="Opcional" />
+                        <label class="check-label">
+                            <input type="checkbox" name="international" [(ngModel)]="draft.international" />
+                            Produto internacional
+                        </label>
+                        <p class="field-help">
+                            Exibe a tag Internacional na área pública desta indicação.
+                        </p>
                         <label for="affiliate-url">Link de afiliado</label>
                         <input
                             id="affiliate-url"

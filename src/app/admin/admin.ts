@@ -377,6 +377,7 @@ export class AdminComponent {
                 status: 'draft',
                 order: this.items.reduce((n, p) => Math.max(n, p.order || 0), 0) + 10,
                 platform: 'Shopee',
+                international: false,
                 seller: '',
                 url: '',
                 demoListing: false,
@@ -396,6 +397,7 @@ export class AdminComponent {
         this.themeQuery = '';
         this.draft = {
             themeIds: [],
+            international: false,
             images: [],
             characteristics: [],
             personalization: [],

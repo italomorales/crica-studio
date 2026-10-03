@@ -15,6 +15,33 @@ const bundle = await build({
 });
 const runtime = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
 
+test('affiliate international flag is sent and retained after catalog reload, including unchecking', async (t) => {
+    let token: string | null = null;
+    let international = false;
+    const affiliate = { id: '12345678-1234-4234-8234-123456789abc', name: 'Material', platform: 'Shopee' };
+    const injector = runtime.createEnvironmentInjector([
+        { provide: runtime.AuthService, useValue: { accessToken: () => token } },
+    ]);
+    const service = runtime.runInInjectionContext(injector, () => new runtime.AdminCatalogService());
+    t.after(() => injector.destroy());
+    token = 'test-token';
+    t.mock.method(globalThis, 'fetch', async (url: string, options: any) => {
+        if (options.method) {
+            international = JSON.parse(options.body).international;
+            assert.equal(typeof international, 'boolean');
+            return Response.json({ id: affiliate.id });
+        }
+        return Response.json(url.endsWith('/affiliates') ? [{ ...affiliate, international }] :
+            url.endsWith('/settings') ? { whatsappNumber: '' } : []);
+    });
+    await service.saveAffiliate({ ...affiliate, international: true });
+    assert.equal(service.allAffiliates[0].international, true);
+    await service.saveAffiliate({ ...affiliate, international: false });
+    assert.equal(service.allAffiliates[0].international, false);
+    await service.saveAffiliate(affiliate);
+    assert.equal(service.allAffiliates[0].international, false);
+});
+
 test('themes use authenticated POST/PUT/DELETE and product saves include zero or multiple theme IDs', async (t) => {
     let token: string | null = null;
     const injector = runtime.createEnvironmentInjector([
