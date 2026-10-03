@@ -86,13 +86,18 @@
             [query]="query"
             (selection)="select($event)"
             (queryChange)="search($event)" />
+        <div class="supplier-type-filter">
+            <crica-theme-filter [themes]="supplierTypes" [selected]="typeIds"
+                label="Tipo" noun="tipo" plural="tipos" idPrefix="supplier-type"
+                (selection)="selectTypes($event)" />
+        </div>
         <div class="results-row">
             <p aria-live="polite">
                 @if (catalog.affiliatesLoading() && !catalog.affiliates().length) { Carregando indicações... } @else if (catalog.affiliatesError()) {
                 Catálogo indisponível } @else { {{ catalog.affiliatesTotal() }} {{ catalog.affiliatesTotal() === 1 ?
                 'indicação' : 'indicações' }} }
             </p>
-            @if (query || platform !== 'Todos') {
+            @if (query || platform !== 'Todos' || typeIds.length) {
             <button class="clear" (click)="clear()">Limpar filtros ×</button>
             }
         </div>

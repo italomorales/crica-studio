@@ -8,6 +8,34 @@ const bundle = await build({
 });
 const { PublicCatalogService } = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
 
+test('supplier type selections combine with platform and search on every page and clear together', async t => {
+    const requests: URL[] = [];
+    t.mock.method(globalThis, 'fetch', async (value: string) => {
+        const url = new URL(value);
+        if (url.pathname.endsWith('/types')) return Response.json([{ id: 'type-1', name: 'Máquinas', scope: 'suppliers', active: true }]);
+        requests.push(url);
+        const page = Number(url.searchParams.get('page'));
+        return Response.json({ items: [{ id: `affiliate-${page}`, typeId: 'type-1' }], total: 2, page, pageSize: 1 });
+    });
+    const service = new PublicCatalogService();
+    const filters = { query: 'Máquina', platform: 'Shopee', typeIds: ['type-1', 'type-2'] };
+    await service.loadAffiliates(filters);
+    await service.loadAffiliates(filters, true);
+    assert.equal(requests[1].searchParams.get('page'), '2');
+    for (const url of requests) {
+        assert.equal(url.searchParams.get('types'), 'type-1,type-2');
+        assert.equal(url.searchParams.get('platform'), 'Shopee');
+        assert.equal(url.searchParams.get('query'), 'maquina');
+    }
+    assert.equal(service.affiliates().length, 2);
+    assert.equal(service.affiliates()[0].category, 'Máquinas');
+    await service.loadAffiliates({ query: '', typeIds: [] });
+    assert.equal(service.affiliates().length, 1);
+    assert.equal(requests.at(-1)?.searchParams.has('types'), false);
+    assert.equal(requests.at(-1)?.searchParams.has('platform'), false);
+    assert.equal(requests.at(-1)?.searchParams.get('page'), '1');
+});
+
 test('public service preserves combined themes, type and search on subsequent pages and reloads available themes', async t => {
     const requests: URL[] = [];
     const types = [{ id: 'type-1', name: 'Canecas', scope: 'shop', active: true }];

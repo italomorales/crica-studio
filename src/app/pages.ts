@@ -166,11 +166,15 @@ export class ShopComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'crica-suppliers',
     standalone: true,
-    imports: [FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent],
+    imports: [FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent],
     template: suppliersTemplate,
 })
 export class SuppliersComponent implements OnInit, OnDestroy {
     catalog = inject(PublicCatalogService);
+    typeIds: string[] = [];
+    get supplierTypes() {
+        return this.catalog.types().filter(type => type.active && (type.scope === 'suppliers' || type.scope === 'both'));
+    }
     platform = 'Todos';
     query = '';
     private searchTimer?: ReturnType<typeof setTimeout>;
@@ -219,7 +223,13 @@ export class SuppliersComponent implements OnInit, OnDestroy {
         this.carouselTimer = undefined;
     }
     select(platform: string) {
+        clearTimeout(this.searchTimer);
         this.platform = platform;
+        void this.refresh();
+    }
+    selectTypes(ids: string[]) {
+        clearTimeout(this.searchTimer);
+        this.typeIds = ids;
         void this.refresh();
     }
     search(query: string) {
@@ -231,17 +241,19 @@ export class SuppliersComponent implements OnInit, OnDestroy {
         return this.catalog.loadAffiliates({
             query: this.query,
             platform: this.platform === 'Todos' ? undefined : this.platform,
+            typeIds: this.typeIds,
         });
     }
     loadMore() {
         return this.catalog.loadAffiliates(
-            { query: this.query, platform: this.platform === 'Todos' ? undefined : this.platform },
+            { query: this.query, platform: this.platform === 'Todos' ? undefined : this.platform, typeIds: this.typeIds },
             true,
         );
     }
     clear() {
         clearTimeout(this.searchTimer);
         this.platform = 'Todos';
+        this.typeIds = [];
         this.query = '';
         void this.refresh();
     }

@@ -15,7 +15,7 @@ type ApiAffiliate = Omit<AffiliateProduct, 'category' | 'typeId'> & { typeId: st
 type ApiPage<T> = { items: T[]; total: number; page: number; pageSize: number };
 type ApiSettings = { whatsappNumber: string };
 export type ShopFilters = { query: string; typeId?: string; themeIds?: string[] };
-type AffiliateFilters = { query: string; platform?: string };
+type AffiliateFilters = { query: string; platform?: string; typeIds?: string[] };
 
 @Injectable({ providedIn: 'root' })
 export class PublicCatalogService {
@@ -141,6 +141,7 @@ export class PublicCatalogService {
                 pageSize: this.affiliatesPageSize,
                 query: normalize(filters.query),
                 platform: filters.platform,
+                types: filters.typeIds?.join(','),
                 featured: false,
             });
             if (request !== this.affiliatesRequest) return;

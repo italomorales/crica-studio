@@ -7,6 +7,10 @@ import template from './theme-filter.html?raw';
 export class ThemeFilterComponent {
     @Input() themes: CatalogTheme[] = [];
     @Input() selected: string[] = [];
+    @Input() label = 'Temas';
+    @Input() noun = 'tema';
+    @Input() plural = 'temas';
+    @Input() idPrefix = 'shop-theme';
     @Output() selection = new EventEmitter<string[]>();
     @ViewChild('picker') picker?: ElementRef<HTMLDetailsElement>;
     search = '';
@@ -16,7 +20,7 @@ export class ThemeFilterComponent {
             .slice().sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     }
     get chips() {
-        return this.selected.map(id => ({ id, name: this.themes.find(t => t.id === id)?.name ?? 'Tema indisponível' }));
+        return this.selected.map(id => ({ id, name: this.themes.find(t => t.id === id)?.name ?? `${this.label} indisponível` }));
     }
     searchThemes(event: Event) { this.search = (event.target as HTMLInputElement).value; }
     toggle(id: string) {

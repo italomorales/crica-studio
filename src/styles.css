@@ -1765,6 +1765,7 @@ crica-affiliate-card {
 .theme-chips button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 .shop-theme-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; }
+.supplier-type-filter { margin: 12px 0 0; }
 .shop-theme-picker { position: relative; }
 .shop-theme-picker summary { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; list-style: none; background: white; }
 .shop-theme-picker summary::-webkit-details-marker { display: none; }
