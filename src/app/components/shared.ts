@@ -15,10 +15,6 @@ import productImageTemplate from './product-image.html?raw';
     template: headerTemplate,
 })
 export class HeaderComponent {
-    readonly language = language;
-    get languages() { return availableLanguages(); }
-    readonly languageFlag=languageFlag;
-    readonly setLanguage = setLanguage;
     readonly showShop = currentSiteMarket() === 'br';
     readonly homePath = publicHomePath();
 }
@@ -28,7 +24,13 @@ export class HeaderComponent {
     imports: [ContentPipe, TranslatePipe, RouterLink],
     template: footerTemplate,
 })
-export class FooterComponent { readonly homePath = publicHomePath(); }
+export class FooterComponent {
+    readonly language = language;
+    get languages() { return availableLanguages(); }
+    readonly languageFlag=languageFlag;
+    readonly setLanguage = setLanguage;
+    readonly homePath = publicHomePath();
+}
 @Component({
     selector: 'crica-filters',
     standalone: true,

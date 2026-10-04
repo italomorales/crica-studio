@@ -21,6 +21,25 @@
                 </a>
             </div>
         </div>
+        <label class="language-menu">
+            <img
+                [src]="languageFlag()"
+                alt=""
+                width="22"
+                height="15"
+                aria-hidden="true" />
+            <span class="sr-only">{{ 'Idioma' | translate }}</span>
+            <select
+                [value]="language()"
+                (change)="setLanguage($any($event.target).value)"
+                [attr.aria-label]="'Idioma' | translate">
+                @for (item of languages; track item.code) {
+                <option [value]="item.code" [selected]="language() === item.code">
+                    {{ item.nativeName }}
+                </option>
+                }
+            </select>
+        </label>
         <a class="admin-entry" routerLink="/login"> {{ 'Administração' | translate }} </a>
     </div>
 </footer>
