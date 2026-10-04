@@ -1,5 +1,5 @@
 export type Category = string;
-export type Platform = 'Shopee' | 'Mercado Livre' | 'TikTok Shop' | 'AliExpress' | 'Outra';
+export type Platform = string;
 export type ItemStatus = 'draft' | 'published' | 'inactive';
 export type PriceMode = 'consult' | 'fixed' | 'from';
 export interface CatalogType {
@@ -42,6 +42,7 @@ export interface AffiliateProduct extends ManagedFields {
     image?: string;
     images?: string[];
     platform: Platform;
+    platformId?: string;
     international?: boolean;
     category: string;
     url?: string;

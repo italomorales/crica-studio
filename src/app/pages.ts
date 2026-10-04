@@ -1,4 +1,6 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { platformLogo } from './services/platform-logos';
+import { Component, ChangeDetectorRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { PlatformService, type CatalogPlatform } from './services/platform.service';
 import { ActivatedRoute, Router, Scroll } from '@angular/router';
 import { PublicCatalogService } from './services/public-catalog.service';
 import { FiltersComponent, ProductImageComponent } from './components/shared';
@@ -171,6 +173,9 @@ export class ShopComponent implements OnInit, OnDestroy {
 })
 export class SuppliersComponent implements OnInit, OnDestroy {
     catalog = inject(PublicCatalogService);
+    private platformService = inject(PlatformService, { optional: true });
+    private registeredPlatforms = signal<CatalogPlatform[]>([]);
+    get platformOptions() { return ['Todos', ...new Set([...this.registeredPlatforms().map(p => p.name), ...this.catalog.affiliates().map(p => p.platform)])]; }
     typeIds: string[] = [];
     get supplierTypes() {
         return this.catalog.types().filter(type => type.active && (type.scope === 'suppliers' || type.scope === 'both'));
@@ -180,6 +185,7 @@ export class SuppliersComponent implements OnInit, OnDestroy {
     private searchTimer?: ReturnType<typeof setTimeout>;
     private carouselTimer?: ReturnType<typeof setInterval>;
     ngOnInit() {
+        if (this.platformService) void this.platformService.publicPlatforms().then(items => this.registeredPlatforms.set(items)).catch(() => {});
         void this.refresh();
         void this.catalog.loadFeaturedAffiliates().then(() => this.startCarousel());
     }
@@ -264,8 +270,24 @@ export class SuppliersComponent implements OnInit, OnDestroy {
     template: storefrontTemplate,
 })
 export class StorefrontComponent {
-    readonly storefronts = SITE_CONFIG.storefronts;
-    async shareStorefront(storefront: (typeof SITE_CONFIG.storefronts)[number]) {
+    private service = inject(PlatformService);
+    private route = inject(ActivatedRoute);
+    private cd = inject(ChangeDetectorRef);
+    storefronts: CatalogPlatform[] = [];
+    loading = true;
+    error = '';
+    readonly platformLogo = platformLogo;
+    readonly externalUrl = externalUrl;
+    ngOnInit() { void this.load(); }
+    async load() {
+        this.loading = true; this.error = '';
+        try {
+            const market = this.route.snapshot.data;
+            this.storefronts = await this.service.publicPlatforms(market['locale'] || 'pt-BR', market['country'] || 'BR', true);
+        } catch (error) { this.error = (error as Error).message; }
+        finally { this.loading = false; this.cd.markForCheck(); }
+    }
+    async shareStorefront(storefront: CatalogPlatform) {
         const url = storefront.url ?? window.location.href;
         await shareLink(
             storefront.name,

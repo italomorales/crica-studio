@@ -65,11 +65,13 @@ bootstrapApplication(AppComponent, {
                 {
                     path: 'vitrine',
                     component: StorefrontComponent,
-                    title: 'Vitrines da Crica Studio | Produtos Personalizados',
+                    title: 'Plataformas da Crica Studio | Produtos Personalizados',
                 },
                 { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
                 { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
-                ...['loja', 'fornecedores', 'tipos', 'temas', 'configuracoes'].map((section) => ({
+                { path: 'admin/marketplaces', redirectTo: 'admin/plataformas', pathMatch: 'full' },
+                { path: 'admin/vitrines', redirectTo: 'admin/plataformas', pathMatch: 'full' },
+                ...['loja', 'fornecedores', 'tipos', 'temas', 'plataformas', 'configuracoes'].map((section) => ({
                     path: 'admin/' + section,
                     loadComponent: () => import('./app/admin/admin').then(module => module.AdminComponent),
                     canActivate: [authGuard],

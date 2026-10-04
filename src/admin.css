@@ -1280,7 +1280,8 @@
   stroke-linejoin: round;
 }
 crica-catalog-grid,
-crica-type-grid {
+crica-type-grid,
+crica-platform-grid {
   display: block;
   min-width: 0;
 }

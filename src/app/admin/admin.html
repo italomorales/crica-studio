@@ -9,6 +9,7 @@
         </a>
         <span class="sidebar-label">ADMINISTRAÇÃO</span>
         <nav aria-label="Administração">
+
             <a routerLink="/admin/loja" routerLinkActive="active" ariaCurrentWhenActive="page">
                 <span aria-hidden="true">▦</span>
                 Produtos da loja
@@ -20,6 +21,7 @@
                 <span aria-hidden="true">↗</span>
                 Fornecedores
             </a>
+            <a routerLink="/admin/plataformas" routerLinkActive="active" ariaCurrentWhenActive="page"><span aria-hidden="true">◈</span> Plataformas</a>
             <a routerLink="/admin/tipos" routerLinkActive="active" ariaCurrentWhenActive="page">
                 <span aria-hidden="true">≡</span>
                 Tipos
@@ -55,13 +57,16 @@
             <div class="admin-page-heading">
                 <div>
                     <span class="eyebrow">
-                        {{ editing ? 'CADASTRO' : section === 'configuracoes' ? 'PREFERÊNCIAS' :
+                        {{ pageEditing ? 'CADASTRO' : section === 'configuracoes' ? 'PREFERÊNCIAS' :
                         'SEU CATÁLOGO' }}
                     </span>
-                    <h1>{{ editing ? (isNew ? 'Novo cadastro' : 'Editar cadastro') : title }}</h1>
+                    <h1>{{ pageEditing ? (pageIsNew ? 'Novo cadastro' : 'Editar cadastro') : title }}</h1>
                     <p>{{ subtitle }}</p>
                 </div>
-                @if (!editing && !organizing && section !== 'configuracoes' && !readOnly) {
+                @if (section === 'plataformas' && !pageEditing) {
+                <button class="primary" type="button" (click)="platformAdmin?.edit()" [disabled]="!platformAdmin || platformAdmin.loading || platformAdmin.saving">+ Nova plataforma</button>
+                }
+                @if (!editing && !organizing && section !== 'configuracoes' && section !== 'plataformas' && !readOnly) {
                 <div class="catalog-heading-actions">
                     @if (section === 'loja' || section === 'fornecedores') {
                     <button
@@ -104,7 +109,9 @@
                     }
                 </ul>
             </div>
-            } @if (catalog.loading()) {
+            } @if (section === 'plataformas') {
+            <crica-platform-admin />
+            } @else if (catalog.loading()) {
             <div class="admin-notice" role="status">Carregando dados administrativos…</div>
             } @else if (catalog.error()) {
             <div class="error-summary" role="alert">
@@ -415,9 +422,9 @@
                     <section class="admin-panel">
                         <h2>Destino da indicação</h2>
                         <label for="platform">Plataforma *</label>
-                        <select id="platform" name="platform" [(ngModel)]="draft.platform">
-                            @for (p of platforms; track p) {
-                            <option [value]="p">{{ p }}</option>
+                        <select id="platform" name="platform" [ngModel]="draft.platformId" (ngModelChange)="selectPlatform($event)" required><option value="">Selecione uma plataforma</option>
+                            @for (p of selectablePlatforms; track p.id) {
+                            <option [value]="p.id">{{ p.name }} ({{ p.locale }} · {{ p.countryCode }}){{ p.active ? "" : " — inativa" }}</option>
                             }
                         </select>
                         <label for="seller">Loja ou vendedor</label>

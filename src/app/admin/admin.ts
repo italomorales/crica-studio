@@ -17,7 +17,8 @@ import {
 import { AdminCatalogService } from '../services/admin-catalog.service';
 import { AuthService } from '../services/auth.service';
 import { normalize } from '../services/contact';
-import { priceLabel, PLATFORMS, validateItem, validateType } from '../services/local-store';
+import { priceLabel, validateItem, validateType } from '../services/local-store';
+import { PlatformService, type CatalogPlatform } from '../services/platform.service';
 import type {
     Product,
     AffiliateProduct,
@@ -32,6 +33,7 @@ import { ThemeGridComponent, type ThemeAction } from './theme-grid';
 import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
 import { friendlySlug } from '../services/product-url';
 import adminTemplate from './admin.html?raw';
+import { PlatformAdminComponent } from './platform-admin';
 
 type DeletionTarget = {
     id: string;
@@ -50,10 +52,14 @@ type DeletionTarget = {
         CatalogGridComponent,
         TypeGridComponent,
         ThemeGridComponent,
+        PlatformAdminComponent,
     ],
     template: adminTemplate,
 })
 export class AdminComponent {
+    @ViewChild(PlatformAdminComponent) platformAdmin?: PlatformAdminComponent;
+    get pageEditing() { return this.editing || !!this.platformAdmin?.editing; }
+    get pageIsNew() { return this.platformAdmin?.editing ? !this.platformAdmin.draft.id : this.isNew; }
     private changeDetector = inject(ChangeDetectorRef);
     savingType = false;
     savingTheme = false;
@@ -154,7 +160,22 @@ export class AdminComponent {
     router = inject(Router);
     route = inject(ActivatedRoute);
     section = this.route.snapshot.data['section'] as string;
-    platforms = PLATFORMS;
+    private platformService = inject(PlatformService, { optional: true });
+    registeredPlatforms: CatalogPlatform[] = [];
+    ngOnInit() { if (this.section === 'fornecedores') void this.loadPlatforms(); }
+    async loadPlatforms() {
+        if (!this.platformService) return;
+        try { this.registeredPlatforms = await this.platformService.all(); }
+        catch (error) { this.showNotice((error as Error).message, 'error'); }
+        finally { this.changeDetector.markForCheck(); }
+    }
+    get platforms() { return [...new Set([...this.registeredPlatforms.map(p => p.name), ...this.catalog.allAffiliates.map(p => p.platform)])]; }
+    get selectablePlatforms() { return this.registeredPlatforms.filter(p => p.active || (!this.isNew && p.id === this.draft.platformId)); }
+    selectPlatform(id: string) {
+        const selected = this.registeredPlatforms.find(p => p.id === id);
+        this.draft.platformId = selected?.id;
+        this.draft.platform = selected?.name || '';
+    }
     query = '';
     status = 'all';
     typeFilter = 'all';
@@ -195,6 +216,7 @@ export class AdminComponent {
                 fornecedores: 'Fornecedores',
                 tipos: 'Tipos de produto',
                 temas: 'Temas da loja',
+                plataformas: 'Plataformas',
                 configuracoes: 'Configurações',
             } as Record<string, string>
         )[this.section];
@@ -206,7 +228,7 @@ export class AdminComponent {
             : 'Digite o título para gerar a URL.';
     }
     get subtitle() {
-        return this.editing
+        return this.pageEditing
             ? 'Dê forma aos detalhes que aparecem no catálogo.'
             : (
                   {
@@ -214,6 +236,7 @@ export class AdminComponent {
                       fornecedores: 'Cada indicação tem seu próprio cadastro e sua plataforma.',
                       tipos: 'Organize seus produtos com tipos simples e reutilizáveis.',
                       temas: 'Agrupe produtos por ocasiões, estilos e assuntos.',
+                      plataformas: 'Um único cadastro para as vitrines e os produtos dos fornecedores, por país e idioma.',
                       configuracoes: 'Contato e preferências da sua demonstração.',
                   } as Record<string, string>
               )[this.section];
@@ -314,20 +337,21 @@ export class AdminComponent {
     }
     get dirty() {
         return (
+            !!this.platformAdmin?.dirty ||
             this.orderDirty ||
             (this.editing && this.baseline !== this.snapshot()) ||
             (this.section === 'configuracoes' && this.whatsapp !== this.catalog.whatsappNumber)
         );
     }
     canLeave() {
-        if (this.savingOrder || this.savingType || this.savingTheme) return false;
+        if (this.savingOrder || this.savingType || this.savingTheme || this.platformAdmin?.saving || this.platformAdmin?.uploadingLogo) return false;
         return (
             !(this.dirty || this.uploadingImages) ||
             window.confirm('Há alterações não salvas. Deseja sair sem salvar?')
         );
     }
     @HostListener('window:beforeunload', ['$event']) beforeUnload(event: BeforeUnloadEvent) {
-        if (this.dirty || this.uploadingImages) {
+        if (this.dirty || this.uploadingImages || this.platformAdmin?.uploadingLogo) {
             event.preventDefault();
             event.returnValue = '';
         }
@@ -376,7 +400,8 @@ export class AdminComponent {
                 priceMode: 'consult',
                 status: 'draft',
                 order: this.items.reduce((n, p) => Math.max(n, p.order || 0), 0) + 10,
-                platform: 'Shopee',
+                platform: '',
+                platformId: '',
                 international: false,
                 seller: '',
                 url: '',

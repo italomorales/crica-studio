@@ -1,13 +1,16 @@
 <main id="main" class="storefront container">
     <section class="storefront-intro" aria-labelledby="storefront-title">
         <span class="eyebrow">CRICA STUDIO</span>
-        <h1 id="storefront-title">Vitrines</h1>
+        <h1 id="storefront-title">Plataformas</h1>
         <p>
             Escolha a plataforma que você prefere e descubra os produtos da Crica no seu ritmo.
         </p>
     </section>
 
-    <section class="storefront-grid" aria-label="Vitrines da Crica Studio">
+    @if (loading) { <p role="status">Carregando plataformas…</p> }
+    @else if (error) { <div role="alert"><p>{{ error }}</p><button class="secondary" type="button" (click)="load()">Tentar novamente</button></div> }
+    @else {
+    <section class="storefront-grid" aria-label="Plataformas da Crica Studio">
         @for (storefront of storefronts; track storefront.id) {
         <article class="storefront-card">
             <button
@@ -23,32 +26,24 @@
                 </svg>
                 <span class="sr-only">Compartilhar</span>
             </button>
-            @if (storefront.id === 'tiktok') {
+            @if (storefront.mobileOnly) {
             <span class="hero-label storefront-mobile-label">Somente pelo celular</span>
             }
             <div class="storefront-logo" aria-hidden="true">
-                @switch (storefront.id) {
-                    @case ('shopee') {
-                    <img src="/assets/construction/shopee.svg" alt="" width="56" height="56" />
-                    }
-                    @case ('mercado') {
-                    <img src="/assets/construction/mercado-livre.svg" alt="" width="62" height="56" />
-                    }
-                    @case ('tiktok') {
-                    <img src="/assets/construction/tiktok-shop.png" alt="" width="56" height="56" />
-                    }
-                }
+                @if (platformLogo(storefront)) {
+                <img [src]="platformLogo(storefront)" alt="" width="62" height="56" />
+                } @else { <span>{{ storefront.name }}</span> }
             </div>
             <div>
                 <h2>{{ storefront.name }}</h2>
                 <p>{{ storefront.description }}</p>
             </div>
-            @if (storefront.url) {
-            <a class="storefront-link" [class.storefront-mobile-link]="storefront.id === 'tiktok'" [href]="storefront.url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na ' + storefront.name + ' (nova aba)'">
+            @if (externalUrl(storefront.url || '')) {
+            <a class="storefront-link" [class.storefront-mobile-link]="storefront.mobileOnly" [href]="externalUrl(storefront.url || '')" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na ' + storefront.name + ' (nova aba)'">
                 Visitar vitrine <span aria-hidden="true">↗</span>
             </a>
-            @if (storefront.id === 'tiktok') {
-            <span class="storefront-pending storefront-desktop-disabled" role="link" aria-disabled="true" aria-label="Visitar vitrine na TikTok Shop: somente pelo celular">
+            @if (storefront.mobileOnly) {
+            <span class="storefront-pending storefront-desktop-disabled" role="link" aria-disabled="true" [attr.aria-label]="'Visitar vitrine na ' + storefront.name + ': somente pelo celular'">
                 Visitar vitrine <span aria-hidden="true">↗</span>
             </span>
             }
@@ -56,8 +51,9 @@
             <span class="storefront-pending">Disponível em breve</span>
             }
         </article>
-        }
+        } @empty { <p>Nenhuma plataforma disponível no momento.</p> }
     </section>
+    }
 
     <p class="storefront-note">Consulte preços, frete e disponibilidade na plataforma escolhida.</p>
 </main>

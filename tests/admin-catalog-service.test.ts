@@ -18,7 +18,7 @@ const runtime = await import(`data:text/javascript;base64,${Buffer.from(bundle.o
 test('affiliate international flag is sent and retained after catalog reload, including unchecking', async (t) => {
     let token: string | null = null;
     let international = false;
-    const affiliate = { id: '12345678-1234-4234-8234-123456789abc', name: 'Material', platform: 'Shopee' };
+    const affiliate = { id: '12345678-1234-4234-8234-123456789abc', name: 'Material', platform: 'Amazon US', platformId: '22345678-1234-4234-8234-123456789abc' };
     const injector = runtime.createEnvironmentInjector([
         { provide: runtime.AuthService, useValue: { accessToken: () => token } },
     ]);
@@ -27,7 +27,7 @@ test('affiliate international flag is sent and retained after catalog reload, in
     token = 'test-token';
     t.mock.method(globalThis, 'fetch', async (url: string, options: any) => {
         if (options.method) {
-            international = JSON.parse(options.body).international;
+            international = JSON.parse(options.body).international; assert.equal(JSON.parse(options.body).platformId, affiliate.platformId); assert.equal(JSON.parse(options.body).platform, affiliate.platform);
             assert.equal(typeof international, 'boolean');
             return Response.json({ id: affiliate.id });
         }
@@ -35,7 +35,7 @@ test('affiliate international flag is sent and retained after catalog reload, in
             url.endsWith('/settings') ? { whatsappNumber: '' } : []);
     });
     await service.saveAffiliate({ ...affiliate, international: true });
-    assert.equal(service.allAffiliates[0].international, true);
+    assert.equal(service.allAffiliates[0].international, true); assert.equal(service.allAffiliates[0].platformId, affiliate.platformId);
     await service.saveAffiliate({ ...affiliate, international: false });
     assert.equal(service.allAffiliates[0].international, false);
     await service.saveAffiliate(affiliate);

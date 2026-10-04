@@ -14,7 +14,7 @@ const pages = {
             'Confira indicações de canecas para personalizar, máquinas de fazer bottons e materiais para sua produção.',
     },
     vitrine: {
-        title: 'Vitrines da Crica Studio | Produtos Personalizados',
+        title: 'Plataformas da Crica Studio | Produtos Personalizados',
         description:
             'Encontre os produtos personalizados da Crica Studio nas plataformas parceiras de sua preferência.',
     },
@@ -39,6 +39,8 @@ const routes = [
     'admin/fornecedores',
     'admin/tipos',
     'admin/temas',
+    'admin/plataformas',
+    'admin/vitrines',
     'admin/configuracoes',
 ];
 

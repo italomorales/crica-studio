@@ -1,7 +1,6 @@
 import type { CatalogState, Product, AffiliateProduct, CatalogType } from '../data/models';
 import { normalize, externalUrl } from './contact.ts';
 export const STORAGE_KEY = 'crica.catalog.v1';
-export const PLATFORMS = ['Shopee', 'Mercado Livre', 'TikTok Shop', 'AliExpress', 'Outra'] as const;
 export const PRICE_LABELS = { consult: 'Sob consulta', fixed: 'Preço fixo', from: 'À partir de' };
 export function priceLabel(p: Product): string {
     if (!p.priceMode || p.priceMode === 'consult' || p.price === undefined) return 'Sob consulta';
@@ -47,7 +46,7 @@ export function validateItem(
             errors.push('Inclua uma foto principal para publicar.');
     } else {
         const a = item as AffiliateProduct;
-        if (!PLATFORMS.includes(a.platform)) errors.push('Selecione uma plataforma.');
+        if (!a.platform.trim()) errors.push('Selecione uma plataforma.');
         if (a.url && !externalUrl(a.url))
             errors.push('O link de afiliado deve ser uma URL HTTPS válida.');
         if (a.image && !safeImage(a.image)) errors.push('Use uma imagem válida.');
