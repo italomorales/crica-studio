@@ -1,8 +1,8 @@
+import { TranslatePipe, translate, localizedPrice } from '../services/language';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import type { Product, AffiliateProduct } from '../data/models';
 import { ProductImageComponent } from './shared';
 import { SITE_CONFIG } from '../data/site.config';
-import { priceLabel } from '../services/local-store';
 import { externalUrl } from '../services/contact';
 import { shareLink } from '../services/share';
 import productCardTemplate from './product-card.html?raw';
@@ -11,11 +11,11 @@ import affiliateCardTemplate from './affiliate-card.html?raw';
 @Component({
     selector: 'crica-product-card',
     standalone: true,
-    imports: [ProductImageComponent],
+    imports: [TranslatePipe, ProductImageComponent],
     template: productCardTemplate,
 })
 export class ProductCardComponent {
-    price = priceLabel;
+    price = localizedPrice;
     @Input({ required: true }) product!: Product;
     @Output() details = new EventEmitter<Product>();
     @Output() order = new EventEmitter<Product>();
@@ -23,7 +23,7 @@ export class ProductCardComponent {
 @Component({
     selector: 'crica-affiliate-card',
     standalone: true,
-    imports: [ProductImageComponent],
+    imports: [TranslatePipe, ProductImageComponent],
     template: affiliateCardTemplate,
 })
 export class AffiliateCardComponent {
@@ -37,7 +37,6 @@ export class AffiliateCardComponent {
     }
     async share() {
         const url = this.url ?? window.location.href;
-        const text = `Confira esta indicação da Crica Studio: ${this.product.name}`;
-        await shareLink(this.product.name, text, url);
+        await shareLink(this.product.name, translate('Confira esta indicação da Crica Studio: {name}', {name: this.product.name}), url);
     }
 }

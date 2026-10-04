@@ -15,3 +15,11 @@ Prévia local internacional: http://localhost:4173/fornecedores?previewMarket=in
 Publicação: API primeiro, front depois, função CloudFront por último. O arquivo .previous.js preserva o código anterior para reversão.
 
 Referência oficial: https://github.com/aws-samples/amazon-cloudfront-functions/tree/main/redirect-based-on-country
+
+## Idiomas públicos
+
+O seletor do cabeçalho oferece Português, English e Español nos dois domínios. O idioma não altera o mercado do catálogo, os filtros, os links de afiliado ou a moeda BRL. A preferência fica em localStorage (`crica.language`) por domínio; se o armazenamento estiver bloqueado, a seleção continua funcionando durante a visita.
+
+Na primeira visita, .com.br começa em português. No .com, o front consulta `/site-context.json`: a própria função CloudFront responde somente com o país e `private, no-store`. Países de língua espanhola começam em espanhol; outros países, em inglês. Se a consulta falhar, usamos o idioma do navegador (es ou en). Preferências já salvas têm prioridade e dispensam essa consulta.
+
+A interface pública, os títulos de página, a acessibilidade e as mensagens de contato têm traduções locais em `src/app/services/translations.ts`. Conteúdo cadastrado no catálogo permanece no texto original quando não tem tradução. A administração continua em português. O atributo lang do documento acompanha a interface, inclusive após trocar o idioma ou navegar.

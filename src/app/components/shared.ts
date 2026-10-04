@@ -1,3 +1,4 @@
+import { TranslatePipe, language, setLanguage, LANGUAGE_OPTIONS } from '../services/language';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { currentSiteMarket, publicHomePath } from '../services/site-market';
@@ -9,23 +10,27 @@ import productImageTemplate from './product-image.html?raw';
 @Component({
     selector: 'crica-header',
     standalone: true,
-    imports: [RouterLink, RouterLinkActive],
+    imports: [TranslatePipe, RouterLink, RouterLinkActive],
     template: headerTemplate,
 })
 export class HeaderComponent {
+    readonly language = language;
+    readonly languages = LANGUAGE_OPTIONS;
+    readonly setLanguage = setLanguage;
     readonly showShop = currentSiteMarket() === 'br';
     readonly homePath = publicHomePath();
 }
 @Component({
     selector: 'crica-footer',
     standalone: true,
-    imports: [RouterLink],
+    imports: [TranslatePipe, RouterLink],
     template: footerTemplate,
 })
 export class FooterComponent { readonly homePath = publicHomePath(); }
 @Component({
     selector: 'crica-filters',
     standalone: true,
+    imports: [TranslatePipe],
     template: filtersTemplate,
 })
 export class FiltersComponent {
@@ -40,6 +45,7 @@ export class FiltersComponent {
 @Component({
     selector: 'crica-product-image',
     standalone: true,
+    imports: [TranslatePipe],
     template: productImageTemplate,
 })
 export class ProductImageComponent {

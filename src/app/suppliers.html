@@ -2,25 +2,16 @@
     <div class="suppliers-hero">
         <section class="supplier-intro">
             <span class="eyebrow supplier-kicker">
-                <i></i>
-                PARA QUEM TAMBÉM CRIA
-            </span>
-            <h1>
-                Fornecedores
-                <span class="small-lime"></span>
+                <i></i> {{ 'PARA QUEM TAMBÉM CRIA' | translate }} </span>
+            <h1> {{ 'Fornecedores' | translate }} <span class="small-lime"></span>
             </h1>
-            <h2>Materiais e produtos indicados pela Crica</h2>
-            <p>
-                Encontre canecas para personalizar, máquinas de fazer bottons e materiais para sua
-                produção.
-                <br />
-                Aqui, a compra acontece em outras plataformas.
-            </p>
+            <h2> {{ 'Materiais e produtos indicados pela Crica' | translate }} </h2>
+            <p> {{ 'Encontre canecas para personalizar, máquinas de fazer bottons e materiais para sua produção.' | translate }} <br /> {{ 'Aqui, a compra acontece em outras plataformas.' | translate }} </p>
         </section>
         @if (featuredAffiliate; as product) {
         <section
             class="hero-art supplier-featured-art"
-            aria-label="Fornecedor em destaque"
+            [attr.aria-label]="'Fornecedor em destaque' | translate"
             (mouseenter)="stopCarousel()"
             (mouseleave)="startCarousel()">
             @if (featuredUrl(product); as url) {
@@ -29,9 +20,9 @@
                 [href]="url"
                 target="_blank"
                 rel="sponsored noopener noreferrer"
-                [attr.aria-label]="'Ver indicação de ' + product.name">
+                [attr.aria-label]="('Ver indicação de' | translate) + ' ' + product.name">
                 <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
-                <span class="hero-label">Em destaque</span>
+                <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
                 <span class="hero-product-name">{{ product.name }}</span>
             </a>
             } @else {
@@ -39,9 +30,9 @@
                 class="hero-featured"
                 type="button"
                 (click)="details.openAffiliate(product)"
-                [attr.aria-label]="'Ver indicação de ' + product.name">
+                [attr.aria-label]="('Ver indicação de' | translate) + ' ' + product.name">
                 <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
-                <span class="hero-label">Em destaque</span>
+                <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
                 <span class="hero-product-name">{{ product.name }}</span>
             </button>
             }
@@ -49,35 +40,35 @@
                 class="share-product hero-share"
                 type="button"
                 (click)="shareFeatured(product)"
-                [attr.aria-label]="'Compartilhar ' + product.name">
+                [attr.aria-label]="('Compartilhar' | translate) + ' ' + product.name">
                 <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
                     <circle cx="18" cy="5" r="2.5" />
                     <circle cx="6" cy="12" r="2.5" />
                     <circle cx="18" cy="19" r="2.5" />
                     <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
                 </svg>
-                <span class="sr-only">Compartilhar</span>
+                <span class="sr-only"> {{ 'Compartilhar' | translate }} </span>
             </button>
             @if (catalog.featuredAffiliates().length > 1) {
-            <div class="hero-carousel-controls" aria-label="Destaques dos fornecedores">
-                <button type="button" (click)="previousFeatured()" aria-label="Destaque anterior">←</button>
+            <div class="hero-carousel-controls" [attr.aria-label]="'Destaques dos fornecedores' | translate">
+                <button type="button" (click)="previousFeatured()" [attr.aria-label]="'Destaque anterior' | translate">←</button>
                 <div class="hero-carousel-dots">
                     @for (item of catalog.featuredAffiliates(); track item.id; let i = $index) {
                     <button
                         type="button"
                         [class.active]="i === featuredIndex"
                         (click)="selectFeatured(i)"
-                        [attr.aria-label]="'Ver destaque ' + (i + 1)"
+                        [attr.aria-label]="('Ver destaque' | translate) + ' ' + (i + 1)"
                         [attr.aria-current]="i === featuredIndex ? 'true' : null"></button>
                     }
                 </div>
-                <button type="button" (click)="nextFeatured()" aria-label="Próximo destaque">→</button>
+                <button type="button" (click)="nextFeatured()" [attr.aria-label]="'Próximo destaque' | translate">→</button>
             </div>
             }
         </section>
         }
     </div>
-    <section aria-label="Produtos indicados">
+    <section [attr.aria-label]="'Produtos indicados' | translate">
         <crica-filters
             [options]="platformOptions"
             label="Plataformas"
@@ -93,44 +84,43 @@
         </div>
         <div class="results-row">
             <p aria-live="polite">
-                @if (catalog.affiliatesLoading() && !catalog.affiliates().length) { Carregando indicações... } @else if (catalog.affiliatesError()) {
-                Catálogo indisponível } @else { {{ catalog.affiliatesTotal() }} {{ catalog.affiliatesTotal() === 1 ?
-                'indicação' : 'indicações' }} }
+                @if (catalog.affiliatesLoading() && !catalog.affiliates().length) { {{ 'Carregando indicações...' | translate }} } @else if (catalog.affiliatesError()) {
+                {{ 'Catálogo indisponível' | translate }} } @else { {{ (catalog.affiliatesTotal() === 1 ? '{count} indicação' : '{count} indicações') | translate:{count: catalog.affiliatesTotal()} }} }
             </p>
             @if (query || platform !== 'Todos' || typeIds.length) {
-            <button class="clear" (click)="clear()">Limpar filtros ×</button>
+            <button class="clear" (click)="clear()"> {{ 'Limpar filtros ×' | translate }} </button>
             }
         </div>
         <div class="product-grid suppliers-grid">
             @if (catalog.affiliatesLoading() && !catalog.affiliates().length) {
             <div class="empty" aria-live="polite">
-                <h3>Carregando indicações</h3>
-                <p>Estamos buscando os produtos indicados.</p>
+                <h3> {{ 'Carregando indicações' | translate }} </h3>
+                <p> {{ 'Estamos buscando os produtos indicados.' | translate }} </p>
             </div>
             } @else if (catalog.affiliatesError() && !catalog.affiliates().length) {
                 <div class="empty" role="alert">
-                    <h3>Não foi possível carregar as indicações</h3>
-                <p>{{ catalog.affiliatesError() }}</p>
-                <button class="secondary" (click)="refresh()">Tentar novamente</button>
+                    <h3> {{ 'Não foi possível carregar as indicações' | translate }} </h3>
+                <p>{{ catalog.affiliatesError() | translate }}</p>
+                <button class="secondary" (click)="refresh()"> {{ 'Tentar novamente' | translate }} </button>
                 </div>
             } @else { @for (product of catalog.affiliates(); track product.id) {
             <crica-affiliate-card [product]="product" (demo)="details.openAffiliate($event)" />
             } @empty {
             <div class="empty">
-                <h3>Nenhum produto encontrado</h3>
-                <p>Tente outro nome ou escolha outra plataforma.</p>
-                <button class="secondary" (click)="clear()">Limpar filtros</button>
+                <h3> {{ 'Nenhum produto encontrado' | translate }} </h3>
+                <p> {{ 'Tente outro nome ou escolha outra plataforma.' | translate }} </p>
+                <button class="secondary" (click)="clear()"> {{ 'Limpar filtros' | translate }} </button>
             </div>
             } }
         </div>
         @if (catalog.affiliates().length && catalog.hasMoreAffiliates) {
         <div class="load-more">
-            <span>Exibindo {{ catalog.affiliates().length }} de {{ catalog.affiliatesTotal() }} indicações</span>
+            <span>{{ 'Exibindo {shown} de {total} indicações' | translate:{shown: catalog.affiliates().length, total: catalog.affiliatesTotal()} }}</span>
             @if (catalog.affiliatesError()) {
-            <span role="alert">{{ catalog.affiliatesError() }}</span>
+            <span role="alert">{{ catalog.affiliatesError() | translate }}</span>
             }
             <button class="secondary" (click)="loadMore()" [disabled]="catalog.affiliatesLoading()">
-                {{ catalog.affiliatesLoading() ? 'Carregando...' : 'Carregar mais indicações' }}
+                {{ (catalog.affiliatesLoading() ? 'Carregando...' : 'Carregar mais indicações') | translate }}
             </button>
         </div>
         }

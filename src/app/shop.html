@@ -2,21 +2,12 @@
     <section class="hero container">
         <div class="hero-copy">
             <span class="eyebrow hero-kicker">
-                <i></i>
-                PERSONALIZADOS COM A SUA ESSÊNCIA
-            </span>
-            <h1>
-                Sua ideia merece
-                <br />
-                <span>ganhar forma.</span>
+                <i></i> {{ 'PERSONALIZADOS COM A SUA ESSÊNCIA' | translate }} </span>
+            <h1> {{ 'Sua ideia merece' | translate }} <br />
+                <span> {{ 'ganhar forma.' | translate }} </span>
             </h1>
-            <p>
-                Criamos canecas e bottons personalizados para pessoas, empresas, eventos e pedidos em
-                quantidade. Você traz a ideia. A gente cria com você.
-            </p>
-            <a class="primary" href="#catalogo">
-                Explorar produtos
-                <span aria-hidden="true">↓</span>
+            <p> {{ 'Criamos canecas e bottons personalizados para pessoas, empresas, eventos e pedidos em quantidade. Você traz a ideia. A gente cria com você.' | translate }} </p>
+            <a class="primary" href="#catalogo"> {{ 'Explorar produtos' | translate }} <span aria-hidden="true">↓</span>
             </a>
         </div>
         <div
@@ -28,42 +19,42 @@
                 class="hero-featured"
                 type="button"
                 (click)="openProduct(product)"
-                [attr.aria-label]="'Ver detalhes de ' + product.name">
+                [attr.aria-label]="('Ver detalhes de' | translate) + ' ' + product.name">
                 <img [src]="product.images[0]" [alt]="product.name" width="640" height="640" />
-                <span class="hero-label">Em destaque</span>
+                <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
                 <span class="hero-product-name">{{ product.name }}</span>
             </button>
             @if (catalog.featuredProducts().length > 1) {
-            <div class="hero-carousel-controls" aria-label="Destaques da loja">
-                <button type="button" (click)="previousFeatured()" aria-label="Destaque anterior">←</button>
+            <div class="hero-carousel-controls" [attr.aria-label]="'Destaques da loja' | translate">
+                <button type="button" (click)="previousFeatured()" [attr.aria-label]="'Destaque anterior' | translate">←</button>
                 <div class="hero-carousel-dots">
                     @for (item of catalog.featuredProducts(); track item.id; let i = $index) {
                     <button
                         type="button"
                         [class.active]="i === featuredIndex"
                         (click)="selectFeatured(i)"
-                        [attr.aria-label]="'Ver destaque ' + (i + 1)"
+                        [attr.aria-label]="('Ver destaque' | translate) + ' ' + (i + 1)"
                         [attr.aria-current]="i === featuredIndex ? 'true' : null"></button>
                     }
                 </div>
-                <button type="button" (click)="nextFeatured()" aria-label="Próximo destaque">→</button>
+                <button type="button" (click)="nextFeatured()" [attr.aria-label]="'Próximo destaque' | translate">→</button>
             </div>
             }
             } @else {
             <img
                 src="/assets/hero.webp"
-                alt="Caneca com estampa botânica — composição ilustrativa"
+                [alt]="'Caneca com estampa botânica — composição ilustrativa' | translate"
                 width="640"
                 height="640" />
-            <span class="hero-label">Feito para você.</span>
+            <span class="hero-label"> {{ 'Feito para você.' | translate }} </span>
             }
         </div>
     </section>
     <section id="catalogo" class="catalog container" aria-labelledby="catalog-title">
         <div class="section-heading">
             <div>
-                <span class="eyebrow">LOJA CRICA</span>
-                <h2 id="catalog-title">Escolha o começo da sua ideia.</h2>
+                <span class="eyebrow"> {{ 'LOJA CRICA' | translate }} </span>
+                <h2 id="catalog-title"> {{ 'Escolha o começo da sua ideia.' | translate }} </h2>
             </div>
         </div>
         <crica-filters
@@ -76,25 +67,24 @@
         </crica-filters>
         <div class="results-row">
             <p aria-live="polite">
-                @if (catalog.productsLoading() && !catalog.products().length) { Carregando modelos... } @else if (catalog.productsError()) {
-                Catálogo indisponível } @else { {{ catalog.productsTotal() }} {{ catalog.productsTotal() === 1 ?
-                'modelo' : 'modelos' }} para personalizar }
+                @if (catalog.productsLoading() && !catalog.products().length) { {{ 'Carregando modelos...' | translate }} } @else if (catalog.productsError()) {
+                {{ 'Catálogo indisponível' | translate }} } @else { {{ (catalog.productsTotal() === 1 ? '{count} modelo para personalizar' : '{count} modelos para personalizar') | translate:{count: catalog.productsTotal()} }} }
             </p>
             @if (query || category !== 'Todos' || themeIds.length) {
-            <button class="clear" (click)="clear()">Limpar filtros ×</button>
+            <button class="clear" (click)="clear()"> {{ 'Limpar filtros ×' | translate }} </button>
             }
         </div>
         <div class="product-grid">
             @if (catalog.productsLoading() && !catalog.products().length) {
             <div class="empty" aria-live="polite">
-                <h3>Carregando catálogo</h3>
-                <p>Estamos buscando os modelos disponíveis.</p>
+                <h3> {{ 'Carregando catálogo' | translate }} </h3>
+                <p> {{ 'Estamos buscando os modelos disponíveis.' | translate }} </p>
             </div>
             } @else if (catalog.productsError() && !catalog.products().length) {
                 <div class="empty" role="alert">
-                    <h3>Não foi possível carregar o catálogo</h3>
-                <p>{{ catalog.productsError() }}</p>
-                <button class="secondary" (click)="refresh()">Tentar novamente</button>
+                    <h3> {{ 'Não foi possível carregar o catálogo' | translate }} </h3>
+                <p>{{ catalog.productsError() | translate }}</p>
+                <button class="secondary" (click)="refresh()"> {{ 'Tentar novamente' | translate }} </button>
                 </div>
             } @else { @for (product of catalog.products(); track product.id) {
             <crica-product-card
@@ -103,66 +93,59 @@
                 (order)="orderProduct($event)" />
             } @empty {
             <div class="empty">
-                <h3>Nenhum produto encontrado</h3>
-                <p>Tente outra palavra ou explore todos os modelos.</p>
-                <button class="secondary" (click)="clear()">Limpar filtros</button>
+                <h3> {{ 'Nenhum produto encontrado' | translate }} </h3>
+                <p> {{ 'Tente outra palavra ou explore todos os modelos.' | translate }} </p>
+                <button class="secondary" (click)="clear()"> {{ 'Limpar filtros' | translate }} </button>
             </div>
             } }
         </div>
         @if (catalog.products().length && catalog.hasMoreProducts) {
         <div class="load-more">
-            <span>Exibindo {{ catalog.products().length }} de {{ catalog.productsTotal() }} modelos</span>
+            <span>{{ 'Exibindo {shown} de {total} modelos' | translate:{shown: catalog.products().length, total: catalog.productsTotal()} }}</span>
             @if (catalog.productsError()) {
-            <span role="alert">{{ catalog.productsError() }}</span>
+            <span role="alert">{{ catalog.productsError() | translate }}</span>
             }
             <button class="secondary" (click)="loadMore()" [disabled]="catalog.productsLoading()">
-                {{ catalog.productsLoading() ? 'Carregando...' : 'Carregar mais produtos' }}
+                {{ (catalog.productsLoading() ? 'Carregando...' : 'Carregar mais produtos') | translate }}
             </button>
         </div>
         }
     </section>
     <section class="bulk-order container" aria-labelledby="bulk-order-title">
         <div>
-            <span class="eyebrow">PARA EMPRESAS, EVENTOS E GRANDES PEDIDOS</span>
-            <h2 id="bulk-order-title">Personalizados em quantidade, do seu jeito.</h2>
-            <p>
-                Conte o produto, a quantidade e a data desejada. A Crica prepara um orçamento para a
-                sua ideia.
-            </p>
+            <span class="eyebrow"> {{ 'PARA EMPRESAS, EVENTOS E GRANDES PEDIDOS' | translate }} </span>
+            <h2 id="bulk-order-title"> {{ 'Personalizados em quantidade, do seu jeito.' | translate }} </h2>
+            <p> {{ 'Conte o produto, a quantidade e a data desejada. A Crica prepara um orçamento para a sua ideia.' | translate }} </p>
         </div>
         <a
             class="primary"
-            href="https://wa.me/5511963136152?text=Ol%C3%A1%21%20Gostaria%20de%20um%20or%C3%A7amento%20para%20canecas%20ou%20bottons%20personalizados%20em%20quantidade%20para%20minha%20empresa%20ou%20evento.%20Produto%2C%20quantidade%20e%20prazo%3A"
+            [href]="bulkOrderUrl"
             data-whatsapp-source="bulk_order"
             target="_blank"
-            rel="noopener noreferrer">
-            Solicitar orçamento em quantidade
-            <span aria-hidden="true">↗</span>
+            rel="noopener noreferrer"> {{ 'Solicitar orçamento em quantidade' | translate }} <span aria-hidden="true">↗</span>
         </a>
     </section>
     <section class="how-section">
         <div class="container">
             <div class="how-title">
-                <span class="eyebrow">DO SEU JEITO, EM TRÊS PASSOS</span>
-                <h2>Vamos criar juntos?</h2>
+                <span class="eyebrow"> {{ 'DO SEU JEITO, EM TRÊS PASSOS' | translate }} </span>
+                <h2> {{ 'Vamos criar juntos?' | translate }} </h2>
             </div>
             <div class="steps">
                 <article>
                     <span>01</span>
-                    <h3>Escolha seu modelo</h3>
-                    <p>Encontre a caneca ou o botton que combina com o que você imagina.</p>
+                    <h3> {{ 'Escolha seu modelo' | translate }} </h3>
+                    <p> {{ 'Encontre a caneca ou o botton que combina com o que você imagina.' | translate }} </p>
                 </article>
                 <article>
                     <span>02</span>
-                    <h3>Conte sua ideia</h3>
-                    <p>Converse com a Crica pelo WhatsApp sobre a arte e a quantidade.</p>
+                    <h3> {{ 'Conte sua ideia' | translate }} </h3>
+                    <p> {{ 'Converse com a Crica pelo WhatsApp sobre a arte e a quantidade.' | translate }} </p>
                 </article>
                 <article>
                     <span>03</span>
-                    <h3>Combine os detalhes</h3>
-                    <p>
-                        Confirme as possibilidades, o orçamento e os próximos passos no atendimento.
-                    </p>
+                    <h3> {{ 'Combine os detalhes' | translate }} </h3>
+                    <p> {{ 'Confirme as possibilidades, o orçamento e os próximos passos no atendimento.' | translate }} </p>
                 </article>
             </div>
         </div>

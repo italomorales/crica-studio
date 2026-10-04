@@ -6,6 +6,18 @@ function handler(event) {
     var brazilian = host === 'cricastudio.com.br' || host === 'www.cricastudio.com.br';
     if (!international && !brazilian) return request;
 
+    // Country only; no IP address or other visitor data is exposed.
+    if (request.uri === '/site-context.json') {
+        return {
+            statusCode: 200,
+            headers: {
+                'content-type': {value: 'application/json; charset=utf-8'},
+                'cache-control': {value: 'private, no-store'}
+            },
+            body: JSON.stringify({country: country ? country.value : null})
+        };
+    }
+
     var targetHost = host;
     var path = request.uri;
     var temporary = international;

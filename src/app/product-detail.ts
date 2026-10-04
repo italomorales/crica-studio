@@ -1,11 +1,11 @@
+import { TranslatePipe, translate, localizedPrice, localizedOrderMessage } from './services/language';
 import { Component, ElementRef, ViewChild, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductImageComponent } from './components/shared';
 import { PublicCatalogService } from './services/public-catalog.service';
-import { buildMessage, validQuantity, whatsappUrl } from './services/contact';
+import { validQuantity, whatsappUrl } from './services/contact';
 import { trackWhatsAppClick } from './services/whatsapp-tracking';
-import { priceLabel } from './services/local-store';
 import { SeoService } from './services/seo.service';
 import { shareLink } from './services/share';
 import { productPath } from './services/product-url';
@@ -15,7 +15,7 @@ import productDetailTemplate from './product-detail.html?raw';
 @Component({
     selector: 'crica-product-detail',
     standalone: true,
-    imports: [FormsModule, RouterLink, ProductImageComponent],
+    imports: [TranslatePipe, FormsModule, RouterLink, ProductImageComponent],
     template: productDetailTemplate,
 })
 export class ProductDetailComponent implements OnDestroy {
@@ -23,7 +23,7 @@ export class ProductDetailComponent implements OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly seo = inject(SeoService);
     private readonly router = inject(Router, { optional: true });
-    price = priceLabel;
+    price = localizedPrice;
     get shopUrl() {
         const value = typeof history !== 'undefined' ? history.state?.shopUrl : undefined;
         return typeof value === 'string' && /^\/loja(?:\?|#|$)/.test(value) && this.router
@@ -64,7 +64,7 @@ export class ProductDetailComponent implements OnDestroy {
     async share() {
         if (!this.product) return;
         const url = new URL(productPath(this.product), window.location.origin).href;
-        await shareLink(this.product.name, `Confira este produto da Crica Studio: ${this.product.name}`, url);
+        await shareLink(this.product.name, translate('Confira este produto da Crica Studio: {name}', {name: this.product.name}), url);
     }
 
     async load(slug: string) {
@@ -106,7 +106,7 @@ export class ProductDetailComponent implements OnDestroy {
 
     order() {
         if (!this.product || !this.valid) return;
-        this.message = buildMessage(this.product.name, this.quantity, this.idea);
+        this.message = localizedOrderMessage(this.product.name, this.quantity, this.idea);
         const url = whatsappUrl(this.catalog.whatsappNumber(), this.message);
         if (url) {
             trackWhatsAppClick(url, { source: 'product', productId: this.product.id, quantity: this.quantity });

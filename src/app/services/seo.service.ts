@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, effect } from '@angular/core';
+import { language, translate } from './language';
 import { Meta, Title } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -31,7 +32,7 @@ const PAGES: Record<string, PageSeo> = {
         path: '/fornecedores',
     },
     '/vitrine': {
-        title: 'Vitrines da Crica Studio | Produtos Personalizados',
+        title: 'Vitrines da Crica Studio — Produtos Personalizados | Crica Studio',
         description:
             'Encontre os produtos personalizados da Crica Studio nas plataformas parceiras de sua preferência.',
         path: '/vitrine',
@@ -49,8 +50,10 @@ export class SeoService {
     private readonly router = inject(Router);
     private readonly title = inject(Title);
     private readonly meta = inject(Meta);
+    private product?: Product;
 
     constructor() {
+        effect(() => { language(); this.update(this.router.url); });
         this.update(this.router.url);
         this.router.events
             .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
@@ -58,6 +61,7 @@ export class SeoService {
     }
 
     setProduct(product: Product) {
+        this.product = product;
         const page: PageSeo = {
             title: `${product.name} | Crica Studio`,
             description: product.fullDescription || product.description,
@@ -68,6 +72,9 @@ export class SeoService {
 
     private update(url: string) {
         const path = '/' + url.split(/[?#]/)[0].replace(/^\/+/, '');
+        document.documentElement.lang = path.startsWith('/admin') || path === '/login' ? 'pt-BR' : language() === 'pt' ? 'pt-BR' : language();
+        if (this.product && path === productPath(this.product)) { this.setProduct(this.product); return; }
+        this.product = undefined;
         const page = path.startsWith('/admin')
             ? {
                   title: 'Administração | Crica Studio',
@@ -76,7 +83,11 @@ export class SeoService {
                   indexable: false,
               }
             : PAGES[path] ?? DEFAULT_PAGE;
-        this.apply(page);
+        this.apply(page.indexable === false ? page : {
+            ...page,
+            title: translate(page.title.split(' | ')[0]) + ' | Crica Studio',
+            description: translate(page.description),
+        });
     }
 
     private apply(page: PageSeo, image?: string) {
@@ -87,6 +98,7 @@ export class SeoService {
         this.setName('description', page.description);
         this.setName('robots', robots);
         this.setProperty('og:type', 'website');
+        this.setProperty('og:locale', language() === 'pt' ? 'pt_BR' : language() === 'en' ? 'en_US' : 'es_ES');
         this.setProperty('og:site_name', 'Crica Studio');
         this.setProperty('og:title', page.title);
         this.setProperty('og:description', page.description);

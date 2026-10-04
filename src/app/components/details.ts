@@ -1,22 +1,22 @@
+import { TranslatePipe, translate, localizedPrice, localizedOrderMessage } from '../services/language';
 import { Component, ViewChild, ElementRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { Product, AffiliateProduct } from '../data/models';
 import { ProductImageComponent } from './shared';
-import { buildMessage, validQuantity, whatsappUrl } from '../services/contact';
+import { validQuantity, whatsappUrl } from '../services/contact';
 import { trackWhatsAppClick } from '../services/whatsapp-tracking';
 import { PublicCatalogService } from '../services/public-catalog.service';
-import { priceLabel } from '../services/local-store';
 import detailsTemplate from './details.html?raw';
 
 @Component({
     selector: 'crica-details',
     standalone: true,
-    imports: [FormsModule, ProductImageComponent],
+    imports: [TranslatePipe, FormsModule, ProductImageComponent],
     template: detailsTemplate,
 })
 export class DetailsComponent {
     catalog = inject(PublicCatalogService);
-    price = priceLabel;
+    price = localizedPrice;
     @ViewChild('dialog', { static: true }) dialog!: ElementRef<HTMLDialogElement>;
     @ViewChild('messageField') messageField?: ElementRef<HTMLTextAreaElement>;
     product?: Product;
@@ -55,7 +55,7 @@ export class DetailsComponent {
     }
     order() {
         if (!this.product || !this.valid) return;
-        this.message = buildMessage(this.product.name, this.quantity, this.idea);
+        this.message = localizedOrderMessage(this.product.name, this.quantity, this.idea);
         const url = whatsappUrl(this.catalog.whatsappNumber(), this.message);
         if (url) {
             trackWhatsAppClick(url, { source: 'product_dialog', productId: this.product.id, quantity: this.quantity });

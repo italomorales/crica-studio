@@ -6,32 +6,32 @@
             <svg class="shop-theme-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
                 <path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="white" /><circle cx="15" cy="17" r="2" fill="white" />
             </svg>
-            {{ label }} @if (selected.length) { <span class="shop-theme-badge">{{ selected.length }}</span> }
+            {{ label | translate }} @if (selected.length) { <span class="shop-theme-badge">{{ selected.length }}</span> }
             <svg class="shop-theme-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
         </summary>
         <div [id]="idPrefix + '-panel'" class="shop-theme-panel">
-            <label class="sr-only" [for]="idPrefix + '-search'">Buscar nos {{ plural }} disponíveis</label>
-            <input [id]="idPrefix + '-search'" type="search" autocomplete="off" [placeholder]="'Buscar ' + plural + '…'"
+            <label class="sr-only" [for]="idPrefix + '-search'">{{ 'Buscar nos {items} disponíveis' | translate:{items: (plural | translate)} }}</label>
+            <input [id]="idPrefix + '-search'" type="search" autocomplete="off" [placeholder]="'Buscar {items}…' | translate:{items: (plural | translate)}"
                 [value]="search" (input)="searchThemes($event)" />
             <fieldset class="shop-theme-options">
-                <legend class="sr-only">Escolha um ou mais {{ plural }}</legend>
+                <legend class="sr-only">{{ 'Escolha um ou mais {items}' | translate:{items: (plural | translate)} }}</legend>
                 @for (theme of options; track theme.id) {
                 <label>
                     <input type="checkbox" [checked]="selected.includes(theme.id)" (change)="toggle(theme.id)" />
                     <span>{{ theme.name }}</span>
                 </label>
-                } @empty { <p role="status">Nenhum {{ noun }} encontrado.</p> }
+                } @empty { <p role="status">{{ 'Nenhum {item} encontrado.' | translate:{item: (noun | translate)} }}</p> }
             </fieldset>
             <div class="shop-theme-panel-footer">
-                <button type="button" class="shop-theme-reset" (click)="selection.emit([])" [disabled]="!selected.length">Limpar</button>
-                <button type="button" class="shop-theme-done" (click)="close(true)">Ver produtos</button>
+                <button type="button" class="shop-theme-reset" (click)="selection.emit([])" [disabled]="!selected.length"> {{ 'Limpar' | translate }} </button>
+                <button type="button" class="shop-theme-done" (click)="close(true)"> {{ 'Ver produtos' | translate }} </button>
             </div>
         </div>
     </details>
     @if (selected.length && !expanded) {
-    <div class="theme-chips" [attr.aria-label]="plural + ' aplicados'">
+    <div class="theme-chips" [attr.aria-label]="'{items} aplicados' | translate:{items: (plural | translate)}">
         @for (theme of chips; track theme.id) {
-        <button type="button" (click)="remove(theme.id)" [attr.aria-label]="'Remover filtro de ' + noun + ' ' + theme.name">
+        <button type="button" (click)="remove(theme.id)" [attr.aria-label]="'Remover filtro de {item} {name}' | translate:{item: (noun | translate), name: theme.name}">
             {{ theme.name }} <span aria-hidden="true">×</span>
         </button>
         }

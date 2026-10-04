@@ -1,33 +1,31 @@
 <main id="main" class="storefront container">
     <section class="storefront-intro" aria-labelledby="storefront-title">
         <span class="eyebrow">CRICA STUDIO</span>
-        <h1 id="storefront-title">Vitrines</h1>
-        <p>
-            Escolha a plataforma que você prefere e descubra os produtos da Crica no seu ritmo.
-        </p>
+        <h1 id="storefront-title"> {{ 'Vitrines' | translate }} </h1>
+        <p> {{ 'Escolha a plataforma que você prefere e descubra os produtos da Crica no seu ritmo.' | translate }} </p>
     </section>
 
-    @if (loading) { <p role="status">Carregando vitrines…</p> }
-    @else if (error) { <div role="alert"><p>{{ error }}</p><button class="secondary" type="button" (click)="load()">Tentar novamente</button></div> }
+    @if (loading) { <p role="status"> {{ 'Carregando vitrines…' | translate }} </p> }
+    @else if (error) { <div role="alert"><p>{{ 'Não foi possível carregar as vitrines. Tente novamente.' | translate }}</p><button class="secondary" type="button" (click)="load()"> {{ 'Tentar novamente' | translate }} </button></div> }
     @else {
-    <section class="storefront-grid" aria-label="Vitrines da Crica Studio">
+    <section class="storefront-grid" [attr.aria-label]="'Vitrines da Crica Studio' | translate">
         @for (storefront of storefronts; track storefront.id) {
         <article class="storefront-card">
             <button
                 class="share-product storefront-share"
                 type="button"
                 (click)="shareStorefront(storefront)"
-                [attr.aria-label]="'Compartilhar vitrine ' + storefront.name">
+                [attr.aria-label]="('Compartilhar vitrine' | translate) + ' ' + storefront.name">
                 <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
                     <circle cx="18" cy="5" r="2.5" />
                     <circle cx="6" cy="12" r="2.5" />
                     <circle cx="18" cy="19" r="2.5" />
                     <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
                 </svg>
-                <span class="sr-only">Compartilhar</span>
+                <span class="sr-only"> {{ 'Compartilhar' | translate }} </span>
             </button>
             @if (storefront.mobileOnly) {
-            <span class="hero-label storefront-mobile-label">Somente pelo celular</span>
+            <span class="hero-label storefront-mobile-label"> {{ 'Somente pelo celular' | translate }} </span>
             }
             <div class="storefront-logo" aria-hidden="true">
                 @if (platformLogo(storefront)) {
@@ -39,21 +37,19 @@
                 <p>{{ storefront.description }}</p>
             </div>
             @if (externalUrl(storefront.url || '')) {
-            <a class="storefront-link" [class.storefront-mobile-link]="storefront.mobileOnly" [href]="externalUrl(storefront.url || '')" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na ' + storefront.name + ' (nova aba)'">
-                Visitar vitrine <span aria-hidden="true">↗</span>
+            <a class="storefront-link" [class.storefront-mobile-link]="storefront.mobileOnly" [href]="externalUrl(storefront.url || '')" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na {platform} (nova aba)' | translate:{platform: storefront.name}"> {{ 'Visitar vitrine' | translate }} <span aria-hidden="true">↗</span>
             </a>
             @if (storefront.mobileOnly) {
-            <span class="storefront-pending storefront-desktop-disabled" role="link" aria-disabled="true" [attr.aria-label]="'Visitar vitrine na ' + storefront.name + ': somente pelo celular'">
-                Visitar vitrine <span aria-hidden="true">↗</span>
+            <span class="storefront-pending storefront-desktop-disabled" role="link" aria-disabled="true" [attr.aria-label]="'Visitar vitrine na {platform}: somente pelo celular' | translate:{platform: storefront.name}"> {{ 'Visitar vitrine' | translate }} <span aria-hidden="true">↗</span>
             </span>
             }
             } @else {
-            <span class="storefront-pending">Disponível em breve</span>
+            <span class="storefront-pending"> {{ 'Disponível em breve' | translate }} </span>
             }
         </article>
-        } @empty { <p>Nenhuma vitrine disponível no momento.</p> }
+        } @empty { <p> {{ 'Nenhuma vitrine disponível no momento.' | translate }} </p> }
     </section>
     }
 
-    <p class="storefront-note">Consulte preços, frete e disponibilidade na plataforma escolhida.</p>
+    <p class="storefront-note"> {{ 'Consulte preços, frete e disponibilidade na plataforma escolhida.' | translate }} </p>
 </main>

@@ -1,3 +1,4 @@
+import { TranslatePipe, translate } from './services/language';
 import { platformLogo } from './services/platform-logos';
 import { Component, ChangeDetectorRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { PlatformService, type CatalogPlatform } from './services/platform.service';
@@ -11,7 +12,7 @@ import suppliersTemplate from './suppliers.html?raw';
 import storefrontTemplate from './storefront.html?raw';
 import { SITE_CONFIG } from './data/site.config';
 import type { AffiliateProduct, Product } from './data/models';
-import { externalUrl } from './services/contact';
+import { externalUrl, whatsappUrl } from './services/contact';
 import { shareLink } from './services/share';
 import { productPath } from './services/product-url';
 import { ThemeFilterComponent } from './components/theme-filter';
@@ -21,10 +22,13 @@ import { parseShopFilters, shopFilterParams } from './services/theme-filters';
 @Component({
     selector: 'crica-shop',
     standalone: true,
-    imports: [FiltersComponent, ProductCardComponent, ThemeFilterComponent],
+    imports: [TranslatePipe, FiltersComponent, ProductCardComponent, ThemeFilterComponent],
     template: shopTemplate,
 })
 export class ShopComponent implements OnInit, OnDestroy {
+    get bulkOrderUrl() {
+        return whatsappUrl('5511963136152', translate('Olá! Gostaria de um orçamento para canecas ou bottons personalizados em quantidade para minha empresa ou evento. Produto, quantidade e prazo:'));
+    }
     catalog = inject(PublicCatalogService);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
@@ -168,7 +172,7 @@ export class ShopComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'crica-suppliers',
     standalone: true,
-    imports: [FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent],
+    imports: [TranslatePipe, FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent],
     template: suppliersTemplate,
 })
 export class SuppliersComponent implements OnInit, OnDestroy {
@@ -204,7 +208,7 @@ export class SuppliersComponent implements OnInit, OnDestroy {
         const url = this.featuredUrl(product) ?? window.location.href;
         await shareLink(
             product.name,
-            `Confira esta indicação da Crica Studio: ${product.name}`,
+            translate('Confira esta indicação da Crica Studio: {name}', {name: product.name}),
             url,
         );
     }
@@ -267,6 +271,7 @@ export class SuppliersComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'crica-storefront',
     standalone: true,
+    imports: [TranslatePipe],
     template: storefrontTemplate,
 })
 export class StorefrontComponent {
@@ -291,7 +296,7 @@ export class StorefrontComponent {
         const url = storefront.url ?? window.location.href;
         await shareLink(
             storefront.name,
-            `Confira a vitrine da Crica Studio na ${storefront.name}.`,
+            translate('Confira a vitrine da Crica Studio na {name}.', {name: storefront.name}),
             url,
         );
     }

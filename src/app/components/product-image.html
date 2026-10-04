@@ -2,15 +2,15 @@
     @if (src && !failed) {
     <img
         [src]="src"
-        [alt]="alt"
+        [alt]="alt | translate"
         (error)="failed = true"
         loading="lazy"
         width="640"
         height="640" />
     } @else {
     <div class="image-placeholder">
-        <span>{{ label }}</span>
-        <small>Imagem em preparação</small>
+        <span>{{ label | translate }}</span>
+        <small>{{ 'Imagem em preparação' | translate }}</small>
     </div>
     }
 </div>

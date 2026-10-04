@@ -5,14 +5,14 @@
             class="share-product"
             type="button"
             (click)="share()"
-            [attr.aria-label]="'Compartilhar ' + product.name">
+            [attr.aria-label]="('Compartilhar' | translate) + ' ' + product.name">
             <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
                 <circle cx="18" cy="5" r="2.5" />
                 <circle cx="6" cy="12" r="2.5" />
                 <circle cx="18" cy="19" r="2.5" />
                 <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
             </svg>
-            <span class="sr-only">Compartilhar</span>
+            <span class="sr-only"> {{ 'Compartilhar' | translate }} </span>
         </button>
     </div>
     <div class="card-body">
@@ -24,20 +24,20 @@
             {{ product.platform }}
         </span>
         @if (product.international) {
-        <span class="platform international">Internacional</span>
+        <span class="platform international"> {{ 'Internacional' | translate }} </span>
         }
         </div>
         <h3>{{ product.name }}</h3>
         <p>{{ product.description }}</p>
         @if (url) {
         <a class="text-action" [href]="url" target="_blank" rel="sponsored noopener noreferrer">
-            Ver {{ preposition }} {{ product.platform }}
+            {{ (preposition === 'na' ? 'Ver na {platform}' : 'Ver no {platform}') | translate:{platform: product.platform} }}
             <span aria-hidden="true">↗</span>
-            <span class="sr-only">(link de afiliado, abre em nova aba)</span>
+            <span class="sr-only"> {{ '(link de afiliado, abre em nova aba)' | translate }} </span>
         </a>
         } @else {
         <button class="text-action" (click)="demo.emit(product)">
-            Ver {{ preposition }} {{ product.platform }}
+            {{ (preposition === 'na' ? 'Ver na {platform}' : 'Ver no {platform}') | translate:{platform: product.platform} }}
             <span aria-hidden="true">↗</span>
         </button>
         }

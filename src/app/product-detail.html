@@ -1,20 +1,18 @@
 <main id="main" class="product-page container">
     <div class="product-page-toolbar">
-        <a class="back-link" [routerLink]="shopUrl">← Voltar para a loja</a>
+        <a class="back-link" [routerLink]="shopUrl"> {{ '← Voltar para a loja' | translate }} </a>
         @if (product && !loading && !unavailable) {
-        <button type="button" class="product-share" (click)="share()" aria-label="Compartilhar link deste produto">
+        <button type="button" class="product-share" (click)="share()" [attr.aria-label]="'Compartilhar link deste produto' | translate">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                 <circle cx="18" cy="5" r="2.5" />
                 <circle cx="6" cy="12" r="2.5" />
                 <circle cx="18" cy="19" r="2.5" />
                 <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
-            </svg>
-            Compartilhar
-        </button>
+            </svg> {{ 'Compartilhar' | translate }} </button>
         }
     </div>
     @if (loading) {
-    <section class="product-page-grid product-skeleton" [class.is-visible]="showSkeleton" aria-busy="true" aria-label="Carregando produto">
+    <section class="product-page-grid product-skeleton" [class.is-visible]="showSkeleton" aria-busy="true" [attr.aria-label]="'Carregando produto' | translate">
         <div class="product-page-photo" aria-hidden="true"><div class="skeleton-photo skeleton-block"></div></div>
         <div class="product-page-content" aria-hidden="true">
             <div class="skeleton-category skeleton-block"></div>
@@ -27,24 +25,24 @@
     </section>
     } @else if (loadError) {
     <section class="empty product-page-state" role="alert">
-        <h1>Não foi possível carregar o produto</h1>
-        <p>Verifique sua conexão e tente novamente.</p>
-        <button type="button" class="secondary" (click)="retry()">Tentar novamente</button>
+        <h1> {{ 'Não foi possível carregar o produto' | translate }} </h1>
+        <p> {{ 'Verifique sua conexão e tente novamente.' | translate }} </p>
+        <button type="button" class="secondary" (click)="retry()"> {{ 'Tentar novamente' | translate }} </button>
     </section>
     } @else if (unavailable || !product) {
     <section class="empty product-page-state">
-        <h1>Produto não encontrado</h1>
-        <p>Este produto pode ter sido removido ou ainda não estar disponível.</p>
-        <a class="secondary" routerLink="/loja">Ver produtos da loja</a>
+        <h1> {{ 'Produto não encontrado' | translate }} </h1>
+        <p> {{ 'Este produto pode ter sido removido ou ainda não estar disponível.' | translate }} </p>
+        <a class="secondary" routerLink="/loja"> {{ 'Ver produtos da loja' | translate }} </a>
     </section>
     } @else {
     <section class="product-page-grid" [attr.aria-labelledby]="'product-title-' + product.id">
         <div class="product-page-photo">
             <crica-product-image [src]="product.images[imageIndex]" [alt]="product.name" />
             @if (product.images.length > 1) {
-            <div class="thumbs" aria-label="Fotos do produto">
+            <div class="thumbs" [attr.aria-label]="'Fotos do produto' | translate">
                 @for (src of product.images; track src; let i = $index) {
-                <button type="button" [class.selected]="imageIndex === i" [attr.aria-pressed]="imageIndex === i" [attr.aria-label]="'Ver imagem ' + (i + 1)" (click)="imageIndex = i">
+                <button type="button" [class.selected]="imageIndex === i" [attr.aria-pressed]="imageIndex === i" [attr.aria-label]="('Ver imagem' | translate) + ' ' + (i + 1)" (click)="imageIndex = i">
                     <img [src]="src" alt="" />
                 </button>
                 }
@@ -55,40 +53,40 @@
             <span class="eyebrow category">{{ product.category }}</span>
             <h1 [id]="'product-title-' + product.id">{{ product.name }}</h1>
             <p class="product-page-description">{{ product.fullDescription || product.description }}</p>
-            <strong class="consult">{{ price(product) }}</strong>
+            <strong class="consult">{{ price(product) | translate }}</strong>
             @if (!preview) {
             <div class="detail-info">
                 @if (product.characteristics.length) {
-                <h2>Características</h2>
+                <h2> {{ 'Características' | translate }} </h2>
                 <ul>@for (item of product.characteristics; track item) { <li>{{ item }}</li> }</ul>
                 }
                 @if (product.personalization.length) {
-                <h2>Possibilidades de personalização</h2>
-                <p class="personalization-options">@for (option of product.personalization; track option) { <span>{{ option }}</span> }</p>
+                <h2> {{ 'Possibilidades de personalização' | translate }} </h2>
+                <p class="personalization-options">@for (option of product.personalization; track option) { <span>{{ option | translate }}</span> }</p>
                 }
-                <small>Os preços podem sofrer alterações conforme o modelo e o material escolhidos.</small>
+                <small> {{ 'Os preços podem sofrer alterações conforme o modelo e o material escolhidos.' | translate }} </small>
             </div>
             <form class="product-order" (ngSubmit)="order()">
-                <span class="eyebrow">DO SEU JEITO</span>
-                <h2>Vamos criar o seu?</h2>
-                <p>Conte sua ideia e combine os detalhes com a Crica.</p>
-                <label for="quantity">Quantidade desejada</label>
+                <span class="eyebrow"> {{ 'DO SEU JEITO' | translate }} </span>
+                <h2> {{ 'Vamos criar o seu?' | translate }} </h2>
+                <p> {{ 'Conte sua ideia e combine os detalhes com a Crica.' | translate }} </p>
+                <label for="quantity"> {{ 'Quantidade desejada' | translate }} </label>
                 <input id="quantity" name="quantity" class="quantity" type="number" min="1" step="1" required [(ngModel)]="quantity" [attr.aria-invalid]="!valid" aria-describedby="quantity-hint" />
-                <small id="quantity-hint">Informe um número inteiro a partir de 1.</small>
-                <label for="idea">Conte sua ideia <span>(opcional)</span></label>
-                <textarea id="idea" name="idea" maxlength="1500" rows="4" placeholder="Uma frase, uma ocasião, as cores que você imagina…" [(ngModel)]="idea"></textarea>
-                <button class="primary full" type="submit" [disabled]="!valid">Pedir pelo WhatsApp <span aria-hidden="true">↗</span></button>
+                <small id="quantity-hint"> {{ 'Informe um número inteiro a partir de 1.' | translate }} </small>
+                <label for="idea"> {{ 'Conte sua ideia' | translate }} <span> {{ '(opcional)' | translate }} </span></label>
+                <textarea id="idea" name="idea" maxlength="1500" rows="4" [placeholder]="'Uma frase, uma ocasião, as cores que você imagina…' | translate" [(ngModel)]="idea"></textarea>
+                <button class="primary full" type="submit" [disabled]="!valid"> {{ 'Pedir pelo WhatsApp' | translate }} <span aria-hidden="true">↗</span></button>
             </form>
             } @else {
             <section class="message-preview" aria-labelledby="contact-title">
-                <span class="demo-badge">Contato em configuração</span>
-                <h2 id="contact-title" tabindex="-1">Sua ideia já tem um começo.</h2>
-                <p>O WhatsApp da Crica ainda está em configuração. Você pode copiar a mensagem abaixo para guardar seu pedido de orçamento.</p>
-                <label for="message">Prévia da mensagem</label>
+                <span class="demo-badge"> {{ 'Contato em configuração' | translate }} </span>
+                <h2 id="contact-title" tabindex="-1"> {{ 'Sua ideia já tem um começo.' | translate }} </h2>
+                <p> {{ 'O WhatsApp da Crica ainda está em configuração. Você pode copiar a mensagem abaixo para guardar seu pedido de orçamento.' | translate }} </p>
+                <label for="message"> {{ 'Prévia da mensagem' | translate }} </label>
                 <textarea #messageField id="message" rows="6" readonly [value]="message"></textarea>
-                <button type="button" class="primary full" (click)="copy()">{{ copied ? 'Mensagem copiada' : 'Copiar mensagem' }}</button>
-                <p class="copy-status" role="status">{{ copyStatus }}</p>
-                <button type="button" class="secondary full" (click)="preview = false">Voltar aos detalhes</button>
+                <button type="button" class="primary full" (click)="copy()">{{ (copied ? 'Mensagem copiada' : 'Copiar mensagem') | translate }}</button>
+                <p class="copy-status" role="status">{{ copyStatus | translate }}</p>
+                <button type="button" class="secondary full" (click)="preview = false"> {{ 'Voltar aos detalhes' | translate }} </button>
             </section>
             }
         </div>

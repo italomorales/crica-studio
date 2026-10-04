@@ -1,13 +1,13 @@
 <div class="filterbar">
     <div class="filter-options">
-    <div class="chips" [attr.aria-label]="label" role="group">
+    <div class="chips" [attr.aria-label]="label | translate" role="group">
         @for (option of options; track option) {
         <button
             type="button"
             [class.selected]="selected === option"
             [attr.aria-pressed]="selected === option"
             (click)="selection.emit(option)">
-            {{ option }}
+            {{ option | translate }}
         </button>
         }
     </div>
@@ -23,10 +23,10 @@
             <circle cx="10.5" cy="10.5" r="6.5" />
             <path d="m16 16 5 5" />
         </svg>
-        <span class="sr-only">{{ searchLabel }}</span>
+        <span class="sr-only">{{ searchLabel | translate }}</span>
         <input
             type="search"
-            [placeholder]="searchLabel"
+            [placeholder]="searchLabel | translate"
             [value]="query"
             (input)="queryChange.emit($any($event.target).value)" />
     </label>

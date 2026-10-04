@@ -1,3 +1,4 @@
+import { TranslatePipe, translate, initializeLanguage } from './app/services/language';
 import 'zone.js';
 import '@angular/compiler';
 import { Component, inject } from '@angular/core';
@@ -23,7 +24,7 @@ const shopGuard = () => currentSiteMarket() === 'international' ? inject(Router)
 @Component({
     selector: 'crica-app',
     standalone: true,
-    imports: [RouterOutlet, HeaderComponent, FooterComponent, ConstructionComponent],
+    imports: [TranslatePipe, RouterOutlet, HeaderComponent, FooterComponent, ConstructionComponent],
     template: appTemplate,
 })
 class AppComponent {
@@ -38,14 +39,14 @@ class AppComponent {
             : path === '/vitrine'
               ? 'Estou vendo as vitrines no site'
               : 'Estou vendo os produtos personalizados no site';
-        return whatsappUrl('5511963136152', `Olá! ${context} da Crica Studio e gostaria de tirar uma dúvida.`);
+        return whatsappUrl('5511963136152', translate(`Olá! ${context} da Crica Studio e gostaria de tirar uma dúvida.`));
     }
     get isAdmin() {
         return this.router.url.startsWith('/admin') || this.router.url.startsWith('/login');
     }
 }
 installWhatsAppTracking();
-bootstrapApplication(AppComponent, {
+initializeLanguage().then(() => bootstrapApplication(AppComponent, {
     providers: [
         provideRouter(
             [
@@ -54,23 +55,19 @@ bootstrapApplication(AppComponent, {
                     path: 'loja',
                     canMatch: [shopGuard],
                     component: ShopComponent,
-                    title: 'Canecas e Bottons Personalizados | Crica Studio',
                 },
                 {
                     path: 'loja/:slug',
                     canMatch: [shopGuard],
                     component: ProductDetailComponent,
-                    title: 'Produto personalizado | Crica Studio',
                 },
                 {
                     path: 'fornecedores',
                     component: SuppliersComponent,
-                    title: 'Máquinas de Bottons e Canecas para Personalizar | Crica Studio',
                 },
                 {
                     path: 'vitrine',
                     component: StorefrontComponent,
-                    title: 'Vitrines da Crica Studio | Produtos Personalizados',
                 },
                 { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
                 { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },
@@ -92,4 +89,4 @@ bootstrapApplication(AppComponent, {
             }),
         ),
     ],
-}).catch(console.error);
+})).catch(console.error);

@@ -10,7 +10,7 @@
         <button
             type="button"
             class="close-button"
-            aria-label="Fechar detalhes"
+            [attr.aria-label]="'Fechar detalhes' | translate"
             (click)="close()"
             autofocus>
             ×
@@ -22,7 +22,7 @@
                 @if (product.images.length > 1) {
                 <div class="thumbs">
                     @for (src of product.images; track src; let i = $index) {
-                    <button [attr.aria-label]="'Ver imagem ' + (i + 1)" (click)="imageIndex = i">
+                    <button [attr.aria-label]="('Ver imagem' | translate) + ' ' + (i + 1)" (click)="imageIndex = i">
                         <img [src]="src" alt="" />
                     </button>
                     }
@@ -33,27 +33,25 @@
                 <span class="eyebrow category">{{ product.category }}</span>
                 <h2 id="detail-title">{{ product.name }}</h2>
                 <p>{{ product.fullDescription || product.description }}</p>
-                <strong class="consult">{{ price(product) }}</strong>
+                <strong class="consult">{{ price(product) | translate }}</strong>
                 @if (!preview) {
                 <div class="detail-info">
-                    <h3>Características</h3>
+                    <h3> {{ 'Características' | translate }} </h3>
                     <ul>
                         @for (item of product.characteristics; track item) {
                         <li>{{ item }}</li>
                         }
                     </ul>
-                    <h3>Possibilidades de personalização</h3>
+                    <h3> {{ 'Possibilidades de personalização' | translate }} </h3>
                     <p class="personalization-options">
                         @for (option of product.personalization; track option) {
-                        <span>{{ option }}</span>
+                        <span>{{ option | translate }}</span>
                         }
                     </p>
-                    <small>
-                        Os preços podem sofrer alterações conforme o modelo e o material escolhidos.
-                    </small>
+                    <small> {{ 'Os preços podem sofrer alterações conforme o modelo e o material escolhidos.' | translate }} </small>
                 </div>
                 <form (ngSubmit)="order()">
-                    <label for="quantity">Quantidade desejada</label>
+                    <label for="quantity"> {{ 'Quantidade desejada' | translate }} </label>
                     <input
                         id="quantity"
                         name="quantity"
@@ -65,32 +63,25 @@
                         [(ngModel)]="quantity"
                         [attr.aria-invalid]="!valid"
                         aria-describedby="quantity-hint" />
-                    <small id="quantity-hint">Informe um número inteiro à partir de 1.</small>
-                    <label for="idea">
-                        Conte sua ideia
-                        <span>(opcional)</span>
+                    <small id="quantity-hint"> {{ 'Informe um número inteiro à partir de 1.' | translate }} </small>
+                    <label for="idea"> {{ 'Conte sua ideia' | translate }} <span> {{ '(opcional)' | translate }} </span>
                     </label>
                     <textarea
                         id="idea"
                         name="idea"
                         maxlength="1500"
                         rows="3"
-                        placeholder="Uma frase, uma ocasião, as cores que você imagina…"
+                        [placeholder]="'Uma frase, uma ocasião, as cores que você imagina…' | translate"
                         [(ngModel)]="idea"></textarea>
-                    <button class="primary full" type="submit" [disabled]="!valid">
-                        Pedir pelo WhatsApp
-                        <span aria-hidden="true">↗</span>
+                    <button class="primary full" type="submit" [disabled]="!valid"> {{ 'Pedir pelo WhatsApp' | translate }} <span aria-hidden="true">↗</span>
                     </button>
                 </form>
                 } @else {
                 <section class="message-preview" aria-labelledby="contact-title">
-                    <span class="demo-badge">Contato em configuração</span>
-                    <h3 id="contact-title" tabindex="-1">Sua ideia já tem um começo.</h3>
-                    <p>
-                        O WhatsApp da Crica ainda está em configuração. Você pode copiar a mensagem
-                        abaixo para guardar seu pedido de orçamento.
-                    </p>
-                    <label for="message">Prévia da mensagem</label>
+                    <span class="demo-badge"> {{ 'Contato em configuração' | translate }} </span>
+                    <h3 id="contact-title" tabindex="-1"> {{ 'Sua ideia já tem um começo.' | translate }} </h3>
+                    <p> {{ 'O WhatsApp da Crica ainda está em configuração. Você pode copiar a mensagem abaixo para guardar seu pedido de orçamento.' | translate }} </p>
+                    <label for="message"> {{ 'Prévia da mensagem' | translate }} </label>
                     <textarea
                         #messageField
                         id="message"
@@ -98,29 +89,23 @@
                         readonly
                         [value]="message"></textarea>
                     <button type="button" class="primary full" (click)="copy()">
-                        {{ copied ? 'Mensagem copiada' : 'Copiar mensagem' }}
+                        {{ (copied ? 'Mensagem copiada' : 'Copiar mensagem') | translate }}
                     </button>
-                    <p class="copy-status" role="status">{{ copyStatus }}</p>
-                    <button class="secondary full" (click)="preview = false">
-                        Voltar aos detalhes
-                    </button>
+                    <p class="copy-status" role="status">{{ copyStatus | translate }}</p>
+                    <button class="secondary full" (click)="preview = false"> {{ 'Voltar aos detalhes' | translate }} </button>
                 </section>
                 }
             </div>
         </div>
         } @if (affiliate) {
         <div class="affiliate-dialog">
-            <span class="demo-badge">Indicação de demonstração</span>
+            <span class="demo-badge"> {{ 'Indicação de demonstração' | translate }} </span>
             <h2 id="detail-title">{{ affiliate.name }}</h2>
             <p>
-                O link deste produto na plataforma {{ affiliate.platform }} ainda não foi
-                configurado.
+                {{ 'O link deste produto na plataforma {platform} ainda não foi configurado.' | translate:{platform: affiliate.platform} }}
             </p>
-            <p>
-                Quando estiver disponível, você poderá abrir o anúncio e concluir a compra
-                diretamente na plataforma indicada.
-            </p>
-            <button class="primary" (click)="close()">Voltar às indicações</button>
+            <p> {{ 'Quando estiver disponível, você poderá abrir o anúncio e concluir a compra diretamente na plataforma indicada.' | translate }} </p>
+            <button class="primary" (click)="close()"> {{ 'Voltar às indicações' | translate }} </button>
         </div>
         }
     </div>
