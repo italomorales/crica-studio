@@ -38,8 +38,9 @@ export class PlatformService {
         if (!response.ok) throw new Error(response.status === 401 ? 'Sua sessão expirou. Entre novamente.' : result?.errors ? Object.values(result.errors).flat().join(' ') : result?.detail || 'Não foi possível enviar o logotipo. Tente novamente.');
         return result.url;
     }
-    async publicPlatforms(locale = 'pt-BR', country = 'BR', storefronts = false): Promise<CatalogPlatform[]> {
+    async publicPlatforms(locale = 'pt-BR', country = 'BR', storefronts = false, allMarkets = false): Promise<CatalogPlatform[]> {
         const query = new URLSearchParams({ locale, country, storefronts: String(storefronts) });
+        if (storefronts && allMarkets) query.set('allMarkets', 'true');
         const response = await fetch(`${API_URL}/api/catalog/platforms?${query}`);
         if (!response.ok) throw new Error('Não foi possível carregar as plataformas. Tente novamente.');
         return response.json();

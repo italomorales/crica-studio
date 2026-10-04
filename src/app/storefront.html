@@ -1,16 +1,16 @@
 <main id="main" class="storefront container">
     <section class="storefront-intro" aria-labelledby="storefront-title">
         <span class="eyebrow">CRICA STUDIO</span>
-        <h1 id="storefront-title">Plataformas</h1>
+        <h1 id="storefront-title">Vitrines</h1>
         <p>
             Escolha a plataforma que você prefere e descubra os produtos da Crica no seu ritmo.
         </p>
     </section>
 
-    @if (loading) { <p role="status">Carregando plataformas…</p> }
+    @if (loading) { <p role="status">Carregando vitrines…</p> }
     @else if (error) { <div role="alert"><p>{{ error }}</p><button class="secondary" type="button" (click)="load()">Tentar novamente</button></div> }
     @else {
-    <section class="storefront-grid" aria-label="Plataformas da Crica Studio">
+    <section class="storefront-grid" aria-label="Vitrines da Crica Studio">
         @for (storefront of storefronts; track storefront.id) {
         <article class="storefront-card">
             <button
@@ -51,7 +51,7 @@
             <span class="storefront-pending">Disponível em breve</span>
             }
         </article>
-        } @empty { <p>Nenhuma plataforma disponível no momento.</p> }
+        } @empty { <p>Nenhuma vitrine disponível no momento.</p> }
     </section>
     }
 

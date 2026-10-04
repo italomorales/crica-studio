@@ -65,7 +65,7 @@ bootstrapApplication(AppComponent, {
                 {
                     path: 'vitrine',
                     component: StorefrontComponent,
-                    title: 'Plataformas da Crica Studio | Produtos Personalizados',
+                    title: 'Vitrines da Crica Studio | Produtos Personalizados',
                 },
                 { path: 'login', component: LoginComponent, title: 'Entrar | Crica Studio' },
                 { path: 'admin', redirectTo: 'admin/loja', pathMatch: 'full' },

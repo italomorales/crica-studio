@@ -138,3 +138,17 @@ test('logo upload uses multipart and authenticated platform media endpoint', asy
     assert.equal(runtime.safePlatformLogo('/assets/platforms/../secret.svg'), '');
     assert.equal(runtime.safePlatformLogo('javascript:alert(1)'), '');
 });
+
+
+test('global vitrines request includes international stores while supplier filters stay regional', async t => {
+    const calls: URL[] = [];
+    t.mock.method(globalThis, 'fetch', async (url: any) => { calls.push(new URL(String(url))); return new Response('[]'); });
+    const injector = runtime.createEnvironmentInjector([{ provide: runtime.AuthService, useValue: {} }]);
+    t.after(() => injector.destroy());
+    const service = runtime.runInInjectionContext(injector, () => new runtime.PlatformService());
+    await service.publicPlatforms('pt-BR', 'BR', true, true);
+    await service.publicPlatforms('pt-BR', 'BR', false, true);
+    assert.equal(calls[0].searchParams.get('allMarkets'), 'true');
+    assert.equal(calls[1].searchParams.has('allMarkets'), false);
+    assert.equal(calls[1].searchParams.get('country'), 'BR');
+});

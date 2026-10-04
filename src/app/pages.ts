@@ -283,7 +283,7 @@ export class StorefrontComponent {
         this.loading = true; this.error = '';
         try {
             const market = this.route.snapshot.data;
-            this.storefronts = await this.service.publicPlatforms(market['locale'] || 'pt-BR', market['country'] || 'BR', true);
+            this.storefronts = await this.service.publicPlatforms(market['locale'] || 'pt-BR', market['country'] || 'BR', true, !market['locale'] && !market['country']);
         } catch (error) { this.error = (error as Error).message; }
         finally { this.loading = false; this.cd.markForCheck(); }
     }
