@@ -16,6 +16,9 @@ import { SeoService } from './app/services/seo.service';
 import { whatsappUrl } from './app/services/contact';
 import { installWhatsAppTracking } from './app/services/whatsapp-tracking';
 import appTemplate from './app.html?raw';
+import { currentSiteMarket, publicHomePath } from './app/services/site-market';
+
+const shopGuard = () => currentSiteMarket() === 'international' ? inject(Router).parseUrl('/fornecedores') : true;
 
 @Component({
     selector: 'crica-app',
@@ -46,14 +49,16 @@ bootstrapApplication(AppComponent, {
     providers: [
         provideRouter(
             [
-                { path: '', redirectTo: 'loja', pathMatch: 'full' },
+                { path: '', redirectTo: publicHomePath().slice(1), pathMatch: 'full' },
                 {
                     path: 'loja',
+                    canMatch: [shopGuard],
                     component: ShopComponent,
                     title: 'Canecas e Bottons Personalizados | Crica Studio',
                 },
                 {
                     path: 'loja/:slug',
+                    canMatch: [shopGuard],
                     component: ProductDetailComponent,
                     title: 'Produto personalizado | Crica Studio',
                 },
@@ -79,7 +84,7 @@ bootstrapApplication(AppComponent, {
                     data: { section },
                     title: 'Administração | Crica Studio',
                 })),
-                { path: '**', redirectTo: 'loja' },
+                { path: '**', redirectTo: publicHomePath().slice(1) },
             ],
             withInMemoryScrolling({
                 scrollPositionRestoration: 'enabled',

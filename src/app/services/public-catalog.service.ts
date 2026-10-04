@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import type { AffiliateProduct, CatalogType, CatalogTheme, Product } from '../data/models';
 import { normalize } from './contact';
 import { friendlySlug } from './product-url';
+import { currentSiteMarket } from './site-market';
 
 const API_URL = (
     import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://api.cricastudio.com')
@@ -238,6 +239,7 @@ export class PublicCatalogService {
         params: Record<string, string | number | boolean | undefined>,
     ) {
         const search = new URLSearchParams();
+        if (resource === 'affiliates') search.set('market', currentSiteMarket());
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined && value !== '') search.set(key, String(value));
         }

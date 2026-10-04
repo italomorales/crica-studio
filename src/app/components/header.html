@@ -1,13 +1,13 @@
 <a class="skip" href="#main">Pular para o conteúdo</a>
 <header class="site-header">
     <div class="container header-inner">
-        <a routerLink="/loja" aria-label="Crica Studio — Loja" class="brand">
+        <a [routerLink]="homePath" aria-label="Crica Studio — início" class="brand">
             <img src="/assets/crica-studio-logo-transparent.png" alt="Crica Studio" width="140" height="51" />
         </a>
         <nav aria-label="Navegação principal">
-            <a routerLink="/loja" routerLinkActive="active" ariaCurrentWhenActive="page">
+            @if (showShop) { <a routerLink="/loja" routerLinkActive="active" ariaCurrentWhenActive="page">
                 Loja
-            </a>
+            </a> }
             <a routerLink="/fornecedores" routerLinkActive="active" ariaCurrentWhenActive="page">
                 Fornecedores
             </a>

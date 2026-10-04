@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { currentSiteMarket, publicHomePath } from '../services/site-market';
 import headerTemplate from './header.html?raw';
 import footerTemplate from './footer.html?raw';
 import filtersTemplate from './filters.html?raw';
@@ -11,14 +12,17 @@ import productImageTemplate from './product-image.html?raw';
     imports: [RouterLink, RouterLinkActive],
     template: headerTemplate,
 })
-export class HeaderComponent {}
+export class HeaderComponent {
+    readonly showShop = currentSiteMarket() === 'br';
+    readonly homePath = publicHomePath();
+}
 @Component({
     selector: 'crica-footer',
     standalone: true,
     imports: [RouterLink],
     template: footerTemplate,
 })
-export class FooterComponent {}
+export class FooterComponent { readonly homePath = publicHomePath(); }
 @Component({
     selector: 'crica-filters',
     standalone: true,

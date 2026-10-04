@@ -4,8 +4,9 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import type { Product } from '../data/models';
 import { productPath } from './product-url';
+import { publicSiteUrl } from './site-market';
 
-const SITE_URL = 'https://www.cricastudio.com.br';
+const SITE_URL = publicSiteUrl();
 
 type PageSeo = {
     title: string;

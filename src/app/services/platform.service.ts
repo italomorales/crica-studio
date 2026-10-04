@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { API_URL, AuthService } from './auth.service';
+import { currentSiteMarket } from './site-market';
 export interface CatalogPlatform {
     id: string; name: string; code: string; description: string; url: string | null; logoUrl: string | null;
     locale: string; countryCode: string; status: 'draft' | 'published' | 'inactive'; order: number;
@@ -40,6 +41,7 @@ export class PlatformService {
     }
     async publicPlatforms(locale = 'pt-BR', country = 'BR', storefronts = false, allMarkets = false): Promise<CatalogPlatform[]> {
         const query = new URLSearchParams({ locale, country, storefronts: String(storefronts) });
+        query.set('market', currentSiteMarket());
         if (storefronts && allMarkets) query.set('allMarkets', 'true');
         const response = await fetch(`${API_URL}/api/catalog/platforms?${query}`);
         if (!response.ok) throw new Error('Não foi possível carregar as plataformas. Tente novamente.');
