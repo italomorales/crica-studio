@@ -15,4 +15,5 @@ export const catalogTypeRequest = (type: CatalogType) => ({
     name: type.name.trim(),
     scope: type.scope,
     active: type.active,
+    ...(type.translations === undefined ? {} : {translations:type.translations}),
 });

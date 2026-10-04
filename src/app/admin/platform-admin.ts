@@ -5,9 +5,12 @@ import { CatalogPlatform, PlatformService } from '../services/platform.service';
 import { normalize } from '../services/contact';
 import template from './platform-admin.html?raw';
 import { PlatformGridComponent, type PlatformGridAction } from './platform-grid';
+import { CatalogLanguageSelectorComponent } from './catalog-language-selector';
+import { CatalogLanguageEditor } from './supplier-language-editor';
 
-@Component({ selector: 'crica-platform-admin', standalone: true, imports: [FormsModule, PlatformGridComponent, PlatformLogoPickerComponent], template })
+@Component({ selector: 'crica-platform-admin', standalone: true, imports: [FormsModule, PlatformGridComponent, PlatformLogoPickerComponent, CatalogLanguageSelectorComponent], template })
 export class PlatformAdminComponent implements OnInit {
+    editor = new CatalogLanguageEditor();
     private service = inject(PlatformService);
     private cd = inject(ChangeDetectorRef);
     platforms: CatalogPlatform[] = [];
@@ -58,6 +61,7 @@ export class PlatformAdminComponent implements OnInit {
     }
     edit(item?: CatalogPlatform) {
         if (this.saving || this.uploadingLogo || (this.dirty && !window.confirm('Descartar alterações não salvas?'))) return;
+        this.editor.selected = 'pt';
         this.draft = item ? structuredClone(item) : this.newPlatform();
         this.editing = true; this.baseline = JSON.stringify(this.draft); this.error = ''; this.notice = '';
     }

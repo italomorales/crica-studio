@@ -18,7 +18,7 @@
                 @for (theme of options; track theme.id) {
                 <label>
                     <input type="checkbox" [checked]="selected.includes(theme.id)" (change)="toggle(theme.id)" />
-                    <span>{{ theme.name }}</span>
+                    <span>{{ (theme | content:'name') }}</span>
                 </label>
                 } @empty { <p role="status">{{ 'Nenhum {item} encontrado.' | translate:{item: (noun | translate)} }}</p> }
             </fieldset>
@@ -31,8 +31,8 @@
     @if (selected.length && !expanded) {
     <div class="theme-chips" [attr.aria-label]="'{items} aplicados' | translate:{items: (plural | translate)}">
         @for (theme of chips; track theme.id) {
-        <button type="button" (click)="remove(theme.id)" [attr.aria-label]="'Remover filtro de {item} {name}' | translate:{item: (noun | translate), name: theme.name}">
-            {{ theme.name }} <span aria-hidden="true">×</span>
+        <button type="button" (click)="remove(theme.id)" [attr.aria-label]="'Remover filtro de {item} {name}' | translate:{item: (noun | translate), name: (theme | content:'name')}">
+            {{ (theme | content:'name') }} <span aria-hidden="true">×</span>
         </button>
         }
     </div>

@@ -1,3 +1,4 @@
+import { ContentPipe, contentField } from '../services/catalog-translations';
 import { TranslatePipe, translate, localizedPrice } from '../services/language';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import type { Product, AffiliateProduct } from '../data/models';
@@ -11,7 +12,7 @@ import affiliateCardTemplate from './affiliate-card.html?raw';
 @Component({
     selector: 'crica-product-card',
     standalone: true,
-    imports: [TranslatePipe, ProductImageComponent],
+    imports: [ContentPipe, TranslatePipe, ProductImageComponent],
     template: productCardTemplate,
 })
 export class ProductCardComponent {
@@ -23,7 +24,7 @@ export class ProductCardComponent {
 @Component({
     selector: 'crica-affiliate-card',
     standalone: true,
-    imports: [TranslatePipe, ProductImageComponent],
+    imports: [ContentPipe, TranslatePipe, ProductImageComponent],
     template: affiliateCardTemplate,
 })
 export class AffiliateCardComponent {
@@ -37,6 +38,6 @@ export class AffiliateCardComponent {
     }
     async share() {
         const url = this.url ?? window.location.href;
-        await shareLink(this.product.name, translate('Confira esta indicação da Crica Studio: {name}', {name: this.product.name}), url);
+        await shareLink(contentField(this.product,"name"), translate('Confira esta indicação da Crica Studio: {name}', {name: contentField(this.product,"name")}), url);
     }
 }

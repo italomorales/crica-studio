@@ -20,27 +20,27 @@
                 [href]="url"
                 target="_blank"
                 rel="sponsored noopener noreferrer"
-                [attr.aria-label]="('Ver indicação de' | translate) + ' ' + product.name">
-                <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+                [attr.aria-label]="('Ver indicação de' | translate) + ' ' + (product | content:'name')">
+                <crica-product-image [src]="product.image" [alt]="(product | content:'name')" [label]="(product | content:'category')" />
                 <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
-                <span class="hero-product-name">{{ product.name }}</span>
+                <span class="hero-product-name">{{ (product | content:'name') }}</span>
             </a>
             } @else {
             <button
                 class="hero-featured"
                 type="button"
                 (click)="details.openAffiliate(product)"
-                [attr.aria-label]="('Ver indicação de' | translate) + ' ' + product.name">
-                <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+                [attr.aria-label]="('Ver indicação de' | translate) + ' ' + (product | content:'name')">
+                <crica-product-image [src]="product.image" [alt]="(product | content:'name')" [label]="(product | content:'category')" />
                 <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
-                <span class="hero-product-name">{{ product.name }}</span>
+                <span class="hero-product-name">{{ (product | content:'name') }}</span>
             </button>
             }
             <button
                 class="share-product hero-share"
                 type="button"
                 (click)="shareFeatured(product)"
-                [attr.aria-label]="('Compartilhar' | translate) + ' ' + product.name">
+                [attr.aria-label]="('Compartilhar' | translate) + ' ' + (product | content:'name')">
                 <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
                     <circle cx="18" cy="5" r="2.5" />
                     <circle cx="6" cy="12" r="2.5" />
@@ -71,6 +71,7 @@
     <section [attr.aria-label]="'Produtos indicados' | translate">
         <crica-filters
             [options]="platformOptions"
+            [optionLabels]="platformLabels"
             label="Plataformas"
             searchLabel="Buscar indicações"
             [selected]="platform"

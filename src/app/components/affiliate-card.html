@@ -1,11 +1,11 @@
 <article class="product-card affiliate-card">
     <div class="affiliate-card-media">
-        <crica-product-image [src]="product.image" [alt]="product.name" [label]="product.category" />
+        <crica-product-image [src]="product.image" [alt]="(product | content:'name')" [label]="(product | content:'category')" />
         <button
             class="share-product"
             type="button"
             (click)="share()"
-            [attr.aria-label]="('Compartilhar' | translate) + ' ' + product.name">
+            [attr.aria-label]="('Compartilhar' | translate) + ' ' + (product | content:'name')">
             <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
                 <circle cx="18" cy="5" r="2.5" />
                 <circle cx="6" cy="12" r="2.5" />
@@ -21,23 +21,23 @@
             class="platform"
             [class.shopee]="product.platform === 'Shopee'"
             [class.mercado]="product.platform === 'Mercado Livre'">
-            {{ product.platform }}
+            {{ product | content:'platform' }}
         </span>
         @if (product.international) {
         <span class="platform international"> {{ 'Internacional' | translate }} </span>
         }
         </div>
-        <h3>{{ product.name }}</h3>
-        <p>{{ product.description }}</p>
+        <h3>{{ (product | content:'name') }}</h3>
+        <p>{{ (product | content:'description') }}</p>
         @if (url) {
         <a class="text-action" [href]="url" target="_blank" rel="sponsored noopener noreferrer">
-            {{ (preposition === 'na' ? 'Ver na {platform}' : 'Ver no {platform}') | translate:{platform: product.platform} }}
+            {{ (preposition === 'na' ? 'Ver na {platform}' : 'Ver no {platform}') | translate:{platform: (product | content:'platform')} }}
             <span aria-hidden="true">↗</span>
             <span class="sr-only"> {{ '(link de afiliado, abre em nova aba)' | translate }} </span>
         </a>
         } @else {
         <button class="text-action" (click)="demo.emit(product)">
-            {{ (preposition === 'na' ? 'Ver na {platform}' : 'Ver no {platform}') | translate:{platform: product.platform} }}
+            {{ (preposition === 'na' ? 'Ver na {platform}' : 'Ver no {platform}') | translate:{platform: (product | content:'platform')} }}
             <span aria-hidden="true">↗</span>
         </button>
         }

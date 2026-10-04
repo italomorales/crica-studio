@@ -15,6 +15,26 @@ const bundle = await build({
 });
 const runtime = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
 
+test('catalog saves send translation states and fields alongside the unchanged original data', async t => {
+    const injector=runtime.createEnvironmentInjector([{provide:runtime.AuthService,useValue:{accessToken:()=> 'test-token'}}]);
+    const service=runtime.runInInjectionContext(injector,()=>new runtime.AdminCatalogService());t.after(()=>injector.destroy());
+    const translations={en:{status:'reviewed',fields:{name:'Mug'}},es:{status:'draft',fields:{name:'Taza'}}};
+    const writes:any[]=[];
+    t.mock.method(globalThis,'fetch',async(url:string,options:any={})=>{
+        if(options.method){writes.push(JSON.parse(options.body));return Response.json({id:'12345678-1234-4234-8234-123456789abc'});}
+        return Response.json(url.endsWith('/settings')?{whatsappNumber:''}:[]);
+    });
+    const item={id:'12345678-1234-4234-8234-123456789abc',name:'Caneca',typeId:'22345678-1234-4234-8234-123456789abc',active:true,scope:'both',translations};
+    await service.saveType(item);await service.saveTheme(item);
+    await service.saveProduct({...item,description:'Original',images:[],characteristics:[],personalization:[],priceMode:'fixed',price:65,themeIds:[]});
+    await service.saveAffiliate({...item,description:'Original',platform:'Shopee',images:[],international:false});
+    assert.equal(writes.length,4);
+    for(const body of writes)assert.equal(body.name,'Caneca');
+    for(const index of [0,1,3])assert.deepEqual(writes[index].translations,translations);
+    assert.equal('translations' in writes[2],false);
+    assert.equal(writes[2].price,65);assert.equal(writes[3].platform,'Shopee');
+});
+
 test('affiliate international flag is sent and retained after catalog reload, including unchecking', async (t) => {
     let token: string | null = null;
     let international = false;

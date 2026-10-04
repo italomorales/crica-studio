@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { API_URL, AuthService } from './auth.service';
 import { currentSiteMarket } from './site-market';
-export interface CatalogPlatform {
+import { language } from './language';
+import type { TranslatableContent } from './catalog-translations';
+export interface CatalogPlatform extends TranslatableContent {
     id: string; name: string; code: string; description: string; url: string | null; logoUrl: string | null;
     locale: string; countryCode: string; status: 'draft' | 'published' | 'inactive'; order: number;
     active: boolean; mobileOnly: boolean; productCount?: number;
@@ -42,9 +44,12 @@ export class PlatformService {
     async publicPlatforms(locale = 'pt-BR', country = 'BR', storefronts = false, allMarkets = false): Promise<CatalogPlatform[]> {
         const query = new URLSearchParams({ locale, country, storefronts: String(storefronts) });
         query.set('market', currentSiteMarket());
+        query.set('lang',language());
         if (storefronts && allMarkets) query.set('allMarkets', 'true');
         const response = await fetch(`${API_URL}/api/catalog/platforms?${query}`);
         if (!response.ok) throw new Error('Não foi possível carregar as plataformas. Tente novamente.');
-        return response.json();
+        const items = await response.json() as CatalogPlatform[];
+        // Supplier filter values retain platform identity; their labels can be translated separately.
+        return storefronts ? items : items.map(item=>({...item,name:(item.original?.['name'] as string) || item.name}));
     }
 }

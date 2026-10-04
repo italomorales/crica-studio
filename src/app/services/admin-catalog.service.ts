@@ -189,6 +189,7 @@ export class AdminCatalogService {
         await this.write('affiliates', product.id, {
             typeId: product.typeId,
             name: product.name,
+            translations: product.translations,
             description: product.description,
             platform: product.platform,
             platformId: product.platformId,
@@ -204,7 +205,7 @@ export class AdminCatalogService {
         });
     }
     async saveTheme(theme: CatalogTheme) {
-        await this.write('themes', theme.id, { name: theme.name.trim(), active: theme.active });
+        await this.write('themes', theme.id, { name: theme.name.trim(), active: theme.active, translations:theme.translations });
     }
     async deleteTheme(id: string) {
         await this.remove('themes', id);

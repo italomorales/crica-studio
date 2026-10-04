@@ -2,3 +2,5 @@ node_modules/
 dist/
 .sites/
 .openai/*local*
+
+.env*.local

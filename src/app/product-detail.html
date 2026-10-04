@@ -50,7 +50,7 @@
             }
         </div>
         <div class="product-page-content">
-            <span class="eyebrow category">{{ product.category }}</span>
+            <span class="eyebrow category">{{ (product | content:'category') }}</span>
             <h1 [id]="'product-title-' + product.id">{{ product.name }}</h1>
             <p class="product-page-description">{{ product.fullDescription || product.description }}</p>
             <strong class="consult">{{ price(product) | translate }}</strong>
@@ -62,7 +62,7 @@
                 }
                 @if (product.personalization.length) {
                 <h2> {{ 'Possibilidades de personalização' | translate }} </h2>
-                <p class="personalization-options">@for (option of product.personalization; track option) { <span>{{ option | translate }}</span> }</p>
+                <p class="personalization-options">@for (option of product.personalization; track option) { <span>{{ option }}</span> }</p>
                 }
                 <small> {{ 'Os preços podem sofrer alterações conforme o modelo e o material escolhidos.' | translate }} </small>
             </div>

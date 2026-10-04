@@ -1672,3 +1672,5 @@ crica-platform-grid {
 
 .product-theme-picker .theme-optional { font-weight: 400; color: var(--muted); font-size: 13px; }
 .product-theme-autocomplete input { margin-bottom: 0; }
+
+.translation-tabs{display:flex;gap:8px;overflow-x:auto;margin:20px 0}.translation-tabs button{flex-shrink:0;background:#fff;border:1px solid #d9e2ec;border-radius:8px;padding:12px 16px;color:#244466}.translation-tabs button.active{background:#075cac;color:#fff}.translation-tabs small{display:block;margin-top:4px;color:inherit}.translation-original{padding:12px;background:#f6f8fb;border-radius:8px;margin-bottom:10px}.translation-original p{white-space:pre-line;margin:8px 0;max-height:160px;overflow:auto}.translation-source{display:block;white-space:pre-line;max-height:100px;overflow:auto;margin-bottom:8px}.translation-editor{margin-top:20px}

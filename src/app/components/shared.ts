@@ -1,4 +1,5 @@
-import { TranslatePipe, language, setLanguage, LANGUAGE_OPTIONS } from '../services/language';
+import { ContentPipe, contentField } from '../services/catalog-translations';
+import { TranslatePipe, language, setLanguage, availableLanguages, languageFlag } from '../services/language';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { currentSiteMarket, publicHomePath } from '../services/site-market';
@@ -10,12 +11,13 @@ import productImageTemplate from './product-image.html?raw';
 @Component({
     selector: 'crica-header',
     standalone: true,
-    imports: [TranslatePipe, RouterLink, RouterLinkActive],
+    imports: [ContentPipe, TranslatePipe, RouterLink, RouterLinkActive],
     template: headerTemplate,
 })
 export class HeaderComponent {
     readonly language = language;
-    readonly languages = LANGUAGE_OPTIONS;
+    get languages() { return availableLanguages(); }
+    readonly languageFlag=languageFlag;
     readonly setLanguage = setLanguage;
     readonly showShop = currentSiteMarket() === 'br';
     readonly homePath = publicHomePath();
@@ -23,18 +25,19 @@ export class HeaderComponent {
 @Component({
     selector: 'crica-footer',
     standalone: true,
-    imports: [TranslatePipe, RouterLink],
+    imports: [ContentPipe, TranslatePipe, RouterLink],
     template: footerTemplate,
 })
 export class FooterComponent { readonly homePath = publicHomePath(); }
 @Component({
     selector: 'crica-filters',
     standalone: true,
-    imports: [TranslatePipe],
+    imports: [ContentPipe, TranslatePipe],
     template: filtersTemplate,
 })
 export class FiltersComponent {
     @Input() options: string[] = [];
+    @Input() optionLabels: Record<string,string> = {};
     @Input() selected = 'Todos';
     @Input() query = '';
     @Input() label = 'Categorias';
@@ -45,7 +48,7 @@ export class FiltersComponent {
 @Component({
     selector: 'crica-product-image',
     standalone: true,
-    imports: [TranslatePipe],
+    imports: [ContentPipe, TranslatePipe],
     template: productImageTemplate,
 })
 export class ProductImageComponent {

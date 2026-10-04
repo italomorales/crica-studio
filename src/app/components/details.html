@@ -30,7 +30,7 @@
                 }
             </div>
             <div class="detail-content">
-                <span class="eyebrow category">{{ product.category }}</span>
+                <span class="eyebrow category">{{ (product | content:'category') }}</span>
                 <h2 id="detail-title">{{ product.name }}</h2>
                 <p>{{ product.fullDescription || product.description }}</p>
                 <strong class="consult">{{ price(product) | translate }}</strong>
@@ -45,7 +45,7 @@
                     <h3> {{ 'Possibilidades de personalização' | translate }} </h3>
                     <p class="personalization-options">
                         @for (option of product.personalization; track option) {
-                        <span>{{ option | translate }}</span>
+                        <span>{{ option }}</span>
                         }
                     </p>
                     <small> {{ 'Os preços podem sofrer alterações conforme o modelo e o material escolhidos.' | translate }} </small>
@@ -100,9 +100,9 @@
         } @if (affiliate) {
         <div class="affiliate-dialog">
             <span class="demo-badge"> {{ 'Indicação de demonstração' | translate }} </span>
-            <h2 id="detail-title">{{ affiliate.name }}</h2>
+            <h2 id="detail-title">{{ (affiliate | content:'name') }}</h2>
             <p>
-                {{ 'O link deste produto na plataforma {platform} ainda não foi configurado.' | translate:{platform: affiliate.platform} }}
+                {{ 'O link deste produto na plataforma {platform} ainda não foi configurado.' | translate:{platform: (affiliate | content:'platform')} }}
             </p>
             <p> {{ 'Quando estiver disponível, você poderá abrir o anúncio e concluir a compra diretamente na plataforma indicada.' | translate }} </p>
             <button class="primary" (click)="close()"> {{ 'Voltar às indicações' | translate }} </button>

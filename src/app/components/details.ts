@@ -1,3 +1,4 @@
+import { ContentPipe } from '../services/catalog-translations';
 import { TranslatePipe, translate, localizedPrice, localizedOrderMessage } from '../services/language';
 import { Component, ViewChild, ElementRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import detailsTemplate from './details.html?raw';
 @Component({
     selector: 'crica-details',
     standalone: true,
-    imports: [TranslatePipe, FormsModule, ProductImageComponent],
+    imports: [ContentPipe, TranslatePipe, FormsModule, ProductImageComponent],
     template: detailsTemplate,
 })
 export class DetailsComponent {

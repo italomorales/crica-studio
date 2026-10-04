@@ -1,0 +1,37 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { SupplierLanguageEditor } from '../src/app/admin/supplier-language-editor.ts';
+import type { SupplierTextContent } from '../src/app/admin/supplier-language-editor.ts';
+test('supplier fields switch languages without changing originals or losing unsaved versions', () => {
+    const editor = new SupplierLanguageEditor();
+    const item: SupplierTextContent = {name:'Caneca',description:'Descrição original',translations:{en:{status:'reviewed',fields:{name:'Mug',description:'Original translation'}}}};
+    editor.selected='en';
+    assert.equal(editor.value(item,'name'),'Mug');
+    editor.change(item,'name','Custom mug');
+    assert.equal(editor.status(item),'draft');
+    editor.selected='es';
+    assert.equal(editor.value(item,'name'),'');
+    editor.change(item,'description','Descripción');
+    editor.changeStatus(item,'reviewed');
+    editor.selected='pt';
+    assert.equal(editor.value(item,'name'),'Caneca');
+    editor.change(item,'description','Português atualizado');
+    editor.selected='en';
+    assert.equal(editor.value(item,'name'),'Custom mug');
+    assert.equal(editor.value(item,'description'),'Original translation');
+    assert.equal(item.description,'Português atualizado');
+    assert.equal(item.translations?.es.status,'reviewed');
+    assert.equal(item.translations?.es.fields.description,'Descripción');
+    assert.equal(item.translations?.pt,undefined);
+});
+test('selecting a missing language is read only and blank fields remain available for fallback', () => {
+    const editor=new SupplierLanguageEditor();
+    const item: SupplierTextContent={name:'Original',description:'Texto'};
+    editor.selected='es';
+    assert.equal(editor.value(item,'name'),'');
+    assert.equal(editor.status(item),'pending');
+    assert.equal(item.translations,undefined);
+    editor.change(item,'name','');
+    assert.equal(item.name,'Original');
+    assert.equal(item.translations?.es.fields.name,'');
+});

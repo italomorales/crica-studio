@@ -30,6 +30,7 @@
                 <span aria-hidden="true">#</span>
                 Temas
             </a>
+            <a routerLink="/admin/idiomas" routerLinkActive="active" ariaCurrentWhenActive="page"><span aria-hidden="true">◎</span> Idiomas</a>
             <a
                 routerLink="/admin/configuracoes"
                 routerLinkActive="active"
@@ -63,10 +64,11 @@
                     <h1>{{ pageEditing ? (pageIsNew ? 'Novo cadastro' : 'Editar cadastro') : title }}</h1>
                     <p>{{ subtitle }}</p>
                 </div>
+                @if (section === 'idiomas' && !pageEditing) { <button class="primary" type="button" (click)="languageAdmin?.edit()" [disabled]="!languageAdmin || languageAdmin.loading || languageAdmin.saving">+ Novo idioma</button> }
                 @if (section === 'plataformas' && !pageEditing) {
                 <button class="primary" type="button" (click)="platformAdmin?.edit()" [disabled]="!platformAdmin || platformAdmin.loading || platformAdmin.saving">+ Nova plataforma</button>
                 }
-                @if (!editing && !organizing && section !== 'configuracoes' && section !== 'plataformas' && !readOnly) {
+                @if (!editing && !organizing && section !== 'configuracoes' && section !== 'plataformas' && section !== 'idiomas' && !readOnly) {
                 <div class="catalog-heading-actions">
                     @if (section === 'loja' || section === 'fornecedores') {
                     <button
@@ -111,6 +113,7 @@
             </div>
             } @if (section === 'plataformas') {
             <crica-platform-admin />
+            } @else if (section === 'idiomas') { <crica-language-admin />
             } @else if (catalog.loading()) {
             <div class="admin-notice" role="status">Carregando dados administrativos…</div>
             } @else if (catalog.error()) {
@@ -164,15 +167,18 @@
             } @else if (editing && section === 'temas') {
             <section class="admin-panel type-editor">
                 <form (ngSubmit)="saveTheme()" [attr.aria-busy]="savingTheme">
+                    <crica-catalog-language-selector [editor]="catalogEditor" [item]="themeDraft" [disabled]="savingTheme" />
                     <label for="theme-name">Nome do tema *</label>
                     <input
                         id="theme-name"
                         name="theme-name"
-                        [(ngModel)]="themeDraft.name"
+                        [ngModel]="catalogEditor.value(themeDraft,'name')" (ngModelChange)="catalogEditor.change(themeDraft,'name',$event)"
+                        [attr.aria-describedby]="catalogEditor.selected !== 'pt' ? 'theme-name-original' : null"
                         maxlength="120"
-                        required
+                        [required]="catalogEditor.selected === 'pt'"
                         placeholder="Ex.: Natal, Memes, Dia das Mães"
                         [disabled]="savingTheme" />
+                    @if (catalogEditor.selected !== 'pt') { <small id="theme-name-original" class="field-help">Original em português: {{ themeDraft.name || 'Ainda não preenchido' }}</small> }
                     <label class="check-label">
                         <input
                             type="checkbox"
@@ -202,15 +208,18 @@
             } @else if (editing && section === 'tipos') {
             <section class="admin-panel type-editor">
                 <form (ngSubmit)="saveType()" [attr.aria-busy]="savingType">
+                    <crica-catalog-language-selector [editor]="catalogEditor" [item]="typeDraft" [disabled]="savingType" />
                     <label for="type-name">Nome do tipo *</label>
                     <input
                         id="type-name"
                         name="type-name"
-                        [(ngModel)]="typeDraft.name"
+                        [ngModel]="catalogEditor.value(typeDraft,'name')" (ngModelChange)="catalogEditor.change(typeDraft,'name',$event)"
+                        [attr.aria-describedby]="catalogEditor.selected !== 'pt' ? 'type-name-original' : null"
                         [disabled]="savingType"
-                        maxlength="60"
-                        required
+                        [maxlength]="catalogEditor.selected === 'pt' ? 60 : 120"
+                        [required]="catalogEditor.selected === 'pt'"
                         placeholder="Ex.: Caneca" />
+                    @if (catalogEditor.selected !== 'pt') { <small id="type-name-original" class="field-help">Original em português: {{ typeDraft.name || 'Ainda não preenchido' }}</small> }
                     <label for="scope">Onde usar *</label>
                     <select
                         id="scope"
@@ -252,14 +261,43 @@
                 <div class="editor-main">
                     <section class="admin-panel">
                         <h2>Informações do produto</h2>
+                        @if (section === 'fornecedores') {
+                        <div class="form-two">
+                            <div>
+                                <label for="supplier-language">Idioma do cadastro</label>
+                                <select id="supplier-language" name="supplier-language" [(ngModel)]="supplierEditor.selected" [disabled]="supplierLanguagesLoading || uploadingImages">
+                                    <option value="pt">Português · original</option>
+                                    @for (locale of supplierLanguages; track locale.code) {
+                                    <option [value]="locale.code">{{ locale.nativeName }}{{ locale.active ? '' : ' (inativo)' }}</option>
+                                    }
+                                </select>
+                            </div>
+                            @if (supplierTranslating) {
+                            <div>
+                                <label for="supplier-translation-status">Status da tradução</label>
+                                <select id="supplier-translation-status" name="supplier-translation-status" [ngModel]="supplierEditor.status(draft)" (ngModelChange)="supplierEditor.changeStatus(draft,$event)" [disabled]="uploadingImages">
+                                    <option value="pending">Pendente — usar português</option>
+                                    <option value="draft">Rascunho — usar português</option>
+                                    <option value="reviewed">Revisada — exibir no site</option>
+                                </select>
+                            </div>
+                            }
+                        </div>
+                        @if (supplierLanguagesLoading) { <p class="field-help" role="status">Carregando idiomas…</p> }
+                        @if (supplierLanguagesError) { <p role="alert">{{ supplierLanguagesError }}</p><button type="button" class="secondary" (click)="loadSupplierLanguages()">Tentar novamente</button> }
+                        <p class="field-help">O idioma altera o título e a descrição. Os demais dados são compartilhados. Campos traduzidos vazios usam o português; somente versões revisadas aparecem no site.</p>
+                        }
+
                         <label for="item-title">Título *</label>
                         <input
                             id="item-title"
                             name="title"
-                            [(ngModel)]="draft.name"
-                            required
-                            maxlength="120"
+                            [ngModel]="itemText('name')" (ngModelChange)="changeItemText('name',$event)"
+                            [required]="!supplierTranslating"
+                            [maxlength]="section === 'fornecedores' ? 180 : 120"
+                            [attr.aria-describedby]="supplierTranslating ? 'supplier-title-original' : null"
                             placeholder="Como o produto aparecerá no catálogo" />
+                        @if (supplierTranslating) { <small id="supplier-title-original" class="field-help supplier-original">Original em português: {{ draft.name || 'Ainda não preenchido' }}</small> }
                         @if (section === 'loja') {
                         <label>URL da página do produto</label>
                         <output class="field-help friendly-url">{{ productUrlPreview }}</output>
@@ -333,14 +371,15 @@
                         <textarea
                             id="short-description"
                             name="description"
-                            [(ngModel)]="draft.description"
+                            [ngModel]="itemText('description')" (ngModelChange)="changeItemText('description',$event)"
+                            [attr.aria-describedby]="supplierTranslating ? 'supplier-description-original' : null"
                             rows="3"
-                            maxlength="240"
+                            [maxlength]="supplierTranslating ? 500 : 240"
                             placeholder="Resuma o produto para o card"></textarea>
                         <small>
-                            {{ draft.description.length }}/240 caracteres · Necessária para
-                            publicar.
+                            {{ itemText('description').length }}/{{ supplierTranslating ? 500 : 240 }} caracteres{{ supplierTranslating ? '' : ' · Necessária para publicar.' }}
                         </small>
+                        @if (supplierTranslating) { <small id="supplier-description-original" class="field-help supplier-original">Original em português: {{ draft.description || 'Ainda não preenchido' }}</small> }
                         @if (section === 'loja') {
                         <label for="full-description">Descrição completa</label>
                         <textarea

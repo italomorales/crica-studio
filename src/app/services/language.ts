@@ -6,7 +6,37 @@ import {
     validLanguage,
     type SiteLanguage,
 } from './language-policy';
-import { TRANSLATIONS } from './translations';
+import { interfaceText } from './translations';
+import { API_URL } from './auth.service';
+import type { CatalogLanguage } from './catalog-translations';
+const defaults: CatalogLanguage[] = LANGUAGE_OPTIONS.map((item, i) => ({
+    code: item.code,
+    name: item.name,
+    nativeName: item.name,
+    flagCode: ['BR', 'US', 'ES'][i],
+    active: true,
+    order: i * 10,
+}));
+const registeredLanguages = signal<CatalogLanguage[]>(defaults);
+export const availableLanguages = registeredLanguages.asReadonly();
+export async function refreshLanguages() {
+    const response = await fetch(`${API_URL}/api/catalog/languages`, {
+        signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) throw new Error('Não foi possível carregar os idiomas.');
+    const items = (await response.json()) as CatalogLanguage[];
+    registeredLanguages.set(items.filter((item) => item.active));
+    if (!items.some((item) => item.active && item.code === language())) setLanguage('pt', false);
+}
+export function languageFlag() {
+    const flag = availableLanguages().find((item) => item.code === language())?.flagCode;
+    return (
+        '/assets/languages/' +
+        (({ BR: 'pt', US: 'en', ES: 'es', FR: 'fr' } as Record<string, string>)[flag || ''] ||
+            'world') +
+        '.svg'
+    );
+}
 
 function storedLanguage() {
     try {
@@ -29,7 +59,7 @@ const selectedLanguage = signal<SiteLanguage>(defaultLanguage());
 export const language = selectedLanguage.asReadonly();
 export { LANGUAGE_OPTIONS };
 export function setLanguage(value: string, persist = true) {
-    if (!validLanguage(value)) return;
+    if (!validLanguage(value) || !availableLanguages().some((item) => item.code === value)) return;
     selectedLanguage.set(value);
     if (typeof document !== 'undefined')
         document.documentElement.lang = value === 'pt' ? 'pt-BR' : value;
@@ -41,6 +71,11 @@ export function setLanguage(value: string, persist = true) {
         }
 }
 export async function initializeLanguage() {
+    try {
+        await refreshLanguages();
+    } catch {
+        /* Initial defaults keep the site usable during API outages. */
+    }
     const saved = storedLanguage();
     const hostname = window.location.hostname;
     let country: string | undefined;
@@ -55,7 +90,11 @@ export async function initializeLanguage() {
             /* Browser language is the fallback if country detection is unavailable. */
         }
     }
-    setLanguage(initialLanguage(hostname, saved, country, navigator.language), false);
+    const selected = initialLanguage(hostname, saved, country, navigator.language);
+    setLanguage(
+        availableLanguages().some((item) => item.code === selected) ? selected : 'pt',
+        false,
+    );
 }
 export function translate(
     text: string | undefined | null,
@@ -63,7 +102,7 @@ export function translate(
     locale = language(),
 ) {
     const key = (text || '').replace(/\s+/g, ' ').trim();
-    const translated = locale === 'pt' ? key : (TRANSLATIONS[key]?.[locale] ?? key);
+    const translated = interfaceText(key, locale);
     return translated.replace(/\{(\w+)\}/g, (token, name: string) =>
         params[name] === undefined ? token : String(params[name]),
     );
@@ -71,10 +110,16 @@ export function translate(
 export function localizedPrice(product: { priceMode?: string; price?: number }) {
     if (!product.priceMode || product.priceMode === 'consult' || product.price === undefined)
         return translate('Sob consulta');
-    const price = new Intl.NumberFormat(
-        language() === 'pt' ? 'pt-BR' : language() === 'en' ? 'en-US' : 'es-ES',
-        { style: 'currency', currency: 'BRL' },
-    ).format(product.price);
+    let formatter: Intl.NumberFormat;
+    try {
+        formatter = new Intl.NumberFormat(language() === 'pt' ? 'pt-BR' : language(), {
+            style: 'currency',
+            currency: 'BRL',
+        });
+    } catch {
+        formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    const price = formatter.format(product.price);
     return product.priceMode === 'from' ? translate('A partir de {price}', { price }) : price;
 }
 export function localizedOrderMessage(name: string, quantity: number, idea: string) {

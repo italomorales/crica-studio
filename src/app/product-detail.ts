@@ -1,3 +1,4 @@
+import { ContentPipe } from './services/catalog-translations';
 import { TranslatePipe, translate, localizedPrice, localizedOrderMessage } from './services/language';
 import { Component, ElementRef, ViewChild, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +16,7 @@ import productDetailTemplate from './product-detail.html?raw';
 @Component({
     selector: 'crica-product-detail',
     standalone: true,
-    imports: [TranslatePipe, FormsModule, RouterLink, ProductImageComponent],
+    imports: [ContentPipe, TranslatePipe, FormsModule, RouterLink, ProductImageComponent],
     template: productDetailTemplate,
 })
 export class ProductDetailComponent implements OnDestroy {

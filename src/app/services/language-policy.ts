@@ -1,4 +1,4 @@
-export type SiteLanguage = 'pt' | 'en' | 'es';
+export type SiteLanguage = string;
 export const LANGUAGE_STORAGE_KEY = 'crica.language';
 export const LANGUAGE_OPTIONS = [
     { code: 'pt' as const, name: 'Português', flag: '🇧🇷' },
@@ -6,7 +6,7 @@ export const LANGUAGE_OPTIONS = [
     { code: 'es' as const, name: 'Español', flag: '🇪🇸' },
 ];
 export function validLanguage(value: unknown): value is SiteLanguage {
-    return value === 'pt' || value === 'en' || value === 'es';
+    return typeof value === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(value);
 }
 const SPANISH_COUNTRIES = new Set([
     'ES',

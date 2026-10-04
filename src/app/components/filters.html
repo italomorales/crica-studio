@@ -7,7 +7,7 @@
             [class.selected]="selected === option"
             [attr.aria-pressed]="selected === option"
             (click)="selection.emit(option)">
-            {{ option | translate }}
+            {{ (optionLabels[option] || option) | translate }}
         </button>
         }
     </div>

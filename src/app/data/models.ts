@@ -1,20 +1,22 @@
 export type Category = string;
+import type { TranslatableContent } from '../services/catalog-translations';
 export type Platform = string;
 export type ItemStatus = 'draft' | 'published' | 'inactive';
 export type PriceMode = 'consult' | 'fixed' | 'from';
-export interface CatalogType {
+export interface CatalogType extends TranslatableContent {
     id: string;
     name: string;
     scope: 'shop' | 'suppliers' | 'both';
     active: boolean;
 }
-export interface CatalogTheme {
+export interface CatalogTheme extends TranslatableContent {
     id: string;
     name: string;
     active: boolean;
     productCount?: number;
 }
 export interface ManagedFields {
+    categoryType?: CatalogType;
     typeId?: string;
     status?: ItemStatus;
     order?: number;
@@ -35,7 +37,8 @@ export interface Product extends ManagedFields {
     priceMode?: PriceMode;
     price?: number;
 }
-export interface AffiliateProduct extends ManagedFields {
+export interface AffiliateProduct extends ManagedFields, TranslatableContent {
+    platformContent?: TranslatableContent;
     id: string;
     name: string;
     description: string;

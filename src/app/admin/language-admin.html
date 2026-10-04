@@ -1,0 +1,139 @@
+@if (error) {
+<div class="error-summary" role="alert">{{ error }}</div>
+} @if (notice) {
+<div class="admin-notice" role="status">{{ notice }}</div>
+} @if (editing) {
+<section class="admin-panel">
+    <form (ngSubmit)="save()">
+        <div class="form-grid">
+            <div>
+                <label for="language-code">Código do idioma</label>
+                <input
+                    id="language-code"
+                    name="code"
+                    [(ngModel)]="draft.code"
+                    required
+                    maxlength="35"
+                    pattern="[a-z]{2,3}(-[A-Za-z0-9]{2,8})*"
+                    [readonly]="!isNew"
+                    placeholder="fr ou en-US" />
+                <small>O código identifica as traduções e não muda após o cadastro.</small>
+            </div>
+            <div>
+                <label for="language-name">Nome administrativo</label>
+                <input
+                    id="language-name"
+                    name="name"
+                    [(ngModel)]="draft.name"
+                    required
+                    maxlength="80"
+                    placeholder="Francês" />
+            </div>
+            <div>
+                <label for="language-native">Nome no menu público</label>
+                <input
+                    id="language-native"
+                    name="nativeName"
+                    [(ngModel)]="draft.nativeName"
+                    required
+                    maxlength="80"
+                    placeholder="Français" />
+            </div>
+            <div>
+                <label for="language-flag">País da bandeira</label>
+                <input
+                    id="language-flag"
+                    name="flag"
+                    [(ngModel)]="draft.flagCode"
+                    maxlength="2"
+                    pattern="[A-Za-z]{2}"
+                    placeholder="FR" />
+                <small>BR, US, ES ou FR. Outros países usam o ícone de globo.</small>
+            </div>
+            <div>
+                <label for="language-order">Ordem no menu</label>
+                <input
+                    id="language-order"
+                    name="order"
+                    type="number"
+                    min="0"
+                    [(ngModel)]="draft.order"
+                    required />
+            </div>
+        </div>
+        <label class="checkbox-label">
+            <input
+                name="active"
+                type="checkbox"
+                [(ngModel)]="draft.active"
+                [disabled]="draft.code === 'pt'" />
+            Ativo no site
+        </label>
+        <p>O português permanece disponível. Desativar um idioma preserva suas traduções.</p>
+        <div class="form-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+                {{ saving ? 'Salvando…' : 'Salvar idioma' }}
+            </button>
+            <button type="button" class="secondary" (click)="cancel()" [disabled]="saving">
+                Cancelar
+            </button>
+        </div>
+    </form>
+</section>
+} @else {
+<section class="admin-panel catalog-panel">
+    <div class="admin-filters">
+        <label class="admin-search">
+            <input
+                type="search"
+                aria-label="Buscar idiomas"
+                placeholder="Buscar idiomas"
+                [(ngModel)]="query"
+                (ngModelChange)="filter()" />
+        </label>
+    </div>
+    <div class="admin-results"><span>{{ items.length }} idiomas</span></div>
+    <div #grid class="catalog-grid" aria-label="Idiomas do site"></div>
+</section>
+@if (loading) {
+<p role="status">Carregando idiomas…</p>
+} }
+<dialog
+    #deleteDialog
+    class="delete-dialog"
+    aria-labelledby="language-delete-title"
+    (cancel)="deletionCancel($event)"
+    (close)="deletionClosed()">
+    @if (deletionTarget) {
+    <section class="delete-dialog-shell">
+        <div class="delete-dialog-icon" aria-hidden="true">!</div>
+        <span class="eyebrow">AÇÃO PERMANENTE</span>
+        <h2 id="language-delete-title">Excluir idioma?</h2>
+        <p>
+            Você está prestes a excluir
+            <strong>{{ deletionTarget.name }}</strong>
+            . Idiomas com traduções vinculadas devem ser desativados para preservar os textos.
+        </p>
+        @if (deletionError) {
+        <p class="delete-dialog-error" role="alert">{{ deletionError }}</p>
+        }
+        <div class="delete-dialog-actions">
+            <button
+                type="button"
+                class="secondary"
+                autofocus
+                [disabled]="saving"
+                (click)="cancelDeletion()">
+                Cancelar
+            </button>
+            <button
+                type="button"
+                class="delete-confirm"
+                [disabled]="saving"
+                (click)="remove(deletionTarget)">
+                {{ saving ? 'Excluindo…' : 'Excluir definitivamente' }}
+            </button>
+        </div>
+    </section>
+    }
+</dialog>

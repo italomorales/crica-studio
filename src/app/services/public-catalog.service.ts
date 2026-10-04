@@ -1,3 +1,4 @@
+import { language } from './language';
 import { Injectable, signal } from '@angular/core';
 import type { AffiliateProduct, CatalogType, CatalogTheme, Product } from '../data/models';
 import { normalize } from './contact';
@@ -74,7 +75,7 @@ export class PublicCatalogService {
             const typeNames = new Map(this.types().map((type) => [type.id, type.name]));
             const items = result.items.map((product) => ({
                 ...product,
-                category: typeNames.get(product.typeId) ?? 'Sem tipo',
+                category: typeNames.get(product.typeId) ?? 'Sem tipo', categoryType: this.types().find(t=>t.id===product.typeId),
             }));
             this.products.set(append ? [...this.products(), ...items] : items);
             this.productsTotal.set(result.total);
@@ -99,7 +100,7 @@ export class PublicCatalogService {
             this.featuredProducts.set(
                 result.items.map((product) => ({
                     ...product,
-                    category: typeNames.get(product.typeId) ?? 'Sem tipo',
+                    category: typeNames.get(product.typeId) ?? 'Sem tipo', categoryType: this.types().find(t=>t.id===product.typeId),
                 })),
             );
         } catch {
@@ -121,7 +122,7 @@ export class PublicCatalogService {
         const product = (await response.json()) as ApiProduct;
         return {
             ...product,
-            category: this.types().find((type) => type.id === product.typeId)?.name ?? 'Sem tipo',
+            category: this.types().find((type) => type.id === product.typeId)?.name ?? 'Sem tipo', categoryType: this.types().find(t=>t.id===product.typeId),
         } as Product;
     }
 
@@ -149,7 +150,7 @@ export class PublicCatalogService {
             const typeNames = new Map(this.types().map((type) => [type.id, type.name]));
             const items = result.items.map((affiliate) => ({
                 ...affiliate,
-                category: typeNames.get(affiliate.typeId) ?? 'Sem tipo',
+                category: typeNames.get(affiliate.typeId) ?? 'Sem tipo', categoryType: this.types().find(t=>t.id===affiliate.typeId),
             }));
             this.affiliates.set(append ? [...this.affiliates(), ...items] : items);
             this.affiliatesTotal.set(result.total);
@@ -176,7 +177,7 @@ export class PublicCatalogService {
             this.featuredAffiliates.set(
                 result.items.map((affiliate) => ({
                     ...affiliate,
-                    category: typeNames.get(affiliate.typeId) ?? 'Sem tipo',
+                    category: typeNames.get(affiliate.typeId) ?? 'Sem tipo', categoryType: this.types().find(t=>t.id===affiliate.typeId),
                 })),
             );
         } catch {
@@ -239,6 +240,7 @@ export class PublicCatalogService {
         params: Record<string, string | number | boolean | undefined>,
     ) {
         const search = new URLSearchParams();
+        if(resource !== 'products')search.set('lang',language());
         if (resource === 'affiliates') search.set('market', currentSiteMarket());
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined && value !== '') search.set(key, String(value));

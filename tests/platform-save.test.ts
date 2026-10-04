@@ -11,6 +11,7 @@ const bundle = await build({
         export { PlatformAdminComponent } from './src/app/admin/platform-admin';
         export { PlatformService } from './src/app/services/platform.service';
         export { AuthService } from './src/app/services/auth.service';
+        export { LanguageAdminService } from './src/app/services/language-admin.service';
         export { AdminComponent } from './src/app/admin/admin';
         export { AdminCatalogService } from './src/app/services/admin-catalog.service';
         export { ActivatedRoute, Router } from '@angular/router';
@@ -26,6 +27,7 @@ const runtime = await import(`data:text/javascript;base64,${Buffer.from(bundle.o
 test('supplier editor selects platform IDs and preserves inactive existing links only for edits', t => {
     const injector = runtime.createEnvironmentInjector([
         { provide: runtime.AuthService, useValue: {} },
+        { provide: runtime.LanguageAdminService, useValue: { all: async () => [] } },
         { provide: runtime.AdminCatalogService, useValue: { whatsappNumber: '', allAffiliates: [] } },
         { provide: runtime.ActivatedRoute, useValue: { snapshot: { data: { section: 'fornecedores' } } } },
         { provide: runtime.Router, useValue: {} },
@@ -151,4 +153,36 @@ test('global vitrines request includes international stores while supplier filte
     assert.equal(calls[0].searchParams.get('allMarkets'), 'true');
     assert.equal(calls[1].searchParams.has('allMarkets'), false);
     assert.equal(calls[1].searchParams.get('country'), 'BR');
+});
+
+test('platform inline translations save alongside shared settings without replacing Portuguese', async t => {
+    let payload: any;
+    const injector=runtime.createEnvironmentInjector([
+        {provide:runtime.PlatformService,useValue:{save: async (item:any)=>{payload=structuredClone(item);return {...item,id:'platform-id'};}}},
+        {provide:runtime.ChangeDetectorRef,useValue:{markForCheck(){}}},
+    ]);
+    t.after(()=>injector.destroy());
+    const component=runtime.runInInjectionContext(injector,()=>new runtime.PlatformAdminComponent());
+    component.edit();
+    Object.assign(component.draft,{name:'Amazon',code:'amazon',description:'Vitrine original',locale:'en-US',countryCode:'US',logoUrl:'/assets/platforms/amazon.svg'});
+    component.editor.selected='en';
+    component.editor.change(component.draft,'description','English storefront');
+    component.editor.changeStatus(component.draft,'reviewed');
+    component.editor.selected='es';
+    component.editor.change(component.draft,'name','Amazon ES');
+    component.editor.selected='en';
+    assert.equal(component.editor.value(component.draft,'description'),'English storefront');
+    await component.save();
+    assert.equal(payload.description,'Vitrine original');
+    assert.equal(payload.translations.en.fields.description,'English storefront');
+    assert.equal(payload.translations.en.status,'reviewed');
+    assert.equal(payload.translations.es.fields.name,'Amazon ES');
+    assert.equal(payload.locale,'en-US');
+    assert.equal(payload.countryCode,'US');
+    assert.equal(payload.logoUrl,'/assets/platforms/amazon.svg');
+    assert.equal(component.editing,false);
+    component.edit(component.platforms[0]);
+    assert.equal(component.editor.selected,'pt');
+    component.editor.selected='es';
+    assert.equal(component.editor.value(component.draft,'name'),'Amazon ES');
 });

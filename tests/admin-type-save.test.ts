@@ -9,6 +9,7 @@ const bundle = await build({
         contents: `import '@angular/compiler';
             export { AdminComponent } from './src/app/admin/admin';
             export { AdminCatalogService } from './src/app/services/admin-catalog.service';
+            export { LanguageAdminService } from './src/app/services/language-admin.service';
             export { AuthService } from './src/app/services/auth.service';
             export { ActivatedRoute, Router } from '@angular/router';
             export { ChangeDetectorRef, createEnvironmentInjector, runInInjectionContext } from '@angular/core';`,
@@ -42,6 +43,7 @@ function fixture(t: any, saveType: (type: any) => Promise<void>) {
     const injector = runtime.createEnvironmentInjector([
         { provide: runtime.AdminCatalogService, useValue: { whatsappNumber: '', saveType } },
         { provide: runtime.AuthService, useValue: {} },
+        { provide: runtime.LanguageAdminService, useValue: { all: async () => [] } },
         { provide: runtime.Router, useValue: {} },
         { provide: runtime.ActivatedRoute, useValue: { snapshot: { data: { section: 'tipos' } } } },
         { provide: runtime.ChangeDetectorRef, useValue: { markForCheck() { refreshes++; } } },
@@ -86,4 +88,21 @@ test('failed type save keeps the draft and shows the error instead of success', 
     assert.equal(f.component.noticeTone, 'error');
     assert.equal(f.component.notice, 'Falha ao salvar tipo');
     assert.ok(f.refreshes() > 0);
+});
+
+test('type inline translations save with the Portuguese original and survive language changes', async t => {
+    let payload: any;
+    const f = fixture(t, async item => { payload = structuredClone(item); });
+    f.component.catalogEditor.selected = 'en';
+    f.component.catalogEditor.change(f.component.typeDraft, 'name', 'T-shirt');
+    f.component.catalogEditor.changeStatus(f.component.typeDraft, 'reviewed');
+    f.component.catalogEditor.selected = 'es';
+    f.component.catalogEditor.change(f.component.typeDraft, 'name', 'Camiseta ES');
+    f.component.catalogEditor.selected = 'en';
+    assert.equal(f.component.catalogEditor.value(f.component.typeDraft, 'name'), 'T-shirt');
+    await f.component.saveType();
+    assert.equal(payload.name, 'Camiseta');
+    assert.equal(payload.translations.en.fields.name, 'T-shirt');
+    assert.equal(payload.translations.en.status, 'reviewed');
+    assert.equal(payload.translations.es.fields.name, 'Camiseta ES');
 });

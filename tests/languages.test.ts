@@ -4,7 +4,7 @@ import { build } from 'esbuild';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { initialLanguage } from '../src/app/services/language-policy.ts';
-import { TRANSLATIONS } from '../src/app/services/translations.ts';
+import { INTERFACE_DICTIONARIES, interfaceText } from '../src/app/services/translations.ts';
 
 test('country determines the first international language; saved selection wins in either domain', () => {
     assert.equal(initialLanguage('www.cricastudio.com.br', null, 'US', 'en-US'), 'pt');
@@ -21,12 +21,20 @@ test('country determines the first international language; saved selection wins 
 test('each interface translation preserves interpolation parameters in English and Spanish', () => {
     const parameters = (text: string) =>
         [...text.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
-    for (const [key, value] of Object.entries(TRANSLATIONS)) {
-        for (const locale of ['en', 'es'] as const) {
-            assert.ok(value[locale].trim(), `${key}: ${locale}`);
-            assert.deepEqual(parameters(value[locale]), parameters(key), `${key}: ${locale}`);
+    const sourceKeys = Object.keys(INTERFACE_DICTIONARIES.en).sort();
+    for (const [locale, dictionary] of Object.entries(INTERFACE_DICTIONARIES)) {
+        assert.deepEqual(Object.keys(dictionary).sort(), sourceKeys, locale + ': complete interface dictionary');
+        for (const [key, value] of Object.entries(dictionary)) {
+            assert.ok(value.trim(), key + ': ' + locale);
+            assert.deepEqual(parameters(value), parameters(key), key + ': ' + locale);
         }
     }
+});
+test('source dictionaries support regional variants and Portuguese fallback', () => {
+    assert.equal(interfaceText('Fornecedores', 'en-US'), 'Suppliers');
+    assert.equal(interfaceText('Fornecedores', 'es-MX'), 'Proveedores');
+    assert.equal(interfaceText('Fornecedores', 'fr'), 'Fornecedores');
+    assert.equal(interfaceText('Texto novo', 'en'), 'Texto novo');
 });
 
 const bundled = await build({

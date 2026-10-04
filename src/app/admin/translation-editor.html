@@ -1,0 +1,107 @@
+<div class="translation-editor">
+    <h2>Traduções</h2>
+    <p class="field-help">
+        Somente traduções revisadas aparecem no site. Campos vazios usam o conteúdo original em
+        português.
+    </p>
+    @if (loading) {
+    <p role="status">Carregando idiomas…</p>
+    } @if (error) {
+    <p class="delete-dialog-error" role="alert">{{ error }}</p>
+    <button type="button" class="secondary" (click)="load()">Tentar novamente</button>
+    }
+    <div class="translation-tabs" role="tablist" aria-label="Idiomas do cadastro">
+        <button
+            type="button"
+            role="tab"
+            id="translation-tab-pt"
+            aria-controls="translation-panel"
+            [attr.aria-selected]="selected==='pt'"
+            [class.active]="selected==='pt'"
+            (click)="selected='pt'">
+            Português · original
+        </button>
+        @for (locale of targets; track locale.code) {
+        <button
+            type="button"
+            role="tab"
+            [id]="'translation-tab-'+locale.code"
+            aria-controls="translation-panel"
+            [attr.aria-selected]="selected===locale.code"
+            [class.active]="selected===locale.code"
+            (click)="selected=locale.code">
+            {{ locale.nativeName }} @if (!locale.active) { (inativo) }
+            <small>
+                {{ item.translations?.[locale.code]?.status==='reviewed' ? 'Revisada' :
+                item.translations?.[locale.code]?.status==='draft' ? 'Rascunho' : 'Pendente' }} · {{
+                coverage(locale.code) }}/{{ fields.length }}
+            </small>
+        </button>
+        }
+    </div>
+    <section
+        id="translation-panel"
+        role="tabpanel"
+        [attr.aria-labelledby]="'translation-tab-'+selected">
+        @if (selected==='pt') {
+        <p class="field-help">
+            Edite o português nos campos principais deste cadastro. As traduções mantêm os mesmos
+            vínculos, fotos, preços e links.
+        </p>
+        @for (field of fields; track field.key) {
+        <div class="translation-original">
+            <strong>{{ field.label }}</strong>
+            <p>{{ original(field) || 'Ainda não preenchido' }}</p>
+        </div>
+        } } @else {
+        <label [for]="'translation-status-'+selected">Status da tradução</label>
+        <select
+            [id]="'translation-status-'+selected"
+            [ngModel]="status"
+            (ngModelChange)="changeStatus($event)"
+            [ngModelOptions]="{standalone:true}"
+            [disabled]="disabled">
+            <option value="pending">Pendente — usar português</option>
+            <option value="draft">Rascunho — usar português</option>
+            <option value="reviewed">Revisada — exibir no site</option>
+        </select>
+        @for (field of fields; track field.key) {
+        <label [for]="'translation-'+selected+'-'+field.key">{{ field.label }}</label>
+        <small class="field-help translation-source">
+            Original: {{ original(field) || 'Ainda não preenchido' }}
+        </small>
+        @if (field.multiline) {
+        <textarea
+            [id]="'translation-'+selected+'-'+field.key"
+            [ngModel]="value(field)"
+            (ngModelChange)="change(field,$event)"
+            [ngModelOptions]="{standalone:true}"
+            [maxlength]="field.limit"
+            rows="3"
+            [disabled]="disabled"></textarea>
+        } @else {
+        <input
+            [id]="'translation-'+selected+'-'+field.key"
+            [ngModel]="value(field)"
+            (ngModelChange)="change(field,$event)"
+            [ngModelOptions]="{standalone:true}"
+            [maxlength]="field.limit"
+            [disabled]="disabled" />
+        } @if (field.list) {
+        <small class="field-help">
+            Um texto por linha. Limite de 100 textos, com até 500 caracteres cada.
+        </small>
+        } }
+        <p class="field-help">
+            Editar um texto volta a tradução para rascunho. Marque como revisada depois de conferir.
+        </p>
+        <button
+            type="button"
+            class="text-link"
+            (click)="reset()"
+            [disabled]="disabled || !translation">
+            Usar somente português neste idioma
+        </button>
+        }
+    </section>
+</div>

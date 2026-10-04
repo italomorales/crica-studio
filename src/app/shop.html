@@ -59,6 +59,7 @@
         </div>
         <crica-filters
             [options]="categories"
+            [optionLabels]="categoryLabels"
             [selected]="category"
             [query]="query"
             (selection)="select($event)"

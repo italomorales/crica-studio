@@ -15,7 +15,7 @@
                 class="share-product storefront-share"
                 type="button"
                 (click)="shareStorefront(storefront)"
-                [attr.aria-label]="('Compartilhar vitrine' | translate) + ' ' + storefront.name">
+                [attr.aria-label]="('Compartilhar vitrine' | translate) + ' ' + (storefront | content:'name')">
                 <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
                     <circle cx="18" cy="5" r="2.5" />
                     <circle cx="6" cy="12" r="2.5" />
@@ -30,17 +30,17 @@
             <div class="storefront-logo" aria-hidden="true">
                 @if (platformLogo(storefront)) {
                 <img [src]="platformLogo(storefront)" alt="" width="62" height="56" />
-                } @else { <span>{{ storefront.name }}</span> }
+                } @else { <span>{{ (storefront | content:'name') }}</span> }
             </div>
             <div>
-                <h2>{{ storefront.name }}</h2>
-                <p>{{ storefront.description }}</p>
+                <h2>{{ (storefront | content:'name') }}</h2>
+                <p>{{ (storefront | content:'description') }}</p>
             </div>
             @if (externalUrl(storefront.url || '')) {
-            <a class="storefront-link" [class.storefront-mobile-link]="storefront.mobileOnly" [href]="externalUrl(storefront.url || '')" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na {platform} (nova aba)' | translate:{platform: storefront.name}"> {{ 'Visitar vitrine' | translate }} <span aria-hidden="true">↗</span>
+            <a class="storefront-link" [class.storefront-mobile-link]="storefront.mobileOnly" [href]="externalUrl(storefront.url || '')" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visitar vitrine na {platform} (nova aba)' | translate:{platform: (storefront | content:'name')}"> {{ 'Visitar vitrine' | translate }} <span aria-hidden="true">↗</span>
             </a>
             @if (storefront.mobileOnly) {
-            <span class="storefront-pending storefront-desktop-disabled" role="link" aria-disabled="true" [attr.aria-label]="'Visitar vitrine na {platform}: somente pelo celular' | translate:{platform: storefront.name}"> {{ 'Visitar vitrine' | translate }} <span aria-hidden="true">↗</span>
+            <span class="storefront-pending storefront-desktop-disabled" role="link" aria-disabled="true" [attr.aria-label]="'Visitar vitrine na {platform}: somente pelo celular' | translate:{platform: (storefront | content:'name')}"> {{ 'Visitar vitrine' | translate }} <span aria-hidden="true">↗</span>
             </span>
             }
             } @else {

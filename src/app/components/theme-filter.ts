@@ -1,10 +1,11 @@
+import { ContentPipe, contentField } from '../services/catalog-translations';
 import { TranslatePipe, translate } from '../services/language';
 import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 import type { CatalogTheme } from '../data/models';
 import { normalize } from '../services/contact';
 import template from './theme-filter.html?raw';
 
-@Component({ selector: 'crica-theme-filter', standalone: true, imports: [TranslatePipe], template })
+@Component({ selector: 'crica-theme-filter', standalone: true, imports: [ContentPipe, TranslatePipe], template })
 export class ThemeFilterComponent {
     @Input() themes: CatalogTheme[] = [];
     @Input() selected: string[] = [];
@@ -17,11 +18,11 @@ export class ThemeFilterComponent {
     search = '';
     expanded = false;
     get options() {
-        return this.themes.filter(t => normalize(t.name).includes(normalize(this.search.trim())))
-            .slice().sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+        return this.themes.filter(t => normalize(contentField(t,'name')).includes(normalize(this.search.trim())))
+            .slice().sort((a, b) => contentField(a,'name').localeCompare(contentField(b,'name')));
     }
     get chips() {
-        return this.selected.map(id => ({ id, name: this.themes.find(t => t.id === id)?.name ?? translate('Filtro indisponível') }));
+        return this.selected.map(id => ({ id, name: contentField(this.themes.find(t => t.id === id),'name') || translate('Filtro indisponível') }));
     }
     searchThemes(event: Event) { this.search = (event.target as HTMLInputElement).value; }
     toggle(id: string) {

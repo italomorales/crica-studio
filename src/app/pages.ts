@@ -1,3 +1,4 @@
+import { ContentPipe, contentField } from './services/catalog-translations';
 import { TranslatePipe, translate } from './services/language';
 import { platformLogo } from './services/platform-logos';
 import { Component, ChangeDetectorRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
@@ -22,10 +23,11 @@ import { parseShopFilters, shopFilterParams } from './services/theme-filters';
 @Component({
     selector: 'crica-shop',
     standalone: true,
-    imports: [TranslatePipe, FiltersComponent, ProductCardComponent, ThemeFilterComponent],
+    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductCardComponent, ThemeFilterComponent],
     template: shopTemplate,
 })
 export class ShopComponent implements OnInit, OnDestroy {
+    get categoryLabels() { return Object.fromEntries(this.catalog.types().map(type=>[type.id,contentField(type,"name")])); }
     get bulkOrderUrl() {
         return whatsappUrl('5511963136152', translate('Olá! Gostaria de um orçamento para canecas ou bottons personalizados em quantidade para minha empresa ou evento. Produto, quantidade e prazo:'));
     }
@@ -47,7 +49,7 @@ export class ShopComponent implements OnInit, OnDestroy {
             ...this.catalog
                 .types()
                 .filter((type) => type.scope === 'shop' || type.scope === 'both')
-                .map((type) => type.name),
+                .map((type) => type.id),
         ];
     }
     ngOnInit() {
@@ -71,7 +73,7 @@ export class ShopComponent implements OnInit, OnDestroy {
             clearTimeout(this.searchTimer);
             void this.refresh().then(() => {
                 this.category =
-                    this.catalog.types().find((type) => type.id === this.typeId)?.name ?? 'Todos';
+                    this.typeId ?? 'Todos';
             });
         });
         void this.catalog.loadFeaturedProducts().then(() => this.startCarousel());
@@ -109,7 +111,7 @@ export class ShopComponent implements OnInit, OnDestroy {
     select(category: string) {
         clearTimeout(this.searchTimer);
         this.category = category;
-        this.typeId = this.catalog.types().find((type) => type.name === category)?.id;
+        this.typeId = category === 'Todos' ? undefined : category;
         this.updateFilters();
     }
     openProduct(product: Product) {
@@ -172,10 +174,11 @@ export class ShopComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'crica-suppliers',
     standalone: true,
-    imports: [TranslatePipe, FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent],
+    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent],
     template: suppliersTemplate,
 })
 export class SuppliersComponent implements OnInit, OnDestroy {
+    get platformLabels() { return Object.fromEntries(this.registeredPlatforms().map(item=>[item.name,contentField(item,"name")])); }
     catalog = inject(PublicCatalogService);
     private platformService = inject(PlatformService, { optional: true });
     private registeredPlatforms = signal<CatalogPlatform[]>([]);
@@ -208,7 +211,7 @@ export class SuppliersComponent implements OnInit, OnDestroy {
         const url = this.featuredUrl(product) ?? window.location.href;
         await shareLink(
             product.name,
-            translate('Confira esta indicação da Crica Studio: {name}', {name: product.name}),
+            translate('Confira esta indicação da Crica Studio: {name}', {name: contentField(product,"name")}),
             url,
         );
     }
@@ -271,7 +274,7 @@ export class SuppliersComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'crica-storefront',
     standalone: true,
-    imports: [TranslatePipe],
+    imports: [ContentPipe, TranslatePipe],
     template: storefrontTemplate,
 })
 export class StorefrontComponent {
@@ -296,7 +299,7 @@ export class StorefrontComponent {
         const url = storefront.url ?? window.location.href;
         await shareLink(
             storefront.name,
-            translate('Confira a vitrine da Crica Studio na {name}.', {name: storefront.name}),
+            translate('Confira a vitrine da Crica Studio na {name}.', {name: contentField(storefront,"name")}),
             url,
         );
     }

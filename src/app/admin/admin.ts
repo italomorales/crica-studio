@@ -33,7 +33,13 @@ import { ThemeGridComponent, type ThemeAction } from './theme-grid';
 import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
 import { friendlySlug } from '../services/product-url';
 import adminTemplate from './admin.html?raw';
+import { LanguageAdminComponent } from './language-admin';
 import { PlatformAdminComponent } from './platform-admin';
+import { CatalogLanguageSelectorComponent } from './catalog-language-selector';
+
+import { SupplierLanguageEditor, CatalogLanguageEditor, type SupplierTextField } from './supplier-language-editor';
+import { LanguageAdminService } from '../services/language-admin.service';
+import type { CatalogLanguage } from '../services/catalog-translations';
 
 type DeletionTarget = {
     id: string;
@@ -53,14 +59,37 @@ type DeletionTarget = {
         TypeGridComponent,
         ThemeGridComponent,
         PlatformAdminComponent,
+        LanguageAdminComponent,
+        CatalogLanguageSelectorComponent,
     ],
     template: adminTemplate,
 })
 export class AdminComponent {
+    catalogEditor = new CatalogLanguageEditor();
+
+    @ViewChild(LanguageAdminComponent) languageAdmin?: LanguageAdminComponent;
     @ViewChild(PlatformAdminComponent) platformAdmin?: PlatformAdminComponent;
-    get pageEditing() { return this.editing || !!this.platformAdmin?.editing; }
-    get pageIsNew() { return this.platformAdmin?.editing ? !this.platformAdmin.draft.id : this.isNew; }
+    get pageEditing() { return this.editing || !!this.platformAdmin?.editing || !!this.languageAdmin?.editing; }
+    get pageIsNew() { return this.languageAdmin?.editing ? this.languageAdmin.isNew : this.platformAdmin?.editing ? !this.platformAdmin.draft.id : this.isNew; }
     private changeDetector = inject(ChangeDetectorRef);
+    private languageApi = inject(LanguageAdminService);
+    supplierEditor = new SupplierLanguageEditor();
+    supplierLanguages: CatalogLanguage[] = [];
+    supplierLanguagesLoading = false;
+    supplierLanguagesError = '';
+    async loadSupplierLanguages() {
+        this.supplierLanguagesLoading = true;
+        this.supplierLanguagesError = '';
+        try { this.supplierLanguages = (await this.languageApi.all()).filter(l => l.code !== 'pt'); }
+        catch (error) { this.supplierLanguagesError = (error as Error).message; }
+        finally { this.supplierLanguagesLoading = false; this.changeDetector.markForCheck(); }
+    }
+    get supplierTranslating() { return this.section === 'fornecedores' && this.supplierEditor.selected !== 'pt'; }
+    itemText(field: SupplierTextField) { return this.section === 'fornecedores' ? this.supplierEditor.value(this.draft, field) : this.draft[field]; }
+    changeItemText(field: SupplierTextField, value: string) {
+        if (this.section === 'fornecedores') this.supplierEditor.change(this.draft, field, value);
+        else this.draft[field] = value;
+    }
     savingType = false;
     savingTheme = false;
     themeQuery = '';
@@ -123,7 +152,7 @@ export class AdminComponent {
         this.orderError = '';
     }
     async saveOrder() {
-        if (this.savingOrder || !this.orderDirty) return;
+        if (this.languageAdmin?.saving || this.savingOrder || !this.orderDirty) return;
         this.savingOrder = true;
         this.orderError = '';
         try {
@@ -162,7 +191,7 @@ export class AdminComponent {
     section = this.route.snapshot.data['section'] as string;
     private platformService = inject(PlatformService, { optional: true });
     registeredPlatforms: CatalogPlatform[] = [];
-    ngOnInit() { if (this.section === 'fornecedores') void this.loadPlatforms(); }
+    ngOnInit() { if (this.section === 'fornecedores') { void this.loadPlatforms(); void this.loadSupplierLanguages(); } }
     async loadPlatforms() {
         if (!this.platformService) return;
         try { this.registeredPlatforms = await this.platformService.all(); }
@@ -216,6 +245,7 @@ export class AdminComponent {
                 fornecedores: 'Fornecedores',
                 tipos: 'Tipos de produto',
                 temas: 'Temas da loja',
+                idiomas: 'Idiomas',
                 plataformas: 'Plataformas',
                 configuracoes: 'Configurações',
             } as Record<string, string>
@@ -236,6 +266,7 @@ export class AdminComponent {
                       fornecedores: 'Cada indicação tem seu próprio cadastro e sua plataforma.',
                       tipos: 'Organize seus produtos com tipos simples e reutilizáveis.',
                       temas: 'Agrupe produtos por ocasiões, estilos e assuntos.',
+                      idiomas: 'Gerencie os idiomas disponíveis e as traduções dos cadastros.',
                       plataformas: 'Um único cadastro para as vitrines e os produtos dos fornecedores, por país e idioma.',
                       configuracoes: 'Contato e preferências da sua demonstração.',
                   } as Record<string, string>
@@ -337,7 +368,7 @@ export class AdminComponent {
     }
     get dirty() {
         return (
-            !!this.platformAdmin?.dirty ||
+            !!this.languageAdmin?.dirty || !!this.platformAdmin?.dirty ||
             this.orderDirty ||
             (this.editing && this.baseline !== this.snapshot()) ||
             (this.section === 'configuracoes' && this.whatsapp !== this.catalog.whatsappNumber)
@@ -357,6 +388,8 @@ export class AdminComponent {
         }
     }
     create() {
+        this.supplierEditor.selected = 'pt';
+        this.catalogEditor.selected = 'pt';
         this.errors = [];
         this.dismissNotice();
         this.isNew = true;
@@ -415,6 +448,7 @@ export class AdminComponent {
         window.scrollTo(0, 0);
     }
     edit(item: Product | AffiliateProduct) {
+        this.supplierEditor.selected = 'pt';
         this.errors = [];
         this.dismissNotice();
         this.isNew = false;
@@ -665,6 +699,7 @@ export class AdminComponent {
         else this.requestThemeRemoval(event.item);
     }
     editTheme(theme: CatalogTheme) {
+        this.catalogEditor.selected = 'pt';
         this.themeDraft = structuredClone(theme);
         this.editing = true;
         this.isNew = false;
@@ -725,6 +760,7 @@ export class AdminComponent {
         this.openDeletion({ id: theme.id, name: theme.name, kind: 'tema' });
     }
     editType(t: CatalogType) {
+        this.catalogEditor.selected = 'pt';
         this.editing = true;
         this.isNew = false;
         this.typeDraft = structuredClone(t);
