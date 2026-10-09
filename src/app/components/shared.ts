@@ -57,6 +57,7 @@ export class ProductImageComponent {
     @Input() src?: string;
     @Input() alt = 'Produto';
     @Input() label = 'CRICA / SELEÇÃO';
+    @Input() loading: 'lazy' | 'eager' = 'lazy';
     failed = false;
     ngOnChanges() {
         this.failed = false;

@@ -11,14 +11,9 @@
         @if (featuredAffiliate; as product) {
         <section
             class="hero-art supplier-featured-art"
-            cricaFeaturedSwipe
-            (swipePrevious)="previousFeatured()"
-            (swipeNext)="nextFeatured()"
-            (gestureStart)="stopCarousel()"
-            (gestureEnd)="startCarousel()"
             [attr.aria-label]="'Fornecedor em destaque' | translate"
-            (mouseenter)="stopCarousel()"
-            (mouseleave)="startCarousel()">
+            (pointerenter)="$event.pointerType === 'mouse' && stopCarousel()"
+            (pointerleave)="$event.pointerType === 'mouse' && startCarousel()">
             @if (featuredUrl(product); as url) {
             <a
                 class="hero-featured"
@@ -26,7 +21,9 @@
                 target="_blank"
                 rel="sponsored noopener noreferrer"
                 [attr.aria-label]="('Ver indicação de' | translate) + ' ' + (product | content:'name')">
-                <crica-product-image [src]="product.image" [alt]="(product | content:'name')" [label]="(product | content:'category')" />
+                <crica-image-carousel [images]="featuredImages()" [index]="featuredIndex"
+                    [alt]="(product | content:'name')" [label]="(product | content:'category')"
+                    (indexChange)="selectFeatured($event)" (gestureStart)="stopCarousel()" (gestureEnd)="startCarousel()" />
                 <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
                 <span class="hero-product-name">{{ (product | content:'name') }}</span>
             </a>
@@ -36,7 +33,9 @@
                 type="button"
                 (click)="details.openAffiliate(product)"
                 [attr.aria-label]="('Ver indicação de' | translate) + ' ' + (product | content:'name')">
-                <crica-product-image [src]="product.image" [alt]="(product | content:'name')" [label]="(product | content:'category')" />
+                <crica-image-carousel [images]="featuredImages()" [index]="featuredIndex"
+                    [alt]="(product | content:'name')" [label]="(product | content:'category')"
+                    (indexChange)="selectFeatured($event)" (gestureStart)="stopCarousel()" (gestureEnd)="startCarousel()" />
                 <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
                 <span class="hero-product-name">{{ (product | content:'name') }}</span>
             </button>

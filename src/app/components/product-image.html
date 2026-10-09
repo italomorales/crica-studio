@@ -4,7 +4,7 @@
         [src]="src"
         [alt]="alt | translate"
         (error)="failed = true"
-        loading="lazy"
+        [attr.loading]="loading"
         width="640"
         height="640" />
     } @else {

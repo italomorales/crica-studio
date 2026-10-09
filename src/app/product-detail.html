@@ -38,11 +38,12 @@
     } @else {
     <section class="product-page-grid" [attr.aria-labelledby]="'product-title-' + product.id">
         <div class="product-page-photo">
-            <crica-product-image [src]="product.images[imageIndex]" [alt]="product.name" />
+            <crica-image-carousel [images]="product.images" [index]="imageIndex" [alt]="product.name"
+                (indexChange)="selectImage($event)" />
             @if (product.images.length > 1) {
-            <div class="thumbs" [attr.aria-label]="'Fotos do produto' | translate">
+            <div #thumbs class="thumbs" [attr.aria-label]="'Fotos do produto' | translate">
                 @for (src of product.images; track src; let i = $index) {
-                <button type="button" [class.selected]="imageIndex === i" [attr.aria-pressed]="imageIndex === i" [attr.aria-label]="('Ver imagem' | translate) + ' ' + (i + 1)" (click)="imageIndex = i">
+                <button type="button" [class.selected]="imageIndex === i" [attr.aria-pressed]="imageIndex === i" [attr.aria-label]="('Ver imagem' | translate) + ' ' + (i + 1)" (click)="selectImage(i)">
                     <img [src]="src" alt="" />
                 </button>
                 }

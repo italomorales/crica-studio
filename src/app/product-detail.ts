@@ -1,9 +1,10 @@
 import { ContentPipe } from './services/catalog-translations';
 import { TranslatePipe, translate, localizedPrice, localizedOrderMessage } from './services/language';
-import { Component, ElementRef, ViewChild, inject, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductImageComponent } from './components/shared';
+import { ImageCarouselComponent } from './components/image-carousel';
 import { PublicCatalogService } from './services/public-catalog.service';
 import { validQuantity, whatsappUrl } from './services/contact';
 import { trackWhatsAppClick } from './services/whatsapp-tracking';
@@ -16,7 +17,7 @@ import productDetailTemplate from './product-detail.html?raw';
 @Component({
     selector: 'crica-product-detail',
     standalone: true,
-    imports: [ContentPipe, TranslatePipe, FormsModule, RouterLink, ProductImageComponent],
+    imports: [ContentPipe, TranslatePipe, FormsModule, RouterLink, ProductImageComponent, ImageCarouselComponent],
     template: productDetailTemplate,
 })
 export class ProductDetailComponent implements OnDestroy {
@@ -24,6 +25,7 @@ export class ProductDetailComponent implements OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly seo = inject(SeoService);
     private readonly router = inject(Router, { optional: true });
+    private readonly changeDetector = inject(ChangeDetectorRef, { optional: true });
     price = localizedPrice;
     get shopUrl() {
         const value = typeof history !== 'undefined' ? history.state?.shopUrl : undefined;
@@ -43,8 +45,23 @@ export class ProductDetailComponent implements OnDestroy {
     message = '';
     copied = false;
     copyStatus = '';
-    imageIndex = 0;
+    private readonly selectedImage = signal(0);
+    get imageIndex() { return this.selectedImage(); }
+    set imageIndex(value: number) { this.selectedImage.set(value); }
     @ViewChild('messageField') messageField?: ElementRef<HTMLTextAreaElement>;
+    @ViewChild('thumbs') thumbs?: ElementRef<HTMLDivElement>;
+
+    selectImage(index: number) {
+        this.imageIndex = index;
+        const strip = this.thumbs?.nativeElement;
+        const button = strip?.children[index] as HTMLElement | undefined;
+        if (!strip || !button) return;
+        const bounds = strip.getBoundingClientRect();
+        const selected = button.getBoundingClientRect();
+        const distance = selected.left < bounds.left ? selected.left - bounds.left
+            : selected.right > bounds.right ? selected.right - bounds.right : 0;
+        if (distance) strip.scrollBy({ left: distance, behavior: 'smooth' });
+    }
 
     private routeSubscription = this.route.paramMap.subscribe((params) => void this.load(params.get('slug') || ''));
 
@@ -82,7 +99,10 @@ export class ProductDetailComponent implements OnDestroy {
         this.idea = '';
         if (this.product) this.seo.setProduct(this.product);
         else this.skeletonTimer = setTimeout(() => {
-            if (request === this.loadRequest) this.showSkeleton = true;
+            if (request === this.loadRequest) {
+                this.showSkeleton = true;
+                this.changeDetector?.markForCheck();
+            }
         }, 200);
         try {
             const product = await this.catalog.getProduct(slug);
@@ -101,6 +121,7 @@ export class ProductDetailComponent implements OnDestroy {
                 clearTimeout(this.skeletonTimer);
                 this.showSkeleton = false;
                 this.loading = false;
+                this.changeDetector?.markForCheck();
             }
         }
     }

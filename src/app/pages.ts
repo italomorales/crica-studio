@@ -1,7 +1,7 @@
 import { ContentPipe, contentField } from './services/catalog-translations';
 import { TranslatePipe, translate } from './services/language';
 import { platformLogo } from './services/platform-logos';
-import { Component, ChangeDetectorRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectorRef, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { PlatformService, type CatalogPlatform } from './services/platform.service';
 import { ActivatedRoute, Router, Scroll } from '@angular/router';
 import { PublicCatalogService } from './services/public-catalog.service';
@@ -18,13 +18,13 @@ import { shareLink } from './services/share';
 import { productPath } from './services/product-url';
 import { ThemeFilterComponent } from './components/theme-filter';
 import { Subscription } from 'rxjs';
-import { FeaturedSwipeDirective } from './components/featured-swipe';
+import { ImageCarouselComponent } from './components/image-carousel';
 import { parseShopFilters, shopFilterParams } from './services/theme-filters';
 
 @Component({
     selector: 'crica-shop',
     standalone: true,
-    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductCardComponent, ThemeFilterComponent, FeaturedSwipeDirective],
+    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductCardComponent, ThemeFilterComponent, ImageCarouselComponent],
     template: shopTemplate,
 })
 export class ShopComponent implements OnInit, OnDestroy {
@@ -33,6 +33,7 @@ export class ShopComponent implements OnInit, OnDestroy {
         return whatsappUrl('5511963136152', translate('Olá! Gostaria de um orçamento para canecas ou bottons personalizados em quantidade para minha empresa ou evento. Produto, quantidade e prazo:'));
     }
     catalog = inject(PublicCatalogService);
+    readonly featuredImages = computed(() => this.catalog.featuredProducts().map(product => product.images[0]));
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private routeSubscription?: Subscription;
@@ -85,7 +86,9 @@ export class ShopComponent implements OnInit, OnDestroy {
         this.scrollSubscription?.unsubscribe();
         this.stopCarousel();
     }
-    featuredIndex = 0;
+    private readonly currentFeaturedIndex = signal(0);
+    get featuredIndex() { return this.currentFeaturedIndex(); }
+    set featuredIndex(value: number) { this.currentFeaturedIndex.set(value); }
     get featuredProduct(): Product | undefined {
         return this.catalog.featuredProducts()[this.featuredIndex];
     }
@@ -177,12 +180,13 @@ export class ShopComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'crica-suppliers',
     standalone: true,
-    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent, FeaturedSwipeDirective],
+    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent, ImageCarouselComponent],
     template: suppliersTemplate,
 })
 export class SuppliersComponent implements OnInit, OnDestroy {
     get platformLabels() { return Object.fromEntries(this.registeredPlatforms().map(item=>[item.name,contentField(item,"name")])); }
     catalog = inject(PublicCatalogService);
+    readonly featuredImages = computed(() => this.catalog.featuredAffiliates().map(product => product.image));
     private platformService = inject(PlatformService, { optional: true });
     private registeredPlatforms = signal<CatalogPlatform[]>([]);
     get platformOptions() { return ['Todos', ...new Set([...this.registeredPlatforms().map(p => p.name), ...this.catalog.affiliates().map(p => p.platform)])]; }
@@ -203,7 +207,9 @@ export class SuppliersComponent implements OnInit, OnDestroy {
         clearTimeout(this.searchTimer);
         this.stopCarousel();
     }
-    featuredIndex = 0;
+    private readonly currentFeaturedIndex = signal(0);
+    get featuredIndex() { return this.currentFeaturedIndex(); }
+    set featuredIndex(value: number) { this.currentFeaturedIndex.set(value); }
     get featuredAffiliate() {
         return this.catalog.featuredAffiliates()[this.featuredIndex];
     }

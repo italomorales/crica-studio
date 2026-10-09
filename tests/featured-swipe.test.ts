@@ -88,3 +88,24 @@ test('capture suppresses the click after a swipe before product/link handlers, w
     click(1); assert.ok(!prevented && !stopped);
     f.dispose();
 });
+
+test('movement locks to the initial scroll axis and short horizontal drags suppress accidental clicks', () => {
+    const f = fixture(), moves: number[] = [];
+    f.directive.swipeMove.subscribe((dx: number) => moves.push(dx));
+    const move = (dx: number, dy: number) => f.directive.onTouchMove({
+        touches: [{ identifier: 0, clientX: 150 + dx, clientY: 150 + dy }],
+        cancelable: true, preventDefault() {},
+    });
+    f.start(); move(5, 30); move(100, 40); f.end(100, 40);
+    assert.deepEqual(moves, []);
+    assert.ok(!f.events.includes('next') && !f.events.includes('previous'));
+    f.start(); move(-25, 0); f.end(-25);
+    assert.deepEqual(moves, [-25]);
+    let prevented = false;
+    f.listeners.get('click')({ detail: 1, preventDefault() { prevented = true; }, stopImmediatePropagation() {} });
+    assert.equal(prevented, true);
+    f.directive.swipeEnabled = false;
+    f.start(); move(-80, 0); f.end(-80);
+    assert.deepEqual(moves, [-25]);
+    f.dispose();
+});

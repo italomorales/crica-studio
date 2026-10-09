@@ -1,0 +1,14 @@
+<div class="image-carousel-viewport" cricaFeaturedSwipe
+    [swipeEnabled]="images.length > 1"
+    (gestureStart)="start()" (swipeMove)="move($event)"
+    (swipeNext)="next()" (swipePrevious)="previous()" (gestureEnd)="end()">
+    <div class="image-carousel-track" [class.is-animating]="animating()"
+        [style.transform]="transform" (transitionend)="transitionEnd($event)">
+        @for (src of slides(); track $index; let i = $index) {
+        <div class="image-carousel-slide" [attr.aria-hidden]="i !== position() ? 'true' : null">
+            <crica-product-image [src]="src" [alt]="alt" [label]="label"
+                [loading]="i >= position() - 1 && i <= position() + 1 ? 'eager' : 'lazy'" />
+        </div>
+        }
+    </div>
+</div>

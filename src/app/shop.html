@@ -12,20 +12,16 @@
         </div>
         <div
             class="hero-art"
-            cricaFeaturedSwipe
-            (swipePrevious)="previousFeatured()"
-            (swipeNext)="nextFeatured()"
-            (gestureStart)="stopCarousel()"
-            (gestureEnd)="startCarousel()"
-            (mouseenter)="stopCarousel()"
-            (mouseleave)="startCarousel()">
+            (pointerenter)="$event.pointerType === 'mouse' && stopCarousel()"
+            (pointerleave)="$event.pointerType === 'mouse' && startCarousel()">
             @if (featuredProduct; as product) {
             <button
                 class="hero-featured"
                 type="button"
                 (click)="openProduct(product)"
                 [attr.aria-label]="('Ver detalhes de' | translate) + ' ' + product.name">
-                <img [src]="product.images[0]" [alt]="product.name" width="640" height="640" />
+                <crica-image-carousel [images]="featuredImages()" [index]="featuredIndex" [alt]="product.name"
+                    (indexChange)="selectFeatured($event)" (gestureStart)="stopCarousel()" (gestureEnd)="startCarousel()" />
                 <span class="hero-label"> {{ 'Em destaque' | translate }} </span>
                 <span class="hero-product-name">{{ product.name }}</span>
             </button>
