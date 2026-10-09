@@ -18,12 +18,13 @@ import { shareLink } from './services/share';
 import { productPath } from './services/product-url';
 import { ThemeFilterComponent } from './components/theme-filter';
 import { Subscription } from 'rxjs';
+import { FeaturedSwipeDirective } from './components/featured-swipe';
 import { parseShopFilters, shopFilterParams } from './services/theme-filters';
 
 @Component({
     selector: 'crica-shop',
     standalone: true,
-    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductCardComponent, ThemeFilterComponent],
+    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductCardComponent, ThemeFilterComponent, FeaturedSwipeDirective],
     template: shopTemplate,
 })
 export class ShopComponent implements OnInit, OnDestroy {
@@ -90,10 +91,12 @@ export class ShopComponent implements OnInit, OnDestroy {
     }
     previousFeatured() {
         const products = this.catalog.featuredProducts();
+        if (products.length < 2) return;
         this.featuredIndex = (this.featuredIndex - 1 + products.length) % products.length;
     }
     nextFeatured() {
         const products = this.catalog.featuredProducts();
+        if (products.length < 2) return;
         this.featuredIndex = (this.featuredIndex + 1) % products.length;
     }
     selectFeatured(index: number) {
@@ -174,7 +177,7 @@ export class ShopComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'crica-suppliers',
     standalone: true,
-    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent],
+    imports: [ContentPipe, TranslatePipe, FiltersComponent, ProductImageComponent, AffiliateCardComponent, DetailsComponent, ThemeFilterComponent, FeaturedSwipeDirective],
     template: suppliersTemplate,
 })
 export class SuppliersComponent implements OnInit, OnDestroy {
@@ -217,10 +220,12 @@ export class SuppliersComponent implements OnInit, OnDestroy {
     }
     previousFeatured() {
         const products = this.catalog.featuredAffiliates();
+        if (products.length < 2) return;
         this.featuredIndex = (this.featuredIndex - 1 + products.length) % products.length;
     }
     nextFeatured() {
         const products = this.catalog.featuredAffiliates();
+        if (products.length < 2) return;
         this.featuredIndex = (this.featuredIndex + 1) % products.length;
     }
     selectFeatured(index: number) {

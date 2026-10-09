@@ -248,6 +248,7 @@ a:focus-visible {
     mix-blend-mode: multiply;
 }
 .hero-featured {
+    touch-action: pan-y pinch-zoom;
     display: block;
     height: 100%;
     width: 100%;
@@ -1057,6 +1058,7 @@ footer {
     background: white;
 }
 .product-page-photo {
+    min-width: 0;
     padding: 28px;
     background: #f7f8fa;
     border: 1px solid var(--line);
@@ -1080,6 +1082,7 @@ footer {
     object-fit: cover;
 }
 .product-page-photo .thumbs {
+    max-width: 100%;
     margin-top: 12px;
     overflow-x: auto;
     padding-bottom: 2px;

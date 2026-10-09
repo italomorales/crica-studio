@@ -12,6 +12,11 @@
         </div>
         <div
             class="hero-art"
+            cricaFeaturedSwipe
+            (swipePrevious)="previousFeatured()"
+            (swipeNext)="nextFeatured()"
+            (gestureStart)="stopCarousel()"
+            (gestureEnd)="startCarousel()"
             (mouseenter)="stopCarousel()"
             (mouseleave)="startCarousel()">
             @if (featuredProduct; as product) {

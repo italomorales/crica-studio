@@ -11,6 +11,11 @@
         @if (featuredAffiliate; as product) {
         <section
             class="hero-art supplier-featured-art"
+            cricaFeaturedSwipe
+            (swipePrevious)="previousFeatured()"
+            (swipeNext)="nextFeatured()"
+            (gestureStart)="stopCarousel()"
+            (gestureEnd)="startCarousel()"
             [attr.aria-label]="'Fornecedor em destaque' | translate"
             (mouseenter)="stopCarousel()"
             (mouseleave)="startCarousel()">
