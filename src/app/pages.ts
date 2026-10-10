@@ -189,7 +189,14 @@ export class SuppliersComponent implements OnInit, OnDestroy {
     readonly featuredImages = computed(() => this.catalog.featuredAffiliates().map(product => product.image));
     private platformService = inject(PlatformService, { optional: true });
     private registeredPlatforms = signal<CatalogPlatform[]>([]);
-    get platformOptions() { return ['Todos', ...new Set([...this.registeredPlatforms().map(p => p.name), ...this.catalog.affiliates().map(p => p.platform)])]; }
+    get platformOptions() {
+        const platforms = [...new Set([
+            ...this.registeredPlatforms().map(p => p.name),
+            ...this.catalog.affiliates().map(p => p.platform),
+        ])];
+        const isOther = (name: string) => /^(outr[oa]s?|others?)$/i.test(name.trim());
+        return ['Todos', ...platforms.filter(name => !isOther(name)), ...platforms.filter(isOther)];
+    }
     typeIds: string[] = [];
     get supplierTypes() {
         return this.catalog.types().filter(type => type.active && (type.scope === 'suppliers' || type.scope === 'both'));
