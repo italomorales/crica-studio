@@ -77,6 +77,12 @@ initializeLanguage()
                             path: 'vitrine',
                             component: StorefrontComponent,
                         },
+                        { path: 'blog', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
+                        { path: 'blog/:locale/:slug', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
+                        { canActivate: [authGuard], path: 'admin/blog/categorias', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'categories' } },
+                        { canActivate: [authGuard], path: 'admin/blog/comentarios', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'moderation' } },
+                        { canActivate: [authGuard], path: 'admin/blog/editar/:id', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'edit' } },
+                        { canActivate: [authGuard], path: 'admin/blog', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'list' } },
                         {
                             path: 'login',
                             component: LoginComponent,

@@ -1576,6 +1576,13 @@ crica-affiliate-card {
         text-align: center;
         white-space: nowrap;
     }
+    .header-inner nav.has-shop {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .header-inner nav.has-shop a {
+        font-size: 12px;
+        padding-inline: 2px;
+    }
     .header-inner nav a.active {
         display: flex;
         width: 100%;

@@ -1,0 +1,89 @@
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <a routerLink="/admin/loja" class="admin-brand">
+            <img
+                src="/assets/crica-studio-logo-transparent.png"
+                alt="Crica Studio"
+                width="140"
+                height="51" />
+        </a>
+        <span class="sidebar-label">ADMINISTRAÇÃO</span>
+        <nav aria-label="Administração">
+            <a routerLink="/admin/loja" routerLinkActive="active" ariaCurrentWhenActive="page">
+                <span aria-hidden="true">▦</span>
+                Produtos da loja
+            </a>
+            <a
+                routerLink="/admin/fornecedores"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page">
+                <span aria-hidden="true">↗</span>
+                Fornecedores
+            </a>
+            <a
+                routerLink="/admin/plataformas"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page">
+                <span aria-hidden="true">◈</span>
+                Plataformas
+            </a>
+            <a routerLink="/admin/tipos" routerLinkActive="active" ariaCurrentWhenActive="page">
+                <span aria-hidden="true">≡</span>
+                Tipos
+            </a>
+            <a routerLink="/admin/temas" routerLinkActive="active" ariaCurrentWhenActive="page">
+                <span aria-hidden="true">#</span>
+                Temas
+            </a>
+            <a
+                routerLink="/admin/blog"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{exact:true}"
+                ariaCurrentWhenActive="page">
+                <span aria-hidden="true">▤</span>
+                Matérias
+            </a>
+            <a
+                routerLink="/admin/blog/comentarios"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page">
+                <span aria-hidden="true">◌</span>
+                Moderação
+            </a>
+            <a
+                routerLink="/admin/blog/categorias"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page">
+                <span aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7l11 11-7 7L3 10V3Z" /><circle cx="7" cy="7" r="1" /></svg></span>
+                Categorias
+            </a>
+            <a routerLink="/admin/idiomas" routerLinkActive="active" ariaCurrentWhenActive="page">
+                <span aria-hidden="true">◎</span>
+                Idiomas
+            </a>
+            <a
+                routerLink="/admin/configuracoes"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page">
+                <span aria-hidden="true">⚙</span>
+                Configurações
+            </a>
+        </nav>
+        <div class="sidebar-bottom">
+            <a routerLink="/loja">← Ver site</a>
+            <button type="button" (click)="logout()">Sair</button>
+            <small>
+                Crica Studio
+                <br />
+                Ideias que ganham forma.
+            </small>
+        </div>
+    </aside>
+    <div class="admin-workspace">
+        <header class="admin-topbar">
+            <span>Seu studio, organizado.</span>
+            <span class="demo-badge">{{ badge }}</span>
+        </header>
+        <ng-content />
+    </div>
+</div>

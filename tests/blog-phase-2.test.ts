@@ -1,0 +1,75 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { runInNewContext } from 'node:vm';
+import { execFileSync } from 'node:child_process';
+const source = readFileSync(
+    new URL('../infra/cloudfront/crica-blog-ready-viewer-request.js', import.meta.url),
+    'utf8',
+);
+const handler = runInNewContext(source + ';handler');
+test('blog HTML and sitemap keep their origin paths while S3 SPA routes get an explicit rewrite', () => {
+    const request = (uri: string) => ({
+        uri,
+        headers: { host: { value: 'www.cricastudio.com.br' } },
+        querystring: { q: { value: 'presente' } },
+    });
+    for (const path of [
+        '/blog',
+        '/blog/pt/minha-historia',
+        '/blog-sitemap.xml',
+        '/api/blog/posts',
+        '/assets/blog.css',
+    ])
+        assert.equal(handler({ request: request(path) }).uri, path);
+    for (const path of ['/admin/blog/editar/123', '/loja/caneca', '/login'])
+        assert.equal(handler({ request: request(path) }).uri, '/index.html');
+    const unknown = handler({ request: request('/missing') });
+    assert.equal(unknown.uri, '/missing');
+});
+test('prepared distribution routes blog to HTTPS API and keeps real 404 without losing existing origins', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'crica-blog-cdn-'));
+    try {
+        const input = join(dir, 'input.json'),
+            output = join(dir, 'output.json');
+        writeFileSync(
+            input,
+            JSON.stringify({
+                Origins: { Quantity: 1, Items: [{ Id: 's3', DomainName: 'bucket.example.test' }] },
+                DefaultCacheBehavior: { TargetOriginId: 's3' },
+                CacheBehaviors: { Quantity: 0 },
+                CustomErrorResponses: {
+                    Quantity: 2,
+                    Items: [
+                        { ErrorCode: 404, ResponseCode: '200' },
+                        { ErrorCode: 500, ResponseCode: '500' },
+                    ],
+                },
+            }),
+        );
+        execFileSync(process.execPath, [
+            'infra/cloudfront/prepare-blog-config.mjs',
+            input,
+            output,
+            'api.example.test',
+            'cache-disabled',
+            'query-policy',
+            'function-arn',
+        ]);
+        const config = JSON.parse(readFileSync(output, 'utf8'));
+        assert.equal(config.Origins.Quantity, 2);
+        assert.equal(config.DefaultCacheBehavior.TargetOriginId, 's3');
+        assert.deepEqual(
+            config.CacheBehaviors.Items.map((b: any) => b.PathPattern),
+            ['/blog', '/blog/*', '/blog-sitemap.xml'],
+        );
+        assert.equal(config.CacheBehaviors.Items[0].CachePolicyId, 'cache-disabled');
+        assert.deepEqual(config.CustomErrorResponses.Items, [
+            { ErrorCode: 500, ResponseCode: '500' },
+        ]);
+    } finally {
+        rmSync(dir, { recursive: true, force: true });
+    }
+});

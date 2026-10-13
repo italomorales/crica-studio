@@ -32,6 +32,7 @@ import { TypeGridComponent, type TypeAction } from './type-grid';
 import { ThemeGridComponent, type ThemeAction } from './theme-grid';
 import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
 import { friendlySlug } from '../services/product-url';
+import { AdminShellComponent } from './admin-shell';
 import adminTemplate from './admin.html?raw';
 import { LanguageAdminComponent } from './language-admin';
 import { PlatformAdminComponent } from './platform-admin';
@@ -51,6 +52,7 @@ type DeletionTarget = {
     selector: 'crica-admin',
     standalone: true,
     imports: [
+        AdminShellComponent,
         FormsModule,
         RouterLink,
         RouterLinkActive,

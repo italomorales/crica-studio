@@ -11,7 +11,7 @@
                 width="140"
                 height="51" />
         </a>
-        <nav [attr.aria-label]="'Navegação principal' | translate">
+        <nav [class.has-shop]="showShop" [attr.aria-label]="'Navegação principal' | translate">
             @if (showShop) {
             <a routerLink="/loja" routerLinkActive="active" ariaCurrentWhenActive="page">
                 {{ 'Loja' | translate }}
@@ -23,6 +23,7 @@
             <a routerLink="/vitrine" routerLinkActive="active" ariaCurrentWhenActive="page">
                 {{ 'Vitrines' | translate }}
             </a>
+            <a routerLink="/blog" routerLinkActive="active" ariaCurrentWhenActive="page">Blog</a>
         </nav>
     </div>
 </header>

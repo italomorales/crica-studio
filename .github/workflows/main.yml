@@ -32,6 +32,16 @@ jobs:
       - name: Build Angular
         run: npm run build
 
+      - name: Package matching HTML shell for blog API
+        run: node scripts/package-blog-shell.mjs
+
+      - name: Preserve blog shell for backend release
+        uses: actions/upload-artifact@v4
+        with:
+          name: blog-html-shell-${{ github.sha }}
+          path: .blog-html-shell/
+          include-hidden-files: true
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:

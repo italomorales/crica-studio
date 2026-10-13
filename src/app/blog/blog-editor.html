@@ -1,0 +1,134 @@
+<div class="blog-editor-shell">
+    <div class="blog-editor-toolbar" role="toolbar" aria-label="Formatação do texto">
+        @for (item of
+        [{id:'bold',name:'Negrito',icon:'B'},{id:'italic',name:'Itálico',icon:'I'},{id:'underline',name:'Sublinhado',icon:'U'},{id:'h2',name:'Título
+        de
+        seção',icon:'H2'},{id:'h3',name:'Subtítulo',icon:'H3'},{id:'bulletList',name:'Lista',icon:'•
+        Lista'},{id:'orderedList',name:'Lista numerada',icon:'1.
+        Lista'},{id:'blockquote',name:'Citação',icon:'❞'},{id:'undo',name:'Desfazer',icon:'↶'},{id:'redo',name:'Refazer',icon:'↷'}];
+        track item.id) {
+        <button
+            type="button"
+            [class.active]="active(item.id)"
+            [attr.aria-label]="item.name"
+            [attr.aria-pressed]="active(item.id)"
+            [title]="item.name"
+            (mousedown)="$event.preventDefault()"
+            (click)="format(item.id)">
+            {{ item.icon }}
+        </button>
+        }
+        <button
+            type="button"
+            [class.active]="active('link')"
+            [attr.aria-label]="active('link') ? 'Editar link' : 'Inserir link'"
+            title="Inserir ou editar link"
+            (mousedown)="$event.preventDefault()"
+            (click)="openLink()">
+            <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true">
+                <path
+                    d="m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m4-2 2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" />
+            </svg>
+            Link
+        </button>
+        <button
+            type="button"
+            aria-label="Remover link"
+            title="Remover link mantendo o texto"
+            [disabled]="!active('link')"
+            (mousedown)="$event.preventDefault()"
+            (click)="removeLink()">
+            Remover link
+        </button>
+    </div>
+    @if(linkFormOpen()) {
+    <div
+        class="blog-link-panel"
+        role="group"
+        aria-label="Configurar link"
+        (keydown.escape)="cancelLink()">
+        <p class="blog-help">
+            Selecione um texto para transformá-lo em link ou insira um novo texto na posição do
+            cursor.
+        </p>
+        <div class="blog-insert-tools">
+            <label>
+                Texto do link
+                <input
+                    type="text"
+                    [(ngModel)]="linkText"
+                    placeholder="Ex.: Conheça a loja"
+                    (keydown.enter)="insertLink(); $event.preventDefault()" />
+            </label>
+            <label>
+                Endereço do link
+                <input
+                    #linkAddress
+                    type="text"
+                    inputmode="url"
+                    [(ngModel)]="linkUrl"
+                    placeholder="https://site.com ou /loja"
+                    (keydown.enter)="insertLink(); $event.preventDefault()" />
+            </label>
+            <button type="button" class="primary" (click)="insertLink()">Aplicar link</button>
+            <button type="button" class="secondary" (click)="cancelLink()">Cancelar</button>
+        </div>
+        @if(message()) {
+        <p class="blog-notice" role="status">{{ message() }}</p>
+        }
+    </div>
+    }
+    <div #mount></div>
+    <div class="blog-insert-tools">
+        <label>
+            Buscar produto
+            <input
+                type="search"
+                [(ngModel)]="productQuery"
+                (ngModelChange)="searchProducts()"
+                placeholder="Nome do produto" />
+            Produto ou vitrine
+            <select [(ngModel)]="productId">
+                @for (product of products; track product.id) {
+                <option [value]="product.id">{{ product.name }}</option>
+                }
+            </select>
+        </label>
+        <button type="button" class="secondary" [disabled]="!productId" (click)="insertProduct()">
+            + Inserir card
+        </button>
+        <button [disabled]="productPage === 1" (click)="searchProducts(productPage - 1)">
+            Anterior
+        </button>
+        <button
+            [disabled]="productPage * 20 >= productTotal"
+            (click)="searchProducts(productPage + 1)">
+            Mais produtos
+        </button>
+    </div>
+    <div class="blog-insert-tools">
+        <label>
+            Imagem de exemplo
+            <select [(ngModel)]="imageChoice">
+                <option value="/assets/product-4.webp">Caneca · composição</option>
+                <option value="/assets/product-5.webp">Bottons · detalhe</option>
+                <option value="/assets/product-2.webp">Caneca · cores</option>
+            </select>
+        </label>
+        <button type="button" class="secondary" (click)="insertImage()">+ Inserir imagem</button>
+        <label class="blog-file-button">
+            Imagem do computador
+            <input type="file" accept="image/png,image/jpeg,image/webp" (change)="upload($event)" />
+        </label>
+    </div>
+    @if (message() && !linkFormOpen()) {
+    <p role="status" class="blog-notice">{{ message() }}</p>
+    }
+</div>

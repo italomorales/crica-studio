@@ -1,0 +1,276 @@
+<main id="main" class="blog-page container">
+    @if (loading()) {
+    <p role="status">Carregando histórias…</p>
+    } @if (notice()) {
+    <p role="status">{{ notice() }}</p>
+    }
+    <div class="blog-utility">
+        <span class="blog-demo">Caderno Crica</span>
+        <div class="blog-languages" aria-label="Idioma da matéria">
+            @for (item of locales; track item.code) {
+            <button
+                type="button"
+                [class.active]="locale() === item.code"
+                (click)="selectLocale(item.code)"
+                [attr.aria-pressed]="locale() === item.code">
+                {{ item.name }}
+            </button>
+            }
+        </div>
+    </div>
+    @if (!slug()) {
+    <header class="blog-intro">
+        <span class="eyebrow">CADERNO CRICA</span>
+        <h1>
+            Entre uma ideia
+            <br />
+            e
+            <span>outra.</span>
+        </h1>
+        <p>Inspiração, histórias e detalhes para criar algo que tenha a sua essência.</p>
+        <a class="blog-text-link" routerLink="/admin/blog">Administração ↗</a>
+    </header>
+    @if (featured; as post) {
+    <a class="blog-featured" [routerLink]="path(post)">
+        <div class="blog-cover">
+            <img
+                [src]="post.cover"
+                [alt]="post.versions[locale()].title"
+                width="800"
+                height="640" />
+        </div>
+        <div class="blog-featured-copy">
+            <span class="blog-tag">EM DESTAQUE · {{ post.category }}</span>
+            <h2>{{ post.versions[locale()].title }}</h2>
+            <p>{{ post.versions[locale()].summary }}</p>
+            <div class="blog-meta">
+                {{ date(post.date) }}
+                <span>·</span>
+                {{ minutes(post.versions[locale()].html) }} min de leitura
+            </div>
+            <span class="blog-text-link">Uma boa ideia começa aqui →</span>
+        </div>
+    </a>
+    }
+    <section class="blog-feed" aria-label="Matérias do blog">
+        <div class="blog-feed-heading">
+            <div>
+                <span class="eyebrow">PARA LER COM CALMA</span>
+                <h2>Mais ideias para você.</h2>
+            </div>
+            <label class="blog-search">
+                Buscar matérias
+                <input
+                    type="search"
+                    placeholder="Uma ideia, um tema, uma ocasião…"
+                    [ngModel]="query()"
+                    (ngModelChange)="filters($event)" />
+            </label>
+        </div>
+        <div class="blog-categories" aria-label="Categorias">
+            <button [class.active]="!category()" (click)="filters(query(), '')">Todas</button>
+            @for (item of categoryRows; track item.id) {
+            <button [class.active]="category() === item.id" (click)="filters(query(), item.id)">
+                {{ item.name }}
+            </button>
+            }
+        </div>
+        <p class="blog-result-count" aria-live="polite">
+            {{ total() }} matérias · {{ locale() === 'pt' ? 'Português' : locale() === 'en' ?
+            'English' : 'Español' }}
+        </p>
+        <div class="blog-grid">
+            @for (post of visiblePosts; track post.id) {
+            <a class="blog-card" [routerLink]="path(post)">
+                <div class="blog-cover">
+                    <img
+                        [src]="post.cover"
+                        [alt]="post.versions[locale()].title"
+                        loading="lazy"
+                        width="640"
+                        height="640" />
+                </div>
+                <div class="blog-card-copy">
+                    <span class="eyebrow">{{ post.category }}</span>
+                    <h3>{{ post.versions[locale()].title }}</h3>
+                    <p>{{ post.versions[locale()].summary }}</p>
+                    <div class="blog-meta">
+                        {{ date(post.date) }} · {{ minutes(post.versions[locale()].html) }} min
+                    </div>
+                </div>
+            </a>
+            } @empty {
+            <div class="empty">
+                <h3>Nenhuma matéria por aqui.</h3>
+                <p>Experimente outro tema ou uma busca mais curta.</p>
+                <button class="secondary" (click)="filters('', '')">Limpar filtros</button>
+            </div>
+            }
+        </div>
+        @if (pages.length > 1) {
+        <nav class="blog-pagination" aria-label="Páginas do blog">
+            <button [disabled]="page() === 1" (click)="filters(query(), category(), page() - 1)">
+                ← Anterior
+            </button>
+            @for (number of pages; track number) {
+            <button
+                [attr.aria-current]="page() === number ? 'page' : null"
+                [class.active]="page() === number"
+                (click)="filters(query(), category(), number)">
+                {{ number }}
+            </button>
+            }
+            <button
+                [disabled]="page() * 6 >= total()"
+                (click)="filters(query(), category(), page() + 1)">
+                Próxima →
+            </button>
+        </nav>
+        }
+    </section>
+    } @else if (post; as post) { @if (version; as version) { @if (previewMode()) {
+    <div class="blog-preview-notice">
+        Prévia editorial · {{ version.status === 'published' ? 'Publicada nesta sessão' : 'Versão
+        não publicada' }}
+        <a [routerLink]="['/admin/blog/editar', post.id]" [queryParams]="{idioma: locale()}">
+            ← Voltar à edição
+        </a>
+    </div>
+    }
+    <a class="back-link" [routerLink]="['/blog']" [queryParams]="{idioma: locale()}">
+        ← Todas as histórias
+    </a>
+    <article class="blog-article">
+        <header class="blog-article-heading">
+            <span class="eyebrow">{{ post.category }}</span>
+            <h1>{{ version.title || 'Sua próxima matéria' }}</h1>
+            <p class="blog-deck">{{ version.summary }}</p>
+            <div class="blog-byline">
+                <span class="blog-avatar">C</span>
+                <div>
+                    <strong>{{ post.author }}</strong>
+                    <div class="blog-meta">
+                        {{ date(post.date) }} · {{ minutes(version.html) }} min de leitura
+                    </div>
+                </div>
+            </div>
+        </header>
+        <figure class="blog-article-cover">
+            <img [src]="post.cover" [alt]="version.title" width="1200" height="800" />
+            <figcaption>Ideias que ganham forma, do seu jeito.</figcaption>
+        </figure>
+        <div class="blog-prose" [innerHTML]="version.html"></div>
+    </article>
+    @if (previewMode()) {
+    <p class="blog-demo">
+        Demonstração local · curtidas, login e comentários não são serviços ativos.
+    </p>
+    <div class="blog-reactions">
+        <button
+            class="secondary"
+            [class.is-liked]="liked"
+            [attr.aria-pressed]="liked"
+            (click)="like()">
+            {{ liked ? '♥' : '♡' }} {{ liked ? 'Você curtiu' : 'Gostou desta ideia?' }}
+            <span>{{ 42 + (liked ? 1 : 0) }}</span>
+        </button>
+        <span>Curtidas de exemplo</span>
+    </div>
+    <section id="blog-comments" class="blog-comments" aria-labelledby="comments-title">
+        <div class="blog-section-title">
+            <span class="eyebrow">A CONVERSA CONTINUA</span>
+            <h2 id="comments-title">Deixe sua ideia por aqui.</h2>
+            <p>Os comentários passam por moderação antes de aparecer para todo mundo.</p>
+        </div>
+        @if (!store.user()) {
+        <div class="blog-login">
+            <p>Entre para curtir e participar.</p>
+            <div>
+                <button class="secondary" (click)="login('Google')">
+                    <b>G</b>
+                    Continuar com Google
+                </button>
+                <button class="secondary" (click)="login('Facebook')">
+                    <b>f</b>
+                    Continuar com Facebook
+                </button>
+            </div>
+            <small>Demonstração: esses botões não acessam Google ou Facebook.</small>
+        </div>
+        } @else {
+        <div class="blog-session">
+            <span>{{ store.user()?.name }} · {{ store.user()?.provider }}</span>
+            <button class="blog-text-link" (click)="store.user.set(undefined)">
+                Sair da demonstração
+            </button>
+        </div>
+        <form (ngSubmit)="sendComment()">
+            <label for="blog-comment">Seu comentário</label>
+            <textarea
+                id="blog-comment"
+                name="comment"
+                [(ngModel)]="commentText"
+                rows="4"
+                maxlength="1500"
+                placeholder="Conte o que esta ideia despertou em você…"
+                required></textarea>
+            <div class="blog-comment-actions">
+                <small>{{ commentText.length }}/1500 · sem envio externo</small>
+                <button class="primary" [disabled]="!commentText.trim()">
+                    Enviar para moderação
+                </button>
+            </div>
+        </form>
+        } @if (notice()) {
+        <p class="blog-notice" role="status">{{ notice() }}</p>
+        }
+        <div class="blog-comment-list">
+            @for (comment of comments; track comment.id) {
+            <div class="blog-comment">
+                <span class="blog-avatar">{{ comment.name[0] }}</span>
+                <div>
+                    <strong>{{ comment.name }}</strong>
+                    <small>{{ comment.date }}</small>
+                    @if (comment.status === 'pending') {
+                    <span class="blog-state pending">
+                        Aguardando moderação · visível só para você
+                    </span>
+                    }
+                    <p>{{ comment.text }}</p>
+                </div>
+            </div>
+            } @empty {
+            <p>Comece a conversa com a sua ideia.</p>
+            }
+        </div>
+    </section>
+    }
+    <button class="secondary" (click)="share()">Compartilhar história ↗</button>
+    <section class="blog-related">
+        <div class="blog-section-title">
+            <span class="eyebrow">CONTINUE EXPLORANDO</span>
+            <h2>Uma ideia leva a outra.</h2>
+        </div>
+        <div class="blog-grid">
+            @for (item of related; track item.id) {
+            <a class="blog-card" [routerLink]="path(item)">
+                <div class="blog-cover">
+                    <img [src]="item.cover" [alt]="item.versions[locale()].title" loading="lazy" />
+                </div>
+                <div class="blog-card-copy">
+                    <span class="eyebrow">{{ item.category }}</span>
+                    <h3>{{ item.versions[locale()].title }}</h3>
+                    <span class="blog-text-link">Ler história →</span>
+                </div>
+            </a>
+            }
+        </div>
+    </section>
+    } } @else {
+    <section class="empty">
+        <h1>Esta história ainda não está disponível.</h1>
+        <p>Ela pode estar em tradução ou aguardando publicação.</p>
+        <a class="primary" routerLink="/blog">Explorar o blog</a>
+    </section>
+    }
+</main>

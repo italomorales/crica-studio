@@ -1,0 +1,421 @@
+<crica-admin-shell
+    [badge]="mode() === 'moderation' ? 'Demonstração · dados apenas nesta aba' : 'Conectado à API'">
+    <main id="main" class="admin-main">
+        @if (mode() === 'list') {
+        <div class="admin-page-heading">
+            <div>
+                <span class="eyebrow">SEU CONTEÚDO</span>
+                <h1>Matérias do blog</h1>
+                <p>Uma boa ideia merece um lugar para crescer.</p>
+            </div>
+            <a class="primary" routerLink="/admin/blog/editar/novo">+ Nova matéria</a>
+        </div>
+        <section class="admin-panel catalog-list-panel">
+            <div class="admin-filters">
+                <label>
+                    Buscar matéria
+                    <input
+                        type="search"
+                        [(ngModel)]="query"
+                        (ngModelChange)="reload()"
+                        placeholder="Título no idioma selecionado" />
+                </label>
+                <label>
+                    Categoria
+                    <select [(ngModel)]="category" (ngModelChange)="reload()">
+                        <option value="">Todas</option>
+                        @for (item of categories; track item) {
+                        <option [value]="item">{{ item }}</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    Idioma
+                    <select [(ngModel)]="localeFilter" (ngModelChange)="reload()">
+                        @for (item of locales; track item.code) {
+                        <option [value]="item.code">{{ item.name }}</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    Situação
+                    <select [(ngModel)]="statusFilter" (ngModelChange)="reload()">
+                        <option value="">Todas</option>
+                        <option value="draft">Rascunho</option>
+                        <option value="published">Publicada</option>
+                        <option value="scheduled">Agendada</option>
+                        <option value="archived">Arquivada</option>
+                    </select>
+                </label>
+            </div>
+            <div class="admin-results">
+                <span aria-live="polite">{{ total }} matérias</span>
+                <div class="admin-results-actions">
+                    <label class="page-size">
+                        <span>Por página</span>
+                        <select [(ngModel)]="pageSize">
+                            <option [ngValue]="20">20</option>
+                            <option [ngValue]="50">50</option>
+                            <option [ngValue]="100">100</option>
+                        </select>
+                    </label>
+                    @if(query || category || statusFilter) {
+                    <button
+                        class="text-link"
+                        (click)="query='';category='';statusFilter='';reload()">
+                        Limpar filtros
+                    </button>
+                    }
+                </div>
+            </div>
+            <crica-blog-grid
+                [locale]="localeFilter"
+                [query]="query"
+                [categoryId]="filterCategoryId"
+                [status]="statusFilter"
+                [pageSize]="pageSize"
+                [refreshToken]="refreshToken"
+                (loaded)="gridLoaded($event)"
+                (failed)="notice.set($event)"
+                (edit)="edit($event)"
+                (remove)="requestDeletion($event)" />
+        </section>
+        } @else if (mode() === 'categories') {
+        <div class="admin-page-heading">
+            <div>
+                <span class="eyebrow">SEU CONTEÚDO</span>
+                <h1>Categorias</h1>
+                <p>Organize as categorias e suas traduções.</p>
+            </div>
+            <button class="primary" (click)="editCategory()">+ Nova categoria</button>
+        </div>
+        @if(categoryDraft; as item) {
+        <section class="admin-panel">
+            <h2>{{ categoryIsNew ? 'Nova categoria' : 'Editar categoria' }}</h2>
+            <div class="blog-category-editor">
+                <label>
+                    Nome PT
+                    <input [(ngModel)]="item.name" maxlength="120" />
+                </label>
+                <label>
+                    Slug
+                    <input [(ngModel)]="item.slug" maxlength="140" />
+                </label>
+                <label>
+                    Nome EN
+                    <input [(ngModel)]="item.translations['en']" maxlength="120" />
+                </label>
+                <label>
+                    Nome ES
+                    <input [(ngModel)]="item.translations['es']" maxlength="120" />
+                </label>
+                <label class="blog-check">
+                    <input type="checkbox" [(ngModel)]="item.active" />
+                    Ativa
+                </label>
+            </div>
+            <button class="primary" (click)="saveCategory(item)">Salvar categoria</button>
+            <button class="secondary" (click)="categoryDraft = undefined">Cancelar</button>
+        </section>
+        }
+        <section class="admin-panel catalog-list-panel">
+            <div class="admin-filters">
+                <label class="admin-search">
+                    <span class="sr-only">Buscar categorias</span>
+                    <input
+                        type="search"
+                        placeholder="Buscar categorias"
+                        [(ngModel)]="categoryQuery" />
+                </label>
+                <select aria-label="Situação das categorias" [(ngModel)]="categoryStatus">
+                    <option value="">Todas as categorias</option>
+                    <option value="active">Ativas</option>
+                    <option value="inactive">Inativas</option>
+                </select>
+            </div>
+            <div class="admin-results">
+                <span>{{ filteredCategories.length }} categorias</span>
+                <label class="page-size">
+                    <span>Por página</span>
+                    <select [(ngModel)]="pageSize">
+                        <option [ngValue]="20">20</option>
+                        <option [ngValue]="50">50</option>
+                        <option [ngValue]="100">100</option>
+                    </select>
+                </label>
+            </div>
+            <crica-blog-record-grid
+                kind="categories"
+                [rows]="filteredCategories"
+                [pageSize]="pageSize"
+                (action)="categoryAction($event)" />
+        </section>
+        } @else if (mode() === 'moderation') {
+        <div class="admin-page-heading">
+            <div>
+                <span class="eyebrow">CUIDE DA CONVERSA</span>
+                <h1>Moderação</h1>
+                <p>Comentários aprovados aparecem no blog desta sessão.</p>
+            </div>
+            <span class="blog-state pending">{{ pendingCount }} aguardando revisão</span>
+        </div>
+        <section class="admin-panel catalog-list-panel">
+            <div class="admin-filters">
+                <select aria-label="Situação dos comentários" [(ngModel)]="moderationFilter">
+                    <option value="pending">Aguardando moderação</option>
+                    <option value="approved">Aprovados</option>
+                    <option value="rejected">Rejeitados</option>
+                    <option value="spam">Spam</option>
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="admin-results">
+                <span>{{ comments.length }} comentários de demonstração</span>
+                <label class="page-size">
+                    <span>Por página</span>
+                    <select [(ngModel)]="pageSize">
+                        <option [ngValue]="20">20</option>
+                        <option [ngValue]="50">50</option>
+                        <option [ngValue]="100">100</option>
+                    </select>
+                </label>
+            </div>
+            <crica-blog-record-grid
+                kind="moderation"
+                [rows]="comments"
+                [pageSize]="pageSize"
+                (action)="moderateAction($event)" />
+        </section>
+        } @else if (editing; as post) {
+        <div class="admin-page-heading">
+            <div>
+                <a class="back-link" routerLink="/admin/blog">← Matérias</a>
+                <h1>{{ post.versions.pt.title ? 'Editar história' : 'Sua próxima história' }}</h1>
+                <p>Crie, ajuste e veja como a matéria aparece para quem lê.</p>
+            </div>
+            <button type="button" class="secondary" (click)="preview()">Ver prévia ↗</button>
+        </div>
+        <div class="blog-edit-layout">
+            <div class="blog-edit-primary">
+                <section class="blog-panel">
+                    <div class="blog-language-tabs" role="tablist" aria-label="Versões da matéria">
+                        @for (item of locales; track item.code) {
+                        <button
+                            role="tab"
+                            [attr.aria-selected]="editLocale === item.code"
+                            [class.active]="editLocale === item.code"
+                            (click)="editLocale = item.code">
+                            {{ item.name }}
+                            <small>
+                                {{ complete(post.versions[item.code]) ? 'Completa' : 'Tradução
+                                pendente' }}
+                            </small>
+                        </button>
+                        }
+                    </div>
+                    <p class="blog-help">
+                        Cada idioma tem título, conteúdo, endereço e situação próprios.
+                    </p>
+                    <label>
+                        Título
+                        <input
+                            [(ngModel)]="version.title"
+                            maxlength="180"
+                            placeholder="Uma boa história começa pelo título" />
+                    </label>
+                    <label>
+                        Resumo
+                        <textarea
+                            [(ngModel)]="version.summary"
+                            rows="3"
+                            maxlength="400"
+                            placeholder="Convide a pessoa a continuar a leitura…"></textarea>
+                    </label>
+                    <label>Conteúdo</label>
+                    <crica-blog-editor
+                        [html]="version.html"
+                        [associatedProducts]="post.products || []"
+                        [document]="version.document"
+                        [locale]="editLocale"
+                        (documentChange)="version.document = $event"
+                        (htmlChange)="version.html = $event" />
+                </section>
+                <section class="blog-panel">
+                    <span class="eyebrow">COMO A MATÉRIA SERÁ ENCONTRADA</span>
+                    <h2>SEO desta versão</h2>
+                    <label>
+                        Slug · endereço da matéria
+                        <div class="blog-slug-field">
+                            <input [(ngModel)]="version.slug" placeholder="uma-boa-ideia" />
+                            <button type="button" class="secondary" (click)="slugFromTitle()">
+                                Gerar do título
+                            </button>
+                        </div>
+                    </label>
+                    <label>
+                        Título para busca
+                        <input [(ngModel)]="version.seoTitle" maxlength="100" />
+                        <small>{{ version.seoTitle.length }}/100 caracteres</small>
+                    </label>
+                    <label>
+                        Descrição para busca
+                        <textarea
+                            [(ngModel)]="version.seoDescription"
+                            maxlength="180"
+                            rows="3"></textarea>
+                        <small>{{ version.seoDescription.length }}/180 caracteres</small>
+                    </label>
+                    <div class="blog-search-preview">
+                        <small>PRÉVIA DE BUSCA · ILUSTRATIVA</small>
+                        <p>
+                            cricastudio.com.br › blog › {{ editLocale }} › {{ version.slug ||
+                            'endereco-da-materia' }}
+                        </p>
+                        <h3>{{ version.seoTitle || version.title || 'Título da sua matéria' }}</h3>
+                        <p>
+                            {{ version.seoDescription || version.summary || 'Uma descrição curta
+                            ajuda a mostrar o que esta história tem de especial.' }}
+                        </p>
+                    </div>
+                </section>
+            </div>
+            <aside class="blog-edit-sidebar">
+                <section class="blog-panel">
+                    <span class="eyebrow">PUBLICAÇÃO</span>
+                    <h2>Do seu jeito, no seu tempo.</h2>
+                    <span class="blog-state" [class.pending]="version.status !== 'published'">
+                        {{ statusLabels[version.status] }} · {{ editLocale.toUpperCase() }}
+                    </span>
+                    <label>
+                        Categoria
+                        <select [(ngModel)]="post.category">
+                            @for (item of categories; track item) {
+                            <option [value]="item">{{ item }}</option>
+                            }
+                        </select>
+                    </label>
+                    <label>
+                        Autor
+                        <input [(ngModel)]="post.author" />
+                    </label>
+                    <label>
+                        Data
+                        <input type="date" [(ngModel)]="post.date" />
+                    </label>
+                    <label class="blog-check">
+                        <input type="checkbox" [(ngModel)]="post.featured" />
+                        Destacar na listagem
+                    </label>
+                    <label>
+                        Agendar para (horário local)
+                        <input type="datetime-local" [(ngModel)]="scheduleLocal" />
+                    </label>
+                    <div class="blog-save-buttons">
+                        <button class="secondary" [disabled]="busy" (click)="save('scheduled')">
+                            Agendar versão
+                        </button>
+                        <button
+                            type="button"
+                            class="primary"
+                            [disabled]="busy"
+                            (click)="save('published')">
+                            Publicar esta versão
+                        </button>
+                        <button
+                            type="button"
+                            class="secondary"
+                            [disabled]="busy"
+                            (click)="save('draft')">
+                            Guardar como rascunho
+                        </button>
+                        <button
+                            type="button"
+                            class="blog-text-link"
+                            [disabled]="busy"
+                            (click)="save('archived')">
+                            Arquivar esta versão
+                        </button>
+                        @if (!isNew) {
+                        <button
+                            type="button"
+                            class="blog-danger"
+                            [disabled]="busy || deleting"
+                            (click)="requestDeletion(post)">
+                            Excluir matéria
+                        </button>
+                        }
+                    </div>
+                    <small>Cada versão é salva e publicada independentemente.</small>
+                </section>
+                <section class="blog-panel">
+                    <h2>Imagem de capa</h2>
+                    <img class="blog-cover-preview" [src]="post.cover" alt="Prévia da capa" />
+                    <label>
+                        Imagem de exemplo
+                        <select [(ngModel)]="post.cover">
+                            <option value="/assets/product-1.webp">Caneca botânica</option>
+                            <option value="/assets/product-2.webp">Caneca colorida</option>
+                            <option value="/assets/product-5.webp">Bottons</option>
+                            <option value="/assets/product-7.webp">Chaveiro</option>
+                        </select>
+                    </label>
+                    <label class="blog-file-button">
+                        Escolher do computador
+                        <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            (change)="uploadCover($event)" />
+                    </label>
+                </section>
+            </aside>
+        </div>
+        } @else {
+        <div class="empty">
+            <h1>Matéria não encontrada.</h1>
+            <a routerLink="/admin/blog" class="primary">Voltar às matérias</a>
+        </div>
+        } @if (notice()) {
+        <p class="blog-admin-notice" role="status">{{ notice() }}</p>
+        }
+    </main>
+</crica-admin-shell>
+<dialog
+    #deleteDialog
+    class="delete-dialog"
+    aria-labelledby="blog-delete-title"
+    (cancel)="onDeleteCancel($event)"
+    (click)="onDeleteBackdrop($event)">
+    @if (deletionTarget) {
+    <section class="delete-dialog-shell">
+        <div class="delete-dialog-icon" aria-hidden="true">!</div>
+        <span class="eyebrow">AÇÃO PERMANENTE</span>
+        <h2 id="blog-delete-title">Excluir matéria?</h2>
+        <p>
+            Você está prestes a excluir
+            <strong>{{ deletionTitle }}</strong>
+            . A matéria e todas as versões de idioma serão removidas definitivamente, inclusive as
+            publicadas e agendadas.
+        </p>
+        @if(deletionError) {
+        <p class="delete-dialog-error" role="alert">{{ deletionError }}</p>
+        }
+        <div class="delete-dialog-actions">
+            <button
+                class="secondary"
+                type="button"
+                autofocus
+                [disabled]="deleting"
+                (click)="cancelDeletion()">
+                Cancelar
+            </button>
+            <button
+                class="delete-confirm"
+                type="button"
+                [disabled]="deleting"
+                (click)="confirmDeletion()">
+                {{ deleting ? 'Excluindo…' : 'Excluir definitivamente' }}
+            </button>
+        </div>
+    </section>
+    }
+</dialog>

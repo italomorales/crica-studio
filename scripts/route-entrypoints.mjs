@@ -42,6 +42,10 @@ const routes = [
     'admin/plataformas',
     'admin/vitrines',
     'admin/configuracoes',
+    'admin/blog',
+    'admin/blog/comentarios',
+    'admin/blog/categorias',
+    'admin/blog/editar/novo',
 ];
 
 function escapeHtml(value) {

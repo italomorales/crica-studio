@@ -4,3 +4,5 @@ dist/
 .openai/*local*
 
 .env*.local
+blog-local*.log
+.blog-html-shell/

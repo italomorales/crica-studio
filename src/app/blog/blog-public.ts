@@ -1,0 +1,263 @@
+import { Component, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { language, setLanguage } from '../services/language';
+import {
+    BLOG_CATEGORIES,
+    BLOG_LOCALES,
+    blogPath,
+    searchBlog,
+    type BlogLocale,
+    type BlogPost,
+} from './blog-data';
+import { BlogStore } from './blog-store';
+import { BlogApi, type Category } from './blog-api';
+import { SeoService } from '../services/seo.service';
+import template from './blog-public.html?raw';
+import './blog.css';
+
+@Component({
+    selector: 'crica-blog',
+    standalone: true,
+    imports: [FormsModule, RouterLink],
+    template,
+})
+export class BlogPublicComponent {
+    readonly store = inject(BlogStore);
+    private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+    readonly locales = BLOG_LOCALES;
+    private api = inject(BlogApi);
+    private seo = inject(SeoService);
+    categoryRows: Category[] = [];
+    get categories() {
+        return this.categoryRows.map((c) => c.name);
+    }
+    total = signal(0);
+    currentPost = signal<BlogPost | undefined>(undefined);
+    loading = signal(false);
+    private requestId = 0;
+    async load() {
+        const id = ++this.requestId;
+        this.loading.set(true);
+        try {
+            const categories = await this.api.categories(false, this.locale());
+            if (id !== this.requestId) return;
+            this.categoryRows = categories;
+            const categoryId = categories.find(
+                (c) => c.name === this.category() || c.id === this.category(),
+            )?.id;
+            const data = await this.api.list(false, {
+                locale: this.locale(),
+                page: this.page(),
+                pageSize: 6,
+                query: this.query(),
+                ...(categoryId ? { categoryId } : {}),
+            });
+            if (id !== this.requestId) return;
+            this.store.posts.set(data.items);
+            this.total.set(data.total);
+            if (this.slug() && !this.previewMode()) {
+                const post = await this.api.article(this.locale(), this.slug());
+                if (id !== this.requestId) return;
+                this.currentPost.set(post);
+                const v = post.versions[this.locale()];
+                this.seo.setBlog(
+                    v.seoTitle || v.title,
+                    v.seoDescription || v.summary,
+                    blogPath(post, this.locale()),
+                    post.cover,
+                    post.versions,
+                    {
+                        headline: v.title,
+                        description: v.summary,
+                        image: post.cover,
+                        inLanguage: this.locale(),
+                        datePublished: v.publishedAt || v.publishAt,
+                        dateModified: v.updatedAt,
+                        author: { '@type': 'Person', name: post.author },
+                    },
+                );
+            } else if (!this.slug())
+                this.seo.setBlog(
+                    'Caderno Crica',
+                    'Inspiração, histórias e detalhes para criar algo que tenha a sua essência.',
+                    '/blog',
+                );
+        } catch (e) {
+            if (id === this.requestId) {
+                this.currentPost.set(undefined);
+                this.notice.set((e as Error).message);
+            }
+        } finally {
+            if (id === this.requestId) this.loading.set(false);
+        }
+    }
+    readonly locale = signal<BlogLocale>('pt');
+    readonly slug = signal('');
+    readonly previewMode = signal(false);
+    readonly query = signal('');
+    readonly category = signal('');
+    readonly page = signal(1);
+    commentText = '';
+    readonly notice = signal('');
+    private readonly subscriptions = new Subscription();
+    constructor() {
+        this.subscriptions.add(
+            this.route.paramMap.subscribe((params) => {
+                this.slug.set(params.get('slug') || '');
+                const locale = params.get('locale');
+                if (locale === 'pt' || locale === 'en' || locale === 'es') {
+                    this.locale.set(locale);
+                    setLanguage(locale);
+                }
+                this.commentText = '';
+                this.notice.set('');
+            }),
+        );
+        this.subscriptions.add(
+            this.route.queryParamMap.subscribe((params) => {
+                this.previewMode.set(params.get('preview') === '1');
+                if (!this.slug()) {
+                    const locale = params.get('idioma') || language();
+                    this.locale.set(locale === 'en' || locale === 'es' ? locale : 'pt');
+                    setLanguage(this.locale());
+                    this.query.set(params.get('q') || '');
+                    this.category.set(params.get('categoria') || '');
+                    this.page.set(Math.max(1, Number(params.get('pagina')) || 1));
+                }
+            }),
+        );
+        effect(() => {
+            this.locale();
+            this.slug();
+            this.previewMode();
+            this.query();
+            this.category();
+            this.page();
+            void this.load();
+        });
+        effect(() => {
+            const locale = language();
+            if ((locale === 'pt' || locale === 'en' || locale === 'es') && locale !== this.locale())
+                this.selectLocale(locale);
+        });
+    }
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
+    }
+    get results() {
+        return this.store.posts();
+    }
+    get featured() {
+        return this.results.find((post) => post.featured) || this.results[0];
+    }
+    get pages() {
+        const count = Math.ceil(this.total() / 6);
+        const start = Math.max(1, Math.min(this.page() - 3, count - 6));
+        return Array.from({ length: Math.min(7, count) }, (_, i) => start + i);
+    }
+    get visiblePosts() {
+        return this.results;
+    }
+    get post() {
+        const preview = this.store.preview();
+        if (
+            this.previewMode() &&
+            preview &&
+            (preview.versions[this.locale()].slug || 'previa') === this.slug()
+        )
+            return preview;
+        return this.currentPost();
+    }
+    get version() {
+        return this.post?.versions[this.locale()];
+    }
+    get related() {
+        return this.results.filter((post) => post.id !== this.post?.id).slice(0, 3);
+    }
+    get key() {
+        return `${this.post?.id}:${this.locale()}`;
+    }
+    get liked() {
+        return this.store.liked().includes(this.key);
+    }
+    get comments() {
+        return this.store
+            .comments()
+            .filter(
+                (comment) =>
+                    comment.postId === this.post?.id &&
+                    comment.locale === this.locale() &&
+                    (comment.status === 'approved' ||
+                        (comment.status === 'pending' && comment.name === this.store.user()?.name)),
+            );
+    }
+    async share() {
+        try {
+            const url = location.origin + this.path(this.post!);
+            if (navigator.share) await navigator.share({ title: this.version?.title, url });
+            else {
+                await navigator.clipboard.writeText(url);
+                this.notice.set('Link copiado.');
+            }
+        } catch (e) {
+            if ((e as Error).name !== 'AbortError')
+                this.notice.set('Copie o endereço da página para compartilhar.');
+        }
+    }
+    path(post: BlogPost) {
+        return blogPath(post, this.locale());
+    }
+    date(value: string) {
+        return new Date(value + 'T12:00:00').toLocaleDateString(
+            this.locale() === 'pt' ? 'pt-BR' : this.locale(),
+            { day: 'numeric', month: 'long', year: 'numeric' },
+        );
+    }
+    minutes(html: string) {
+        return Math.max(1, Math.ceil(html.replace(/<[^>]*>/g, '').split(/\s+/).length / 200));
+    }
+    filters(query = this.query(), category = this.category(), page = 1) {
+        this.query.set(query);
+        this.category.set(category);
+        this.page.set(page);
+        if (page > 1) document.querySelector('.blog-feed')?.scrollIntoView({ behavior: 'smooth' });
+    }
+    selectLocale(locale: BlogLocale) {
+        if (this.post) {
+            const post = this.post;
+            const version = post.versions[locale];
+            if (!version.title || (!this.previewMode() && version.status !== 'published')) {
+                this.notice.set('Esta versão ainda está aguardando tradução ou publicação.');
+                setLanguage(this.locale());
+                return;
+            }
+            void this.router.navigate(['/blog', locale, version.slug || 'previa'], {
+                queryParams: this.previewMode() ? { preview: 1 } : {},
+            });
+        } else {
+            setLanguage(locale);
+            void this.router.navigate(['/blog'], { queryParams: { idioma: locale } });
+        }
+    }
+    login(provider: string) {
+        this.store.login(provider);
+        this.notice.set('Sessão de demonstração iniciada. Nenhuma conta externa foi acessada.');
+    }
+    like() {
+        if (!this.store.user()) {
+            this.notice.set('Escolha uma conta de demonstração abaixo para curtir ou comentar.');
+            document.getElementById('blog-comments')?.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        this.store.toggleLike(this.key);
+    }
+    sendComment() {
+        if (!this.post || !this.commentText.trim() || !this.store.user()) return;
+        this.store.comment(this.post.id, this.locale(), this.commentText);
+        this.commentText = '';
+        this.notice.set('Comentário recebido nesta sessão e aguardando moderação.');
+    }
+}

@@ -53,13 +53,50 @@ export class SeoService {
     private product?: Product;
 
     constructor() {
-        effect(() => { language(); this.update(this.router.url); });
+        effect(() => {
+            language();
+            this.update(this.router.url);
+        });
         this.update(this.router.url);
         this.router.events
             .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
             .subscribe((event) => this.update(event.urlAfterRedirects));
     }
 
+    setBlog(
+        title: string,
+        description: string,
+        path: string,
+        image?: string,
+        versions?: Record<string, { slug: string; status: string }>,
+        schema?: Record<string, unknown>,
+    ) {
+        this.apply({ title: title + ' | Crica Studio', description, path }, image);
+        this.setProperty('og:type', versions ? 'article' : 'website');
+        document.querySelectorAll('link[data-blog-alternate]').forEach((e) => e.remove());
+        for (const [locale, v] of Object.entries(versions || {}))
+            if (v.status === 'published') {
+                const link = document.createElement('link');
+                link.rel = 'alternate';
+                link.hreflang = locale;
+                link.href = SITE_URL + '/blog/' + locale + '/' + v.slug;
+                link.dataset['blogAlternate'] = 'true';
+                document.head.append(link);
+            }
+        document.getElementById('blog-article-schema')?.remove();
+        if (schema) {
+            const script = document.createElement('script');
+            script.id = 'blog-article-schema';
+            script.type = 'application/ld+json';
+            script.textContent = JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Article',
+                ...schema,
+                mainEntityOfPage: SITE_URL + path,
+            });
+            document.head.append(script);
+        }
+    }
     setProduct(product: Product) {
         this.product = product;
         const page: PageSeo = {
@@ -72,8 +109,20 @@ export class SeoService {
 
     private update(url: string) {
         const path = '/' + url.split(/[?#]/)[0].replace(/^\/+/, '');
-        document.documentElement.lang = path.startsWith('/admin') || path === '/login' ? 'pt-BR' : language() === 'pt' ? 'pt-BR' : language();
-        if (this.product && path === productPath(this.product)) { this.setProduct(this.product); return; }
+        if (!path.startsWith('/blog/')) {
+            document.getElementById('blog-article-schema')?.remove();
+            document.querySelectorAll('link[data-blog-alternate]').forEach((e) => e.remove());
+        }
+        document.documentElement.lang =
+            path.startsWith('/admin') || path === '/login'
+                ? 'pt-BR'
+                : language() === 'pt'
+                  ? 'pt-BR'
+                  : language();
+        if (this.product && path === productPath(this.product)) {
+            this.setProduct(this.product);
+            return;
+        }
         this.product = undefined;
         const page = path.startsWith('/admin')
             ? {
@@ -82,12 +131,23 @@ export class SeoService {
                   path,
                   indexable: false,
               }
-            : PAGES[path] ?? DEFAULT_PAGE;
-        this.apply(page.indexable === false ? page : {
-            ...page,
-            title: translate(page.title.split(' | ')[0]) + ' | Crica Studio',
-            description: translate(page.description),
-        });
+            : path.startsWith('/blog')
+              ? {
+                    title: 'Caderno Crica | Crica Studio',
+                    description: 'Inspiração e histórias da Crica Studio.',
+                    path,
+                    indexable: url.includes('preview=1') ? false : true,
+                }
+              : (PAGES[path] ?? DEFAULT_PAGE);
+        this.apply(
+            page.indexable === false
+                ? page
+                : {
+                      ...page,
+                      title: translate(page.title.split(' | ')[0]) + ' | Crica Studio',
+                      description: translate(page.description),
+                  },
+        );
     }
 
     private apply(page: PageSeo, image?: string) {
@@ -98,12 +158,18 @@ export class SeoService {
         this.setName('description', page.description);
         this.setName('robots', robots);
         this.setProperty('og:type', 'website');
-        this.setProperty('og:locale', language() === 'pt' ? 'pt_BR' : language() === 'en' ? 'en_US' : 'es_ES');
+        this.setProperty(
+            'og:locale',
+            language() === 'pt' ? 'pt_BR' : language() === 'en' ? 'en_US' : 'es_ES',
+        );
         this.setProperty('og:site_name', 'Crica Studio');
         this.setProperty('og:title', page.title);
         this.setProperty('og:description', page.description);
         this.setProperty('og:url', canonical);
-        this.setProperty('og:image', image?.startsWith('http') ? image : `${SITE_URL}${image || '/assets/hero.webp'}`);
+        this.setProperty(
+            'og:image',
+            image?.startsWith('http') ? image : `${SITE_URL}${image || '/assets/hero.webp'}`,
+        );
         this.setName('twitter:card', 'summary_large_image');
 
         let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
