@@ -45,6 +45,7 @@ const routes = [
     'admin/blog',
     'admin/blog/comentarios',
     'admin/blog/categorias',
+    'admin/blog/autores',
     'admin/blog/editar/novo',
 ];
 

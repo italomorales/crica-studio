@@ -112,3 +112,27 @@ Validado com uma matéria temporária PT/EN no banco local: cancelamento preserv
 O botão Link está na barra do Tiptap. Selecione texto ou posicione o cursor, abra Link, preencha o texto/endereço e aplique. Dentro de um link existente o botão muda para Editar link; Remover link preserva o texto. O formulário mantém a seleção durante a digitação, suporta links HTTPS e rotas internas, e pode ser aplicado com Enter ou cancelado com Escape. URLs sem protocolo recebem HTTPS. Salvar a versão persiste o link no documento e no HTML público.
 
 Validação local: seleção de texto, inserção de texto novo, bloqueio de javascript:, gravação de links interno/externo, reload, presença no HTML inicial, edição do endereço e remoção preservando o texto. Build passou; a matéria temporária usada no teste foi removida.
+
+## Itálico no conteúdo — 13/10/2026
+
+O Tiptap aplicava a marca italic e o servidor renderizava `<em>`, mas `font-synthesis: none` impedia a inclinação da fonte Outfit, que não possui variante itálica. O conteúdo `.blog-prose` agora permite somente síntese de estilo, tanto no editor quanto na leitura. Confirmados no navegador: aplicação/remoção do itálico e renderização inclinada na prévia. Build frontend passou.
+
+## Cadastro de autores — 13/10/2026
+
+- Tela `/admin/blog/autores`, no menu comum, com AG Grid no padrão do catálogo: foto redonda/nome, apresentação, situação, editar/excluir, filtros e paginação 20/50/100.
+- Cadastro com nome (120 caracteres), foto PNG/JPEG/WebP de até 5 MB e apresentação simples (600 caracteres). A foto usa o upload existente do blog; sem foto, aparece uma inicial em círculo.
+- Campo de seleção de Autor na matéria. O vínculo é compartilhado pelas traduções da matéria. Nome e foto vêm do cadastro e aparecem na matéria pública, HTML inicial e Article/Person JSON-LD. A apresentação continua no cadastro e na API, mas não é exibida na página pública nem no JSON-LD.
+- Autores inativos não podem ser escolhidos para novas associações. Uma matéria já vinculada mantém seu autor, inclusive quando ele é desativado. A exclusão de autor em uso é bloqueada no banco/API; trocar o autor ou desativar preserva as matérias.
+- Os nomes livres de matérias antigas são preservados e identificados como autor anterior no seletor. Novos perfis não são criados automaticamente pela migration. Matérias novas usam a seleção do cadastro; publicação exige um autor.
+
+Migration adicional: `backend/sql/017_create_blog_authors.sql`, depois de `016_create_blog.sql`. Aplicada apenas no banco isolado `crica_blog_phase2_local`. Para uma publicação futura, aplicar essa migration antes de subir a API atualizada. Não houve alteração no banco atual nem deploy.
+
+APIs autenticadas: `GET /api/admin/blog/authors`, `PUT /api/admin/blog/authors/{id}`, `DELETE /api/admin/blog/authors/{id}`. O payload de matéria aceita `authorId`; `author` continua suportado para compatibilidade com os registros antigos. Perfil vinculado é retornado como `authorProfile`.
+
+Validação: builds front/backend; 74 testes frontend e 65 backend passaram (6 antigos do catálogo ignorados por configuração específica ausente). `node scripts/test-blog-authors-local.mjs` verificou 28 chamadas e asserções: autorização, cadastro/edição, upload, limites, nomes duplicados, vínculo PT/EN, perfil público/HTML/SEO, apresentação oculta, autor inexistente/inativo e exclusão bloqueada quando em uso. Os dados temporários ficaram no banco isolado para revisão visual.
+
+Ajustes de apresentação: avatar da matéria pública ampliado de 42 para 60 px, mantendo o recorte circular. Novo autor/editar autor substituem a listagem, seus filtros e paginação; cancelar ou salvar retorna à listagem. Builds front/backend e as 28 verificações locais passaram novamente após esses ajustes.
+
+Idiomas públicos do News: removidos os três botões locais; seleção centralizada no rodapé. Sem escolha manual salva, `.com.br` usa português e `.com` usa espanhol para navegador em espanhol, inglês para os demais. O HTML inicial da listagem segue a mesma regra. A função CloudFront proposta encaminha `idioma` à origem (cuja política não encaminha Host), preserva links explícitos e mantém visitantes do News no domínio `.com` mesmo quando o país detectado é BR. URLs de matérias/traduções permanecem explícitas. Alterações de infraestrutura apenas em arquivos locais, sem publicação na AWS.
+
+Navegador: cadastro e gravação do nome/apresentação, grid, seleção de autor na matéria e persistência. Fotos redondas conferidas por renderização e estilo; upload PNG/WebP verificado pela API. A automação de seleção de arquivo no Chrome foi limitada pela permissão de acesso a arquivos locais da extensão; não foi alterada nenhuma permissão do navegador.

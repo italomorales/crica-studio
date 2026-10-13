@@ -21,7 +21,8 @@ function handler(event) {
     var targetHost = host;
     var path = request.uri;
     var temporary = international;
-    if (international && country && country.value === 'BR') {
+    var news = path === '/blog' || path.indexOf('/blog/') === 0;
+    if (international && country && country.value === 'BR' && !news) {
         targetHost = 'www.cricastudio.com.br';
     } else if (international) {
         targetHost = 'www.cricastudio.com';
@@ -30,6 +31,16 @@ function handler(event) {
         targetHost = 'www.cricastudio.com.br';
     }
     if (targetHost === host && path === request.uri) {
+        // The origin policy excludes Host. Pass the viewer's News language explicitly.
+        if (path === '/blog' && !request.querystring.idioma) {
+            var accepted = request.headers['accept-language'];
+            var preferences = accepted ? accepted.value.split(',').map(function (item) {
+                var parts = item.trim().split(';');
+                return {code: parts[0].toLowerCase(), quality: parts.length > 1 ? Number(parts[1].trim().replace('q=', '')) : 1};
+            }).filter(function (item) { return item.quality > 0; }).sort(function (a, b) { return b.quality - a.quality; }) : [];
+            var preferred = preferences.length ? preferences[0].code : '';
+            request.querystring.idioma = {value: brazilian ? 'pt' : preferred === 'es' || preferred.indexOf('es-') === 0 ? 'es' : 'en'};
+        }
         // API-rendered HTML and genuine 404s must reach the blog origin unchanged.
         if (path === '/blog' || path.indexOf('/blog/') === 0 || path === '/blog-sitemap.xml' || path.indexOf('/api/') === 0) return request;
         // Replace the global S3 error fallback with explicit SPA route rewrites.

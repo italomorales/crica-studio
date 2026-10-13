@@ -13,7 +13,7 @@ import {
 } from './blog-data';
 import { BlogStore } from './blog-store';
 import { BlogEditorComponent } from './blog-editor';
-import { BlogApi, emptyVersion, type Category } from './blog-api';
+import { BlogApi, emptyVersion, type Category, type Author } from './blog-api';
 import { BlogGridComponent } from './blog-grid';
 import { AdminShellComponent } from '../admin/admin-shell';
 import { BlogRecordGridComponent } from './blog-record-grid';
@@ -92,6 +92,14 @@ export class BlogAdminComponent {
         }
     }
     categoryRows: Category[] = [];
+    authorRows: Author[] = [];
+    selectAuthor(id: string) {
+        if (!this.editing) return;
+        const author = this.authorRows.find((item) => item.id === id);
+        this.editing.authorId = id || null;
+        this.editing.author = author?.name || '';
+        this.editing.authorProfile = author;
+    }
     get categories() {
         return this.categoryRows.map((c) => c.name);
     }
@@ -213,6 +221,7 @@ export class BlogAdminComponent {
         try {
             this.categoryRows = await this.api.categories(true);
             if (this.mode() === 'edit') {
+                this.authorRows = await this.api.authors();
                 if (this.editing?.id === id) return;
                 this.isNew = id === 'novo';
                 this.editing =
@@ -309,7 +318,8 @@ export class BlogAdminComponent {
             id: 'novo',
             category: this.categoryRows[0]?.name || '',
             categoryId: this.categoryRows[0]?.id,
-            author: 'Equipe Crica',
+            author: '',
+            authorId: null,
             date: new Date().toISOString().slice(0, 10),
             featured: false,
             cover: '/assets/product-1.webp',
@@ -339,6 +349,9 @@ export class BlogAdminComponent {
             this.editing.id = saved.id;
             this.isNew = false;
             this.editing.products = saved.products;
+            this.editing.author = saved.author;
+            this.editing.authorId = saved.authorId;
+            this.editing.authorProfile = saved.authorProfile;
             this.editing.versions[this.editLocale] = saved.versions[this.editLocale];
             this.store.preview.set(undefined);
             await this.router.navigate(['/admin/blog/editar', saved.id], {

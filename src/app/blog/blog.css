@@ -23,14 +23,12 @@
     color: var(--muted);
     background: white;
 }
-.blog-languages,
 .blog-categories,
 .blog-pagination {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
-.blog-languages button,
 .blog-categories button,
 .blog-pagination button {
     background: white;
@@ -39,11 +37,6 @@
     padding: 9px 16px;
     min-height: 42px;
 }
-.blog-languages button {
-    font-size: 13px;
-    padding: 6px 12px;
-}
-.blog-languages .active,
 .blog-pagination .active {
     color: white;
     background: var(--blue);
@@ -277,6 +270,8 @@
     margin-top: 10px;
 }
 .blog-prose {
+    /* Outfit has no italic face; allow slanted emphasis in editor and public content. */
+    font-synthesis: style;
     max-width: 720px;
     margin: 0 auto;
     font-size: 18px;
@@ -1000,5 +995,53 @@ crica-blog-grid {
     }
     .blog-admin-main .catalog-grid {
         height: 480px;
+    }
+}
+
+.blog-author-photo {
+    object-fit: cover;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.blog-byline .blog-avatar {
+    flex: 0 0 60px;
+    width: 60px;
+    height: 60px;
+}
+.blog-byline > div {min-width:0;}
+.blog-author-form {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 28px;
+}
+.blog-author-portrait {
+    display: block;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 16px;
+    background: var(--pale);
+}
+.blog-author-placeholder {
+    display: grid;
+    place-items: center;
+    font-size: 32px;
+    color: var(--blue);
+    font-weight: 700;
+}
+.blog-author-fields {
+    display: grid;
+    gap: 16px;
+}
+.catalog-product img.blog-author-photo {
+    border-radius: 50%;
+}
+@media (max-width: 600px) {
+    .blog-author-form {
+        grid-template-columns: 1fr;
+    }
+    .blog-byline {
+        align-items: flex-start;
     }
 }

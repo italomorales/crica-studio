@@ -79,6 +79,7 @@ initializeLanguage()
                         },
                         { path: 'blog', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
                         { path: 'blog/:locale/:slug', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
+                        { canActivate: [authGuard], path: 'admin/blog/autores', loadComponent: () => import('./app/blog/blog-author-admin').then(module => module.BlogAuthorAdminComponent) },
                         { canActivate: [authGuard], path: 'admin/blog/categorias', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'categories' } },
                         { canActivate: [authGuard], path: 'admin/blog/comentarios', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'moderation' } },
                         { canActivate: [authGuard], path: 'admin/blog/editar/:id', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'edit' } },

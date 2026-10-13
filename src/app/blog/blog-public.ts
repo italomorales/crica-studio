@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 import { language, setLanguage } from '../services/language';
 import {
     BLOG_CATEGORIES,
-    BLOG_LOCALES,
     blogPath,
     searchBlog,
     type BlogLocale,
@@ -27,7 +26,6 @@ export class BlogPublicComponent {
     readonly store = inject(BlogStore);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
-    readonly locales = BLOG_LOCALES;
     private api = inject(BlogApi);
     private seo = inject(SeoService);
     categoryRows: Category[] = [];
@@ -76,12 +74,16 @@ export class BlogPublicComponent {
                         inLanguage: this.locale(),
                         datePublished: v.publishedAt || v.publishAt,
                         dateModified: v.updatedAt,
-                        author: { '@type': 'Person', name: post.author },
+                        author: {
+                            '@type': 'Person',
+                            name: post.author,
+                            image: post.authorProfile?.photo || undefined,
+                        },
                     },
                 );
             } else if (!this.slug())
                 this.seo.setBlog(
-                    'Caderno Crica',
+                    'Crica News',
                     'Inspiração, histórias e detalhes para criar algo que tenha a sua essência.',
                     '/blog',
                 );
@@ -110,7 +112,7 @@ export class BlogPublicComponent {
                 const locale = params.get('locale');
                 if (locale === 'pt' || locale === 'en' || locale === 'es') {
                     this.locale.set(locale);
-                    setLanguage(locale);
+                    setLanguage(locale, false);
                 }
                 this.commentText = '';
                 this.notice.set('');
@@ -122,7 +124,7 @@ export class BlogPublicComponent {
                 if (!this.slug()) {
                     const locale = params.get('idioma') || language();
                     this.locale.set(locale === 'en' || locale === 'es' ? locale : 'pt');
-                    setLanguage(this.locale());
+                    setLanguage(this.locale(), false);
                     this.query.set(params.get('q') || '');
                     this.category.set(params.get('categoria') || '');
                     this.page.set(Math.max(1, Number(params.get('pagina')) || 1));

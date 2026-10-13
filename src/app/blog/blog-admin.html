@@ -296,7 +296,24 @@
                     </label>
                     <label>
                         Autor
-                        <input [(ngModel)]="post.author" />
+                        <select
+                            [ngModel]="post.authorId || ''"
+                            (ngModelChange)="selectAuthor($event)">
+                            <option value="">
+                                {{ !post.authorId && post.author ? post.author + ' (autor anterior)'
+                                : 'Selecione um autor' }}
+                            </option>
+                            @for(item of authorRows; track item.id) {
+                            <option
+                                [value]="item.id"
+                                [disabled]="!item.active && item.id !== post.authorId">
+                                {{ item.name }}{{ !item.active ? ' · Inativo' : '' }}
+                            </option>
+                            }
+                        </select>
+                        <a class="text-link" routerLink="/admin/blog/autores">
+                            Gerenciar autores ↗
+                        </a>
                     </label>
                     <label>
                         Data

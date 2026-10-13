@@ -133,7 +133,7 @@ export class SeoService {
               }
             : path.startsWith('/blog')
               ? {
-                    title: 'Caderno Crica | Crica Studio',
+                    title: 'Crica News | Crica Studio',
                     description: 'Inspiração e histórias da Crica Studio.',
                     path,
                     indexable: url.includes('preview=1') ? false : true,

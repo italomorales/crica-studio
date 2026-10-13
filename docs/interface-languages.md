@@ -6,10 +6,12 @@ A interface pública usa dicionários versionados no código. O admin de Idiomas
 
 1. Cadastre o novo idioma no admin e mantenha-o inativo durante a preparação.
 2. Crie um arquivo em `src/app/services/locales/<codigo>.ts` seguindo `en.ts` ou `es.ts`. As chaves são os textos originais em português. Traduza todos os valores e preserve parâmetros como `{name}`, `{quantity}` e `{price}`.
-3. Registre o dicionário em `INTERFACE_DICTIONARIES`, em `src/app/services/translations.ts`. Revise telas, acessibilidade, formatação e textos novos. Se precisar mudar a seleção automática por país, ajuste `language-policy.ts`.
+3. Registre o dicionário em `INTERFACE_DICTIONARIES`, em `src/app/services/translations.ts`. Revise telas, acessibilidade, formatação e textos novos. Se precisar mudar a seleção automática por domínio/idioma do navegador, ajuste `language-policy.ts`.
 4. Execute `npm test` e `npm run build`, valide as telas e então ative o idioma no admin. Os testes verificam que todos os dicionários têm as mesmas chaves e preservam os parâmetros.
 
 A escolha manual de idioma continua independente de Brasil/mundo. Variantes como en-US e es-MX usam primeiro um dicionário específico, se existir, e depois o idioma base. Texto sem tradução usa o original em português. Cadastrar um idioma não cria automaticamente suas traduções de interface ou de catálogo.
+
+Sem preferência manual salva, `.com.br` abre em português. `.com` abre em espanhol quando o idioma principal do navegador é espanhol; os demais abrem em inglês, independentemente do país. O seletor do rodapé salva a preferência e é o único seletor no News. URLs de matérias identificam sua tradução; abrir um link não grava uma nova preferência manual.
 
 ## Alterar um texto
 

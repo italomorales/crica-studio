@@ -43,16 +43,17 @@ export function blogGridButton(kind: string, label: string, action: () => void) 
     selector: 'crica-blog-record-grid',
     standalone: true,
     template:
-        "<div #host class=\"catalog-grid\" [attr.aria-label]=\"kind === 'categories' ? 'Categorias do blog' : 'Moderação de demonstração'\"></div>",
+        "<div #host class=\"catalog-grid\" [attr.aria-label]=\"kind === 'categories' ? 'Categorias do blog' : kind === 'authors' ? 'Autores do Crica News' : 'Moderação de demonstração'\"></div>",
 })
 export class BlogRecordGridComponent {
     @Input() rows: any[] = [];
-    @Input() kind: 'categories' | 'moderation' = 'categories';
+    @Input() kind: 'categories' | 'moderation' | 'authors' = 'categories';
     @Input() pageSize = 20;
     @Output() action = new EventEmitter<{ kind: string; row: any }>();
     @ViewChild('host', { static: true }) host!: ElementRef<HTMLElement>;
     private zone = inject(NgZone);
     private grid?: GridApi;
+    private displayed: any[] = [];
     ngAfterViewInit() {
         this.grid = createGrid(this.host.nativeElement, {
             theme: catalogGridTheme,
@@ -69,10 +70,17 @@ export class BlogRecordGridComponent {
             paginationPageSizeSelector: false,
             columnDefs: this.columns(),
         });
+        this.displayed = this.rows;
     }
     ngOnChanges() {
         if (this.grid) {
-            this.grid.setGridOption('rowData', this.rows);
+            if (
+                this.rows.length !== this.displayed.length ||
+                this.rows.some((row, i) => row !== this.displayed[i])
+            ) {
+                this.displayed = this.rows;
+                this.grid.setGridOption('rowData', this.rows);
+            }
             this.grid.setGridOption('paginationPageSize', this.pageSize);
         }
     }
@@ -83,6 +91,65 @@ export class BlogRecordGridComponent {
         this.zone.run(() => this.action.emit({ kind, row }));
     }
     private columns(): ColDef[] {
+        if (this.kind === 'authors')
+            return [
+                {
+                    headerName: 'Autor',
+                    field: 'name',
+                    flex: 2,
+                    minWidth: 240,
+                    cellRenderer: (p: any) => {
+                        const cell = document.createElement('div');
+                        cell.className = 'catalog-product';
+                        if (p.data.photo) {
+                            const image = document.createElement('img');
+                            image.className = 'blog-author-photo';
+                            image.src = p.data.photo;
+                            image.alt = '';
+                            cell.append(image);
+                        } else {
+                            const initial = document.createElement('span');
+                            initial.className = 'blog-avatar';
+                            initial.textContent = p.data.name.charAt(0);
+                            cell.append(initial);
+                        }
+                        const name = document.createElement('button');
+                        name.className = 'catalog-product-name';
+                        name.textContent = p.data.name;
+                        name.onclick = () => this.emit('edit', p.data);
+                        cell.append(name);
+                        return cell;
+                    },
+                },
+                {
+                    headerName: 'Sobre o autor',
+                    field: 'bio',
+                    tooltipField: 'bio',
+                    flex: 3,
+                    minWidth: 260,
+                },
+                {
+                    headerName: 'Ativo',
+                    width: 88,
+                    sortable: false,
+                    resizable: false,
+                    cellRenderer: (p: any) => {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'catalog-switch';
+                        button.setAttribute('role', 'switch');
+                        button.setAttribute('aria-checked', String(p.data.active));
+                        button.setAttribute(
+                            'aria-label',
+                            (p.data.active ? 'Desativar' : 'Ativar') + ' autor ' + p.data.name,
+                        );
+                        button.append(document.createElement('span'));
+                        button.onclick = () => this.emit('toggle', p.data);
+                        return button;
+                    },
+                },
+                this.actions(['edit', 'delete']),
+            ];
         if (this.kind === 'categories')
             return [
                 {

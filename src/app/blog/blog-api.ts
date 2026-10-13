@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { API_URL, AuthService } from '../services/auth.service';
 import { BLOG_LOCALES, type BlogPost, type BlogLocale } from './blog-data';
+export type Author = { id: string; name: string; photo: string; bio: string; active: boolean };
 export type Category = {
     id: string;
     name: string;
@@ -76,6 +77,7 @@ export class BlogApi {
             categoryId: post.categoryId,
             cover: post.cover,
             author: post.author,
+            authorId: post.authorId || null,
             date: post.date,
             featured: post.featured,
             version: post.versions[locale],
@@ -111,5 +113,8 @@ export class BlogApi {
         return this.request<Category[]>(
             `/api/${admin ? 'admin/' : ''}blog/categories?locale=${locale}`,
         );
+    }
+    authors() {
+        return this.request<Author[]>('/api/admin/blog/authors');
     }
 }

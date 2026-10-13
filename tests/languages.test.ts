@@ -6,11 +6,17 @@ import vm from 'node:vm';
 import { initialLanguage } from '../src/app/services/language-policy.ts';
 import { INTERFACE_DICTIONARIES, interfaceText } from '../src/app/services/translations.ts';
 
-test('country determines the first international language; saved selection wins in either domain', () => {
+test('domain and browser language determine defaults; the footer selection wins in either domain', () => {
     assert.equal(initialLanguage('www.cricastudio.com.br', null, 'US', 'en-US'), 'pt');
-    assert.equal(initialLanguage('www.cricastudio.com', null, 'US', 'es-ES'), 'en');
+    assert.equal(initialLanguage('www.cricastudio.com', null, 'US', 'es-ES'), 'es');
     for (const country of ['ES', 'MX', 'AR', 'CL', 'CO', 'PE', 'UY', 'PR'])
-        assert.equal(initialLanguage('www.cricastudio.com', null, country, 'en-US'), 'es');
+        assert.equal(initialLanguage('www.cricastudio.com', null, country, 'en-US'), 'en');
+    for (const domain of ['cricastudio.com', 'www.cricastudio.com']) {
+        for (const browser of ['en-US', 'pt-BR', 'fr-FR', 'de', ''])
+            assert.equal(initialLanguage(domain, null, 'ES', browser), 'en');
+        for (const browser of ['es', 'es-MX', 'ES-ar'])
+            assert.equal(initialLanguage(domain, null, 'US', browser), 'es');
+    }
     assert.equal(initialLanguage('www.cricastudio.com', null, undefined, 'es-MX'), 'es');
     assert.equal(initialLanguage('www.cricastudio.com', 'invalid', 'JP'), 'en');
     for (const domain of ['www.cricastudio.com.br', 'www.cricastudio.com'])

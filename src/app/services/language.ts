@@ -78,19 +78,7 @@ export async function initializeLanguage() {
     }
     const saved = storedLanguage();
     const hostname = window.location.hostname;
-    let country: string | undefined;
-    if (!validLanguage(saved) && ['cricastudio.com', 'www.cricastudio.com'].includes(hostname)) {
-        try {
-            const response = await fetch('/site-context.json', {
-                cache: 'no-store',
-                signal: AbortSignal.timeout(2000),
-            });
-            if (response.ok) country = (await response.json()).country;
-        } catch {
-            /* Browser language is the fallback if country detection is unavailable. */
-        }
-    }
-    const selected = initialLanguage(hostname, saved, country, navigator.language);
+    const selected = initialLanguage(hostname, saved, undefined, navigator.language);
     setLanguage(
         availableLanguages().some((item) => item.code === selected) ? selected : 'pt',
         false,

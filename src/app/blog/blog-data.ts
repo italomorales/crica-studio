@@ -28,6 +28,14 @@ export type BlogPost = {
     }[];
     cover: string;
     author: string;
+    authorId?: string | null;
+    authorProfile?: {
+        id: string;
+        name: string;
+        photo: string;
+        bio: string;
+        active: boolean;
+    } | null;
     date: string;
     featured: boolean;
     versions: Record<BlogLocale, BlogVersion>;

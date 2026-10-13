@@ -1,0 +1,180 @@
+<crica-admin-shell>
+    <main class="admin-main">
+        <div class="admin-page-heading">
+            <div>
+                <span class="eyebrow">SEU CONTEÚDO</span>
+                <h1>{{ draft ? (isNew ? 'Novo autor' : 'Editar autor') : 'Autores' }}</h1>
+                <p>Quem dá voz às histórias do Crica News.</p>
+            </div>
+            @if(!draft){
+            <button
+                class="primary"
+                type="button"
+                [disabled]="loading || busy || uploading"
+                (click)="edit()">
+                + Novo autor
+            </button>
+            }
+        </div>
+        @if(notice){
+        <p class="admin-notice" role="status">{{ notice }}</p>
+        } @if(error){
+        <div class="error-summary" role="alert">{{ error }}</div>
+        } @if(draft;as author){
+        <section class="admin-panel">
+            <div class="blog-author-form">
+                <div>
+                    @if(author.photo){
+                    <img
+                        class="blog-author-portrait"
+                        [src]="author.photo"
+                        alt="Prévia da foto do autor"
+                        width="96"
+                        height="96" />
+                    }@else{
+                    <span class="blog-author-portrait blog-author-placeholder" aria-hidden="true">
+                        {{ author.name.charAt(0) || 'A' }}
+                    </span>
+                    }
+                    <label class="blog-file-button">
+                        {{ uploading ? 'Enviando foto…' : 'Escolher foto' }}
+                        <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            [disabled]="busy || uploading"
+                            (change)="upload($event)" />
+                    </label>
+                    @if(author.photo){
+                    <button
+                        class="text-link"
+                        type="button"
+                        [disabled]="busy || uploading"
+                        (click)="author.photo=''">
+                        Remover foto
+                    </button>
+                    }
+                    <p class="blog-help">PNG, JPEG ou WebP, até 5 MB.</p>
+                </div>
+                <div class="blog-author-fields">
+                    <label>
+                        Nome
+                        <input
+                            type="text"
+                            [(ngModel)]="author.name"
+                            maxlength="120"
+                            [disabled]="busy" />
+                    </label>
+                    <label>
+                        Sobre o autor
+                        <textarea
+                            [(ngModel)]="author.bio"
+                            rows="4"
+                            maxlength="600"
+                            [disabled]="busy"
+                            placeholder="Uma breve apresentação de quem escreve."></textarea>
+                        <small>{{ author.bio.length }}/600 caracteres</small>
+                    </label>
+                    <label class="blog-check">
+                        <input type="checkbox" [(ngModel)]="author.active" [disabled]="busy" />
+                        Ativo para seleção nas matérias
+                    </label>
+                </div>
+            </div>
+            <div class="blog-save-buttons">
+                <button
+                    class="primary"
+                    type="button"
+                    [disabled]="busy || uploading"
+                    (click)="save()">
+                    {{ busy ? 'Salvando…' : 'Salvar autor' }}
+                </button>
+                <button
+                    class="secondary"
+                    type="button"
+                    [disabled]="busy || uploading"
+                    (click)="draft=undefined">
+                    Cancelar
+                </button>
+            </div>
+        </section>
+        } @else if(loading){
+        <p class="admin-notice" role="status">Carregando autores…</p>
+        }@else{
+        <section class="admin-panel catalog-list-panel">
+            <div class="admin-filters">
+                <label class="admin-search">
+                    <span class="sr-only">Buscar autores</span>
+                    <input type="search" placeholder="Buscar autores" [(ngModel)]="query" />
+                </label>
+                <select aria-label="Filtrar autores por situação" [(ngModel)]="status">
+                    <option value="">Todos os autores</option>
+                    <option value="active">Ativos</option>
+                    <option value="inactive">Inativos</option>
+                </select>
+            </div>
+            <div class="admin-results">
+                <span>{{ filtered.length }} autores</span>
+                <div class="admin-results-actions">
+                    <label class="page-size">
+                        <span>Por página</span>
+                        <select aria-label="Autores por página" [(ngModel)]="pageSize">
+                            <option [ngValue]="20">20</option>
+                            <option [ngValue]="50">50</option>
+                            <option [ngValue]="100">100</option>
+                        </select>
+                    </label>
+                    @if(query || status){
+                    <button class="text-link" (click)="query='';status=''">Limpar filtros</button>
+                    }
+                </div>
+            </div>
+            <crica-blog-record-grid
+                kind="authors"
+                [rows]="filtered"
+                [pageSize]="pageSize"
+                (action)="action($event)" />
+            <p class="catalog-grid-hint">
+                Clique no título de uma coluna para consultar em outra ordem.
+            </p>
+        </section>
+        }
+    </main>
+</crica-admin-shell>
+<dialog
+    #deleteDialog
+    class="delete-dialog"
+    aria-labelledby="author-delete-title"
+    (cancel)="onCancel($event)">
+    @if(deletionTarget){
+    <section class="delete-dialog-shell">
+        <div class="delete-dialog-icon" aria-hidden="true">!</div>
+        <span class="eyebrow">AÇÃO PERMANENTE</span>
+        <h2 id="author-delete-title">Excluir autor?</h2>
+        <p>
+            Você está prestes a excluir
+            <strong>{{ deletionTarget.name }}</strong>
+            . Autores vinculados a matérias precisam ser desvinculados antes da exclusão.
+        </p>
+        @if(deleteError){
+        <p class="delete-dialog-error" role="alert">{{ deleteError }}</p>
+        }
+        <div class="delete-dialog-actions">
+            <button
+                class="secondary"
+                type="button"
+                autofocus
+                [disabled]="busy"
+                (click)="cancelDeletion()">
+                Cancelar
+            </button>
+            <button
+                class="delete-confirm"
+                type="button"
+                [disabled]="busy"
+                (click)="confirmDeletion()">
+                {{ busy ? 'Excluindo…' : 'Excluir definitivamente' }}
+            </button>
+        </div>
+    </section>
+    }
+</dialog>

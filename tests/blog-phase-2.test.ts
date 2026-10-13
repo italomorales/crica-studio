@@ -10,6 +10,23 @@ const source = readFileSync(
     'utf8',
 );
 const handler = runInNewContext(source + ';handler');
+test('News origin receives the domain/browser locale and preserves explicit footer links', () => {
+    for (const [host, browser, expected] of [
+        ['www.cricastudio.com.br', 'es-MX,en;q=0.8', 'pt'],
+        ['www.cricastudio.com', 'es-MX,en;q=0.8', 'es'],
+        ['www.cricastudio.com', 'pt-BR,en;q=0.8', 'en'],
+        ['www.cricastudio.com', 'fr-FR', 'en'],
+        ['www.cricastudio.com', 'es;q=0,en;q=1', 'en'],
+        ['www.cricastudio.com', '', 'en'],
+    ]) {
+        const request = {uri:'/blog', headers:{host:{value:host}, 'accept-language':{value:browser}, 'cloudfront-viewer-country':{value:'BR'}}, querystring:{} as any};
+        const result = handler({request});
+        assert.equal(result.uri, '/blog');
+        assert.equal(result.querystring.idioma.value, expected);
+        request.querystring.idioma={value:'es'};
+        assert.equal(handler({request}).querystring.idioma.value, 'es');
+    }
+});
 test('blog HTML and sitemap keep their origin paths while S3 SPA routes get an explicit rewrite', () => {
     const request = (uri: string) => ({
         uri,
