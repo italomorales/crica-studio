@@ -1045,3 +1045,5 @@ crica-blog-grid {
         align-items: flex-start;
     }
 }
+
+.blog-moderation-text,.blog-moderation-detail blockquote p{white-space:pre-wrap;overflow-wrap:anywhere;max-height:45vh;overflow:auto;text-align:left}.blog-moderation-detail blockquote{padding:16px;background:var(--pale);border-left:3px solid var(--lime);border-radius:10px;text-align:left}.blog-moderation-detail .delete-dialog-actions{flex-wrap:wrap}

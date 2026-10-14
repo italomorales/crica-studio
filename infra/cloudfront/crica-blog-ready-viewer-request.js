@@ -21,7 +21,7 @@ function handler(event) {
     var targetHost = host;
     var path = request.uri;
     var temporary = international;
-    var news = path === '/blog' || path.indexOf('/blog/') === 0;
+    var news = path === '/blog' || path.indexOf('/blog/') === 0 || path.indexOf('/api/blog/') === 0;
     if (international && country && country.value === 'BR' && !news) {
         targetHost = 'www.cricastudio.com.br';
     } else if (international) {
@@ -31,6 +31,7 @@ function handler(event) {
         targetHost = 'www.cricastudio.com.br';
     }
     if (targetHost === host && path === request.uri) {
+        if (path.indexOf('/api/blog/') === 0) request.headers['x-crica-viewer-host'] = {value: host};
         // The origin policy excludes Host. Pass the viewer's News language explicitly.
         if (path === '/blog' && !request.querystring.idioma) {
             var accepted = request.headers['accept-language'];

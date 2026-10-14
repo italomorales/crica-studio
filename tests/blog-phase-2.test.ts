@@ -10,6 +10,12 @@ const source = readFileSync(
     'utf8',
 );
 const handler = runInNewContext(source + ';handler');
+test('social callbacks stay on their viewer domain and cannot spoof the forwarded host',()=>{
+    const request={uri:'/api/blog/auth/callback/google',headers:{host:{value:'www.cricastudio.com'},'cloudfront-viewer-country':{value:'BR'},'x-crica-viewer-host':{value:'evil.example'}},querystring:{}};
+    const response=handler({request});
+    assert.equal(response.uri,request.uri);
+    assert.equal(response.headers['x-crica-viewer-host'].value,'www.cricastudio.com');
+});
 test('News origin receives the domain/browser locale and preserves explicit footer links', () => {
     for (const [host, browser, expected] of [
         ['www.cricastudio.com.br', 'es-MX,en;q=0.8', 'pt'],
@@ -80,9 +86,10 @@ test('prepared distribution routes blog to HTTPS API and keeps real 404 without 
         assert.equal(config.DefaultCacheBehavior.TargetOriginId, 's3');
         assert.deepEqual(
             config.CacheBehaviors.Items.map((b: any) => b.PathPattern),
-            ['/blog', '/blog/*', '/blog-sitemap.xml'],
+            ['/blog', '/blog/*', '/blog-sitemap.xml', '/api/blog/*'],
         );
         assert.equal(config.CacheBehaviors.Items[0].CachePolicyId, 'cache-disabled');
+        assert.equal(config.CacheBehaviors.Items[3].AllowedMethods.Quantity,7);
         assert.deepEqual(config.CustomErrorResponses.Items, [
             { ErrorCode: 500, ResponseCode: '500' },
         ]);

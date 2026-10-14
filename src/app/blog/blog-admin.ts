@@ -17,6 +17,7 @@ import { BlogApi, emptyVersion, type Category, type Author } from './blog-api';
 import { BlogGridComponent } from './blog-grid';
 import { AdminShellComponent } from '../admin/admin-shell';
 import { BlogRecordGridComponent } from './blog-record-grid';
+import type { BlogActivity } from './blog-interactions-api';
 import template from './blog-admin.html?raw';
 import './blog.css';
 
@@ -205,14 +206,43 @@ export class BlogAdminComponent {
         this.store.posts.set(data.items);
         this.cd.markForCheck();
     }
-    moderateAction(event: { kind: string; row: any }) {
+    moderationRows: BlogActivity[] = [];
+    moderationKind = '';
+    moderationPage = 1;
+    moderationTotal = 0;
+    moderationPending = 0;
+    moderationLoading = false;
+    get moderationPages(){return Math.max(1,Math.ceil(this.moderationTotal/this.pageSize));}
+    @ViewChild('moderationDialog',{static:true}) moderationDialog!:ElementRef<HTMLDialogElement>;
+    reviewActivity?:BlogActivity;
+    private moderationRequest = 0;
+    async loadModeration(page=1) {
+        const request=++this.moderationRequest;this.moderationLoading=true;this.moderationPage=page;
+        try {
+            const params=new URLSearchParams({status:this.moderationFilter,kind:this.moderationKind,page:String(page),pageSize:String(this.pageSize)});
+            const [data,pending]=await Promise.all([
+                this.api.request<{items:BlogActivity[];total:number}>('/api/admin/blog/activity?'+params),
+                this.api.request<{total:number}>('/api/admin/blog/activity?status=pending&pageSize=1'),
+            ]);
+            if(request!==this.moderationRequest)return;
+            this.moderationRows=data.items;this.moderationTotal=data.total;this.moderationPending=pending.total;
+        } catch(e){if(request===this.moderationRequest)this.notice.set((e as Error).message);}
+        finally{if(request===this.moderationRequest)this.moderationLoading=false;this.cd.markForCheck();}
+    }
+    async moderateAction(event: { kind: string; row: any }) {
+        if(this.busy)return;
+        if(event.kind==='inspect'){this.reviewActivity=event.row;this.cd.detectChanges();this.moderationDialog.nativeElement.showModal();return;}
         const status = {
             approve: 'approved',
             reject: 'rejected',
             spam: 'spam',
             pending: 'pending',
         }[event.kind] as 'approved' | 'rejected' | 'spam' | 'pending';
-        if (status) this.store.moderate(event.row.id, status);
+        if(!status)return;
+        this.busy=true;
+        try{await this.api.request('/api/admin/blog/activity/'+event.row.id,{method:'PUT',body:JSON.stringify({status})});await this.loadModeration(this.moderationPage);this.notice.set('Interação atualizada.');this.moderationDialog.nativeElement.close();this.reviewActivity=undefined;}
+        catch(e){this.notice.set((e as Error).message);}
+        finally{this.busy=false;this.cd.markForCheck();}
     }
     edit(id: string) {
         void this.router.navigate(['/admin/blog/editar', id]);
@@ -231,6 +261,7 @@ export class BlogAdminComponent {
                           ? this.newPost()
                           : await this.api.get(id!);
             } else if (this.mode() === 'list') await this.reload();
+            else if (this.mode() === 'moderation') await this.loadModeration();
         } catch (e) {
             this.notice.set((e as Error).message);
         }
@@ -285,14 +316,10 @@ export class BlogAdminComponent {
         return this.rows;
     }
     get comments() {
-        return this.store
-            .comments()
-            .filter(
-                (comment) => !this.moderationFilter || comment.status === this.moderationFilter,
-            );
+        return this.moderationRows;
     }
     get pendingCount() {
-        return this.store.comments().filter((comment) => comment.status === 'pending').length;
+        return this.moderationPending;
     }
     complete = versionComplete;
     postTitle(id: string) {

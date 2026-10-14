@@ -15,7 +15,7 @@ origins.push({
     Id: originId,
     DomainName: host,
     OriginPath: '',
-    CustomHeaders: { Quantity: 0 },
+    CustomHeaders: process.env.BLOG_ORIGIN_PROXY_KEY ? {Quantity:1,Items:[{HeaderName:'X-Crica-Proxy-Key',HeaderValue:process.env.BLOG_ORIGIN_PROXY_KEY}]} : { Quantity: 0 },
     CustomOriginConfig: {
         HTTPPort: 80,
         HTTPSPort: 443,
@@ -28,7 +28,7 @@ origins.push({
     ConnectionTimeout: 10,
 });
 config.Origins = { Quantity: origins.length, Items: origins };
-const patterns = ['/blog', '/blog/*', '/blog-sitemap.xml'];
+const patterns = ['/blog', '/blog/*', '/blog-sitemap.xml', '/api/blog/*'];
 const existing = (config.CacheBehaviors?.Items || []).filter(
     (b) => !patterns.includes(b.PathPattern),
 );
@@ -41,8 +41,8 @@ const blog = patterns.map((PathPattern) => ({
     TargetOriginId: originId,
     ViewerProtocolPolicy: 'redirect-to-https',
     AllowedMethods: {
-        Quantity: 2,
-        Items: ['HEAD', 'GET'],
+        Quantity: PathPattern==='/api/blog/*'?7:2,
+        Items: PathPattern==='/api/blog/*'?['HEAD','GET','OPTIONS','POST','PUT','PATCH','DELETE']:['HEAD', 'GET'],
         CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
     },
     Compress: true,

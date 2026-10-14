@@ -158,91 +158,12 @@
         </figure>
         <div class="blog-prose" [innerHTML]="version.html"></div>
     </article>
-    @if (previewMode()) {
-    <p class="blog-demo">
-        Demonstração local · curtidas, login e comentários não são serviços ativos.
-    </p>
-    <div class="blog-reactions">
-        <button
-            class="secondary"
-            [class.is-liked]="liked"
-            [attr.aria-pressed]="liked"
-            (click)="like()">
-            {{ liked ? '♥' : '♡' }} {{ liked ? 'Você curtiu' : 'Gostou desta ideia?' }}
-            <span>{{ 42 + (liked ? 1 : 0) }}</span>
-        </button>
-        <span>Curtidas de exemplo</span>
-    </div>
-    <section id="blog-comments" class="blog-comments" aria-labelledby="comments-title">
-        <div class="blog-section-title">
-            <span class="eyebrow">A CONVERSA CONTINUA</span>
-            <h2 id="comments-title">Deixe sua ideia por aqui.</h2>
-            <p>Os comentários passam por moderação antes de aparecer para todo mundo.</p>
-        </div>
-        @if (!store.user()) {
-        <div class="blog-login">
-            <p>Entre para curtir e participar.</p>
-            <div>
-                <button class="secondary" (click)="login('Google')">
-                    <b>G</b>
-                    Continuar com Google
-                </button>
-                <button class="secondary" (click)="login('Facebook')">
-                    <b>f</b>
-                    Continuar com Facebook
-                </button>
-            </div>
-            <small>Demonstração: esses botões não acessam Google ou Facebook.</small>
-        </div>
-        } @else {
-        <div class="blog-session">
-            <span>{{ store.user()?.name }} · {{ store.user()?.provider }}</span>
-            <button class="blog-text-link" (click)="store.user.set(undefined)">
-                Sair da demonstração
-            </button>
-        </div>
-        <form (ngSubmit)="sendComment()">
-            <label for="blog-comment">Seu comentário</label>
-            <textarea
-                id="blog-comment"
-                name="comment"
-                [(ngModel)]="commentText"
-                rows="4"
-                maxlength="1500"
-                placeholder="Conte o que esta ideia despertou em você…"
-                required></textarea>
-            <div class="blog-comment-actions">
-                <small>{{ commentText.length }}/1500 · sem envio externo</small>
-                <button class="primary" [disabled]="!commentText.trim()">
-                    Enviar para moderação
-                </button>
-            </div>
-        </form>
-        } @if (notice()) {
-        <p class="blog-notice" role="status">{{ notice() }}</p>
-        }
-        <div class="blog-comment-list">
-            @for (comment of comments; track comment.id) {
-            <div class="blog-comment">
-                <span class="blog-avatar">{{ comment.name[0] }}</span>
-                <div>
-                    <strong>{{ comment.name }}</strong>
-                    <small>{{ comment.date }}</small>
-                    @if (comment.status === 'pending') {
-                    <span class="blog-state pending">
-                        Aguardando moderação · visível só para você
-                    </span>
-                    }
-                    <p>{{ comment.text }}</p>
-                </div>
-            </div>
-            } @empty {
-            <p>Comece a conversa com a sua ideia.</p>
-            }
-        </div>
-    </section>
-    }
-    <button class="secondary" (click)="share()">Compartilhar história ↗</button>
+    <crica-blog-interactions
+        [postId]="post.id"
+        [locale]="locale()"
+        [title]="version.title"
+        [url]="articleUrl"
+        [preview]="previewMode()" />
     <section class="blog-related">
         <div class="blog-section-title">
             <span class="eyebrow">CONTINUE EXPLORANDO</span>

@@ -43,7 +43,7 @@ export function blogGridButton(kind: string, label: string, action: () => void) 
     selector: 'crica-blog-record-grid',
     standalone: true,
     template:
-        "<div #host class=\"catalog-grid\" [attr.aria-label]=\"kind === 'categories' ? 'Categorias do blog' : kind === 'authors' ? 'Autores do Crica News' : 'Moderação de demonstração'\"></div>",
+        "<div #host class=\"catalog-grid\" [attr.aria-label]=\"kind === 'categories' ? 'Categorias do blog' : kind === 'authors' ? 'Autores do Crica News' : 'Moderação do Crica News'\"></div>",
 })
 export class BlogRecordGridComponent {
     @Input() rows: any[] = [];
@@ -65,7 +65,7 @@ export class BlogRecordGridComponent {
             headerHeight: 46,
             animateRows: false,
             suppressScrollOnNewData: true,
-            pagination: true,
+            pagination: this.kind !== 'moderation',
             paginationPageSize: this.pageSize,
             paginationPageSizeSelector: false,
             columnDefs: this.columns(),
@@ -201,7 +201,10 @@ export class BlogRecordGridComponent {
                 this.actions(['edit', 'delete']),
             ];
         return [
-            { headerName: 'Comentário', field: 'text', flex: 2, minWidth: 280 },
+            {headerName:'Tipo',width:150,valueGetter:(p)=>p.data.kind==='like'?'Curtida':p.data.kind==='share'?'Compartilhamento':p.data.parentId?'Resposta':'Comentário'},
+            {headerName:'Matéria',field:'postTitle',tooltipField:'postTitle',minWidth:180,flex:1},
+            { headerName: 'Interação', field: 'text', tooltipField:'text', flex: 2, minWidth: 280,
+              cellRenderer:(p:any)=>{const button=document.createElement('button');button.type='button';button.className='catalog-product-name';button.textContent=p.data.text|| (p.data.kind==='like'?'Curtiu esta matéria':'Compartilhou esta matéria');button.setAttribute('aria-label','Revisar interação de '+p.data.name);button.onclick=()=>this.emit('inspect',p.data);return button;} },
             { headerName: 'Visitante', field: 'name', minWidth: 180 },
             { headerName: 'Idioma', field: 'locale', width: 100 },
             {
@@ -216,7 +219,7 @@ export class BlogRecordGridComponent {
                         spam: 'Spam',
                     })[p.value as 'pending'],
             },
-            { headerName: 'Data', field: 'date', width: 140 },
+            { headerName: 'Data', field: 'date', width: 140,valueFormatter:(p)=>new Date(p.value).toLocaleDateString('pt-BR') },
             this.actions(['approve', 'reject', 'spam', 'pending']),
         ];
     }

@@ -1,0 +1,268 @@
+<section class="news-social" [attr.aria-label]="t('conversation')">
+    <div class="news-social-bar">
+        <button
+            class="news-action"
+            [class.news-liked]="liked"
+            [attr.aria-pressed]="liked"
+            [disabled]="busy || preview"
+            (click)="like()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                    d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
+            </svg>
+            <span>{{ likeLabel }}</span>
+            <span class="news-count">{{ engagement.likes }}</span>
+        </button>
+        <button class="news-action" [disabled]="preview" (click)="share()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 16V3m-4 4 4-4 4 4M5 12v8h14v-8" />
+            </svg>
+            <span>{{ t('share') }}</span>
+        </button>
+        <button
+            class="news-action news-comments-toggle"
+            [attr.aria-expanded]="expanded"
+            aria-controls="news-conversation"
+            [disabled]="preview"
+            (click)="toggleComments()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                    d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5A8.5 8.5 0 0 1 10.5 3h2A8.5 8.5 0 0 1 21 11.5ZM7 10h10M7 14h6" />
+            </svg>
+            <span>{{ t(expanded ? 'hide' : 'show') }}</span>
+            <span class="news-count">{{ engagement.comments }}</span>
+        </button>
+    </div>
+    @if (message) {
+        <p class="news-feedback" role="status">{{ message }}</p>
+    }
+    @if (error) {
+        <p class="news-error" role="alert">{{ error }}</p>
+    }
+    @if (preview) {
+        <p class="news-feedback">{{ t('preview') }}</p>
+    }
+    @if (expanded) {
+        <section
+            id="news-conversation"
+            class="news-conversation"
+            aria-labelledby="news-conversation-title">
+            <header>
+                <span class="eyebrow">CRICA NEWS</span>
+                <h2 id="news-conversation-title">{{ t('conversation') }}</h2>
+                <p>{{ t('commentIntro') }}</p>
+            </header>
+            @if (api.user(); as user) {
+                <div class="news-visitor">
+                    <span class="news-visitor-avatar" aria-hidden="true">
+                        {{ user.name.charAt(0) }}
+                    </span>
+                    <strong>{{ user.name }}</strong>
+                    <button class="news-quiet" (click)="logout()" [disabled]="busy">
+                        {{ t('logout') }}
+                    </button>
+                </div>
+                <form (ngSubmit)="send()" class="news-comment-form">
+                    @if (replyTo; as reply) {
+                        <div class="news-reply-context">
+                            <span>
+                                {{ t('replying') }}
+                                <strong>{{ reply.name }}</strong>
+                            </span>
+                            <button type="button" class="news-quiet" (click)="replyTo = null">
+                                {{ t('cancel') }}
+                            </button>
+                            <p>{{ reply.text }}</p>
+                        </div>
+                    }
+                    <label for="crica-comment-text">{{ t('comment') }}</label>
+                    <textarea
+                        id="crica-comment-text"
+                        name="comment"
+                        [(ngModel)]="text"
+                        maxlength="1500"
+                        rows="4"
+                        [placeholder]="t('placeholder')"
+                        [disabled]="busy"
+                        required></textarea>
+                    <div class="news-composer-footer">
+                        <small>{{ text.length }}/1500</small>
+                        <button class="news-primary" [disabled]="busy || !text.trim()">
+                            {{ t(busy ? 'sending' : 'send') }}
+                            <span aria-hidden="true">→</span>
+                        </button>
+                    </div>
+                </form>
+            } @else {
+                <div class="news-join-card">
+                    <div>
+                        <strong>{{ t('join') }}</strong>
+                        <p>{{ t('intro') }}</p>
+                    </div>
+                    <button class="news-primary" (click)="requireLogin('comment')">
+                        {{ t('signin') }}
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+            }
+            <div class="news-comment-list" [attr.aria-busy]="loading">
+                @for (comment of comments; track comment.id) {
+                    <article class="news-comment" [class.news-comment-reply]="comment.parentId">
+                        <span class="news-visitor-avatar" aria-hidden="true">
+                            {{ comment.name.charAt(0) }}
+                        </span>
+                        <div>
+                            <div class="news-comment-heading">
+                                <strong>{{ comment.name }}</strong>
+                                <time [attr.datetime]="comment.date">{{ date(comment.date) }}</time>
+                            </div>
+                            @if (comment.parentId) {
+                                <blockquote>{{ comment.parentText }}</blockquote>
+                            }
+                            <p class="news-comment-text">{{ comment.text }}</p>
+                            @if (comment.status === 'pending') {
+                                <small class="news-pending">{{ t('pending') }}</small>
+                            } @else {
+                                <button class="news-quiet" (click)="reply(comment)">
+                                    {{ t('reply') }}
+                                    <span aria-hidden="true">↩</span>
+                                </button>
+                            }
+                        </div>
+                    </article>
+                } @empty {
+                    @if (!loading) {
+                        <p class="news-empty">{{ t('empty') }}</p>
+                    }
+                }
+            </div>
+            @if (loading) {
+                <p class="news-feedback" role="status">{{ t('load') }}</p>
+            }
+            @if (comments.length < commentsTotal) {
+                <button class="news-load-more" [disabled]="loading" (click)="loadComments(true)">
+                    {{ t('more') }}
+                </button>
+            }
+        </section>
+    }
+</section>
+<dialog
+    #loginDialog
+    class="news-dialog"
+    aria-labelledby="news-login-title"
+    (click)="backdrop($event, loginDialog)">
+    <div class="news-dialog-body">
+        <button
+            class="news-dialog-close"
+            [attr.aria-label]="t('close')"
+            (click)="dismiss(loginDialog)">
+            ×
+        </button>
+        <div class="news-dialog-emblem" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
+            </svg>
+        </div>
+        <span class="eyebrow">CRICA NEWS</span>
+        <h2 id="news-login-title">{{ t('join') }}</h2>
+        <p class="news-dialog-description">{{ t('intro') }}</p>
+        <div class="news-providers">
+            <button class="news-provider" (click)="login('google')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                        fill="#4285F4"
+                        d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.8 3-4.3 3-7.4Z" />
+                    <path
+                        fill="#34A853"
+                        d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5a6 6 0 0 1-9-3.1H3.1v2.6A10 10 0 0 0 12 22Z" />
+                    <path
+                        fill="#FBBC05"
+                        d="M6.4 14a6 6 0 0 1 0-4V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14Z" />
+                    <path
+                        fill="#EA4335"
+                        d="M12 6c1.5 0 2.8.5 3.9 1.5l2.9-2.9A10 10 0 0 0 3.1 7.4L6.4 10A6 6 0 0 1 12 6Z" />
+                </svg>
+                <span>{{ t('google') }}</span>
+                <span aria-hidden="true">→</span>
+            </button>
+            <button class="news-provider" (click)="login('facebook')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                        fill="#1877F2"
+                        d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7V12h3.1V9.3c0-3.1 1.8-4.8 4.6-4.8 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12Z" />
+                </svg>
+                <span>{{ t('facebook') }}</span>
+                <span aria-hidden="true">→</span>
+            </button>
+        </div>
+        @if (loginError) {
+            <p class="news-error" role="alert">{{ loginError }}</p>
+        }
+        <p class="news-privacy">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 10h14v11H5zM8 10V7a4 4 0 0 1 8 0v3" />
+            </svg>
+            {{ t('privacy') }}
+        </p>
+    </div>
+</dialog>
+<dialog
+    #shareDialog
+    class="news-dialog"
+    aria-labelledby="news-share-title"
+    (click)="backdrop($event, shareDialog)">
+    <div class="news-dialog-body">
+        <button
+            class="news-dialog-close"
+            [attr.aria-label]="t('close')"
+            (click)="dismiss(shareDialog)">
+            ×
+        </button>
+        <div class="news-dialog-emblem" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 16V3m-4 4 4-4 4 4M5 12v8h14v-8" /></svg>
+        </div>
+        <span class="eyebrow">CRICA NEWS</span>
+        <h2 id="news-share-title">{{ t('shareTitle') }}</h2>
+        <p class="news-dialog-description">{{ t('shareIntro') }}</p>
+        <div class="news-providers">
+            <button class="news-provider" (click)="copyLink()">
+                <span aria-hidden="true">↗</span>
+                <span>{{ t('copy') }}</span>
+                <span aria-hidden="true">→</span>
+            </button>
+            <a
+                class="news-provider"
+                [href]="shareWhatsApp"
+                target="_blank"
+                rel="noopener noreferrer"
+                (click)="recordShare(); dismiss(shareDialog)">
+                <span class="news-channel whatsapp" aria-hidden="true">W</span>
+                <span>WhatsApp</span>
+                <span aria-hidden="true">↗</span>
+            </a>
+            <a
+                class="news-provider"
+                [href]="shareFacebook"
+                target="_blank"
+                rel="noopener noreferrer"
+                (click)="recordShare(); dismiss(shareDialog)">
+                <span class="news-channel facebook" aria-hidden="true">f</span>
+                <span>Facebook</span>
+                <span aria-hidden="true">↗</span>
+            </a>
+            @if (nativeAvailable) {
+                <button class="news-provider" (click)="nativeShare()">
+                    <span aria-hidden="true">+</span>
+                    <span>{{ t('native') }}</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            }
+        </div>
+        @if (shareError) {
+            <p class="news-error" role="alert">{{ shareError }}</p>
+            <input class="news-share-url" readonly [value]="url" [attr.aria-label]="t('link')" />
+        }
+    </div>
+</dialog>

@@ -13,13 +13,14 @@ import {
 import { BlogStore } from './blog-store';
 import { BlogApi, type Category } from './blog-api';
 import { SeoService } from '../services/seo.service';
+import { BlogInteractionsComponent } from './blog-interactions';
 import template from './blog-public.html?raw';
 import './blog.css';
 
 @Component({
     selector: 'crica-blog',
     standalone: true,
-    imports: [FormsModule, RouterLink],
+    imports: [FormsModule, RouterLink, BlogInteractionsComponent],
     template,
 })
 export class BlogPublicComponent {
@@ -179,38 +180,11 @@ export class BlogPublicComponent {
     get related() {
         return this.results.filter((post) => post.id !== this.post?.id).slice(0, 3);
     }
-    get key() {
-        return `${this.post?.id}:${this.locale()}`;
-    }
-    get liked() {
-        return this.store.liked().includes(this.key);
-    }
-    get comments() {
-        return this.store
-            .comments()
-            .filter(
-                (comment) =>
-                    comment.postId === this.post?.id &&
-                    comment.locale === this.locale() &&
-                    (comment.status === 'approved' ||
-                        (comment.status === 'pending' && comment.name === this.store.user()?.name)),
-            );
-    }
-    async share() {
-        try {
-            const url = location.origin + this.path(this.post!);
-            if (navigator.share) await navigator.share({ title: this.version?.title, url });
-            else {
-                await navigator.clipboard.writeText(url);
-                this.notice.set('Link copiado.');
-            }
-        } catch (e) {
-            if ((e as Error).name !== 'AbortError')
-                this.notice.set('Copie o endereço da página para compartilhar.');
-        }
-    }
     path(post: BlogPost) {
         return blogPath(post, this.locale());
+    }
+    get articleUrl() {
+        return this.post ? location.origin + this.path(this.post) : '';
     }
     date(value: string) {
         return new Date(value + 'T12:00:00').toLocaleDateString(
@@ -243,23 +217,5 @@ export class BlogPublicComponent {
             setLanguage(locale);
             void this.router.navigate(['/blog'], { queryParams: { idioma: locale } });
         }
-    }
-    login(provider: string) {
-        this.store.login(provider);
-        this.notice.set('Sessão de demonstração iniciada. Nenhuma conta externa foi acessada.');
-    }
-    like() {
-        if (!this.store.user()) {
-            this.notice.set('Escolha uma conta de demonstração abaixo para curtir ou comentar.');
-            document.getElementById('blog-comments')?.scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
-        this.store.toggleLike(this.key);
-    }
-    sendComment() {
-        if (!this.post || !this.commentText.trim() || !this.store.user()) return;
-        this.store.comment(this.post.id, this.locale(), this.commentText);
-        this.commentText = '';
-        this.notice.set('Comentário recebido nesta sessão e aguardando moderação.');
     }
 }
