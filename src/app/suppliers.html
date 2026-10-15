@@ -74,19 +74,16 @@
     </div>
     <section [attr.aria-label]="'Produtos indicados' | translate">
         <crica-filters
-            [options]="platformOptions"
-            [optionLabels]="platformLabels"
-            label="Plataformas"
             searchLabel="Buscar indicações"
-            [selected]="platform"
             [query]="query"
-            (selection)="select($event)"
-            (queryChange)="search($event)" />
-        <div class="supplier-type-filter">
+            (queryChange)="search($event)">
+            <crica-theme-filter [themes]="platformFilterOptions" [selected]="selectedPlatform"
+                label="Loja" noun="loja" plural="lojas" idPrefix="supplier-store" [single]="true"
+                (selection)="select($event[0] || 'Todos')" />
             <crica-theme-filter [themes]="supplierTypes" [selected]="typeIds"
                 label="Tipo" noun="tipo" plural="tipos" idPrefix="supplier-type"
                 (selection)="selectTypes($event)" />
-        </div>
+        </crica-filters>
         <div class="results-row">
             <p aria-live="polite">
                 @if (catalog.affiliatesLoading() && !catalog.affiliates().length) { {{ 'Carregando indicações...' | translate }} } @else if (catalog.affiliatesError()) {

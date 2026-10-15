@@ -121,7 +121,7 @@ O Tiptap aplicava a marca italic e o servidor renderizava `<em>`, mas `font-synt
 
 - Tela `/admin/blog/autores`, no menu comum, com AG Grid no padrão do catálogo: foto redonda/nome, apresentação, situação, editar/excluir, filtros e paginação 20/50/100.
 - Cadastro com nome (120 caracteres), foto PNG/JPEG/WebP de até 5 MB e apresentação simples (600 caracteres). A foto usa o upload existente do blog; sem foto, aparece uma inicial em círculo.
-- Campo de seleção de Autor na matéria. O vínculo é compartilhado pelas traduções da matéria. Nome e foto vêm do cadastro e aparecem na matéria pública, HTML inicial e Article/Person JSON-LD. A apresentação continua no cadastro e na API, mas não é exibida na página pública nem no JSON-LD.
+- Campo de seleção de Autor na matéria. O vínculo é compartilhado pelas traduções da matéria. Nome e foto vêm do cadastro e aparecem na matéria pública, HTML inicial e Article/Person JSON-LD. A apresentação aparece no cartão “Sobre o autor”, após o conteúdo e antes das interações; o cabeçalho mantém apenas nome e foto.
 - Autores inativos não podem ser escolhidos para novas associações. Uma matéria já vinculada mantém seu autor, inclusive quando ele é desativado. A exclusão de autor em uso é bloqueada no banco/API; trocar o autor ou desativar preserva as matérias.
 - Os nomes livres de matérias antigas são preservados e identificados como autor anterior no seletor. Novos perfis não são criados automaticamente pela migration. Matérias novas usam a seleção do cadastro; publicação exige um autor.
 
@@ -129,7 +129,7 @@ Migration adicional: `backend/sql/017_create_blog_authors.sql`, depois de `016_c
 
 APIs autenticadas: `GET /api/admin/blog/authors`, `PUT /api/admin/blog/authors/{id}`, `DELETE /api/admin/blog/authors/{id}`. O payload de matéria aceita `authorId`; `author` continua suportado para compatibilidade com os registros antigos. Perfil vinculado é retornado como `authorProfile`.
 
-Validação: builds front/backend; 74 testes frontend e 65 backend passaram (6 antigos do catálogo ignorados por configuração específica ausente). `node scripts/test-blog-authors-local.mjs` verificou 28 chamadas e asserções: autorização, cadastro/edição, upload, limites, nomes duplicados, vínculo PT/EN, perfil público/HTML/SEO, apresentação oculta, autor inexistente/inativo e exclusão bloqueada quando em uso. Os dados temporários ficaram no banco isolado para revisão visual.
+Validação: builds front/backend; 74 testes frontend e 65 backend passaram (6 antigos do catálogo ignorados por configuração específica ausente). `node scripts/test-blog-authors-local.mjs` verifica 28 chamadas e asserções: autorização, cadastro/edição, upload, limites, nomes duplicados, vínculo PT/EN, perfil público/HTML/SEO, apresentação escapada no cartão após a matéria, autor inexistente/inativo e exclusão bloqueada quando em uso. Os dados temporários ficaram no banco isolado para revisão visual.
 
 Ajustes de apresentação: avatar da matéria pública ampliado de 42 para 60 px, mantendo o recorte circular. Novo autor/editar autor substituem a listagem, seus filtros e paginação; cancelar ou salvar retorna à listagem. Builds front/backend e as 28 verificações locais passaram novamente após esses ajustes.
 

@@ -13,6 +13,7 @@ export class ThemeFilterComponent {
     @Input() noun = 'tema';
     @Input() plural = 'temas';
     @Input() idPrefix = 'shop-theme';
+    @Input() single = false;
     @Output() selection = new EventEmitter<string[]>();
     @ViewChild('picker') picker?: ElementRef<HTMLDetailsElement>;
     search = '';
@@ -26,6 +27,7 @@ export class ThemeFilterComponent {
     }
     searchThemes(event: Event) { this.search = (event.target as HTMLInputElement).value; }
     toggle(id: string) {
+        if (this.single) { this.selection.emit([id]); return; }
         this.selection.emit(this.selected.includes(id) ? this.selected.filter(value => value !== id) : [...this.selected, id]);
     }
     remove(id: string) { this.selection.emit(this.selected.filter(value => value !== id)); }

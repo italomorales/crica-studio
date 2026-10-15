@@ -157,6 +157,20 @@
         </figure>
         <div class="blog-prose" [innerHTML]="version.html"></div>
     </article>
+    @if(post.authorProfile; as author) {
+    <section class="blog-author-card" aria-labelledby="blog-about-author-name">
+        @if(author.photo) {
+        <img class="blog-author-card-photo" [src]="author.photo" [alt]="author.name" width="72" height="72" loading="lazy" />
+        } @else {
+        <span class="blog-author-card-photo blog-author-card-initial" aria-hidden="true">{{ author.name.charAt(0) }}</span>
+        }
+        <div class="blog-author-card-copy">
+            <span class="blog-author-card-label">{{ locale() === 'en' ? 'About the author' : locale() === 'es' ? 'Sobre el autor' : 'Sobre o autor' }}</span>
+            <h2 id="blog-about-author-name">{{ author.name }}</h2>
+            @if(author.bio) { <p>{{ author.bio }}</p> }
+        </div>
+    </section>
+    }
     <crica-blog-interactions
         [postId]="post.id"
         [locale]="locale()"

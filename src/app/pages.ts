@@ -185,6 +185,11 @@ export class ShopComponent implements OnInit, OnDestroy {
 })
 export class SuppliersComponent implements OnInit, OnDestroy {
     get platformLabels() { return Object.fromEntries(this.registeredPlatforms().map(item=>[item.name,contentField(item,"name")])); }
+    get platformFilterOptions() {
+        const labels = this.platformLabels;
+        return this.platformOptions.filter(name => name !== 'Todos').map(name => ({id:name, name:labels[name] || name, active:true}));
+    }
+    get selectedPlatform() { return this.platform === 'Todos' ? [] : [this.platform]; }
     catalog = inject(PublicCatalogService);
     readonly featuredImages = computed(() => this.catalog.featuredAffiliates().map(product => product.image));
     private platformService = inject(PlatformService, { optional: true });

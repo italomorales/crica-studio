@@ -22,6 +22,8 @@ const dictionary: Record<string, string> = {
     "temas": "temas",
     "tipo": "tipo",
     "tipos": "tipos",
+    "loja": "tienda",
+    "lojas": "tiendas",
     "Limpar": "Limpiar",
     "Ver produtos": "Ver productos",
     "Buscar {items}…": "Buscar {items}…",

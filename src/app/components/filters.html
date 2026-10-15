@@ -1,5 +1,6 @@
 <div class="filterbar">
     <div class="filter-options">
+    @if(options.length) {
     <div class="chips" [attr.aria-label]="label | translate" role="group">
         @for (option of options; track option) {
         <button
@@ -11,6 +12,7 @@
         </button>
         }
     </div>
+    }
     <ng-content />
     </div>
     <label class="search">

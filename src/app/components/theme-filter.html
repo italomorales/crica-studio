@@ -14,10 +14,16 @@
             <input [id]="idPrefix + '-search'" type="search" autocomplete="off" [placeholder]="'Buscar {items}…' | translate:{items: (plural | translate)}"
                 [value]="search" (input)="searchThemes($event)" />
             <fieldset class="shop-theme-options">
-                <legend class="sr-only">{{ 'Escolha um ou mais {items}' | translate:{items: (plural | translate)} }}</legend>
+                <legend class="sr-only">@if(single){ {{ label | translate }} }@else{ {{ 'Escolha um ou mais {items}' | translate:{items: (plural | translate)} }} }</legend>
+                @if(single && !search.trim()) {
+                <label>
+                    <input type="radio" [name]="idPrefix" [checked]="!selected.length" (change)="selection.emit([])" />
+                    <span>{{ 'Todos' | translate }}</span>
+                </label>
+                }
                 @for (theme of options; track theme.id) {
                 <label>
-                    <input type="checkbox" [checked]="selected.includes(theme.id)" (change)="toggle(theme.id)" />
+                    <input [type]="single ? 'radio' : 'checkbox'" [name]="idPrefix" [checked]="selected.includes(theme.id)" (change)="toggle(theme.id)" />
                     <span>{{ (theme | content:'name') }}</span>
                 </label>
                 } @empty { <p role="status">{{ 'Nenhum {item} encontrado.' | translate:{item: (noun | translate)} }}</p> }
