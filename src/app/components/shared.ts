@@ -1,6 +1,6 @@
 import { ContentPipe, contentField } from '../services/catalog-translations';
 import { TranslatePipe, language, setLanguage, availableLanguages, languageFlag } from '../services/language';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { currentSiteMarket, publicHomePath } from '../services/site-market';
 import headerTemplate from './header.html?raw';
@@ -17,6 +17,17 @@ import productImageTemplate from './product-image.html?raw';
 export class HeaderComponent {
     readonly showShop = currentSiteMarket() === 'br';
     readonly homePath = publicHomePath();
+    @ViewChild('mobileMenu', { static: true }) mobileMenu!: ElementRef<HTMLDialogElement>;
+    readonly links = [
+        { path: '/', label: 'Home', detail: 'O universo Crica começa aqui' },
+        { path: '/blog', label: 'News', detail: 'Histórias e ideias para inspirar' },
+        ...(this.showShop ? [{ path: '/loja', label: 'Loja', detail: 'Presentes com a sua essência' }] : []),
+        { path: '/fornecedores', label: 'Fornecedores', detail: 'Achadinhos para suas criações' },
+        { path: '/vitrine', label: 'Vitrines', detail: 'A Crica nas suas plataformas favoritas' },
+    ];
+    openMenu() { this.mobileMenu.nativeElement.showModal(); }
+    closeMenu() { this.mobileMenu.nativeElement.close(); }
+    onBackdrop(event: MouseEvent) { if (event.target === this.mobileMenu.nativeElement) this.closeMenu(); }
 }
 @Component({
     selector: 'crica-footer',

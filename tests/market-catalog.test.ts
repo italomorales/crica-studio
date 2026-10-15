@@ -41,7 +41,10 @@ test('domains scope supplier pages, featured products and platform filters consi
         assert.ok(scoped.every(url => url.searchParams.get('market') === market));
         const header = new runtime.HeaderComponent();
         assert.equal(header.showShop, market === 'br');
-        assert.equal(header.homePath, market === 'br' ? '/loja' : '/fornecedores');
+        assert.equal(header.homePath, '/');
+        assert.deepEqual(header.links.map((link: { label: string }) => link.label), market === 'br'
+            ? ['Home', 'News', 'Loja', 'Fornecedores', 'Vitrines']
+            : ['Home', 'News', 'Fornecedores', 'Vitrines']);
         assert.equal(new runtime.FooterComponent().homePath, header.homePath);
     }
 });

@@ -1,0 +1,187 @@
+.crica-navigation {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    background: #fffffff0;
+    backdrop-filter: blur(18px);
+}
+.crica-navigation .header-inner {
+    min-height: 88px;
+    gap: 44px;
+}
+.crica-navigation .desktop-navigation {
+    gap: 30px;
+}
+.navigation-signature {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+.mobile-menu-toggle {
+    display: none;
+}
+.crica-mobile-menu {
+    border: 0;
+    padding: 0;
+    position: fixed;
+    inset: 0 0 0 auto;
+    margin: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    width: min(390px, calc(100% - 24px));
+    max-width: 100%;
+    background: #fff;
+    color: var(--ink);
+    box-shadow: -20px 0 80px #17223516;
+}
+.crica-mobile-menu::backdrop {
+    background: #14223866;
+    backdrop-filter: blur(4px);
+}
+.crica-mobile-menu[open] {
+    animation: crica-drawer-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mobile-menu-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: max(22px, env(safe-area-inset-top)) 26px max(24px, env(safe-area-inset-bottom));
+}
+.mobile-menu-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+.mobile-menu-close {
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    width: 44px;
+    height: 44px;
+    background: #f8fafc;
+    border-radius: 50%;
+}
+.mobile-menu-close svg {
+    width: 22px;
+    height: 22px;
+}
+.mobile-menu-panel > p {
+    font-size: 13px;
+    margin: 36px 0 18px;
+    color: var(--muted);
+}
+.mobile-menu-panel nav {
+    display: grid;
+    gap: 4px;
+}
+.mobile-menu-panel nav a {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 86px;
+    border-bottom: 1px solid #edf0f3;
+    padding: 16px 12px;
+    border-radius: 12px;
+}
+.mobile-menu-number {
+    font-size: 10px;
+    color: #8291a4;
+    letter-spacing: 1px;
+}
+.mobile-menu-panel nav strong {
+    font-size: 23px;
+    font-weight: 550;
+    letter-spacing: -0.6px;
+    display: block;
+}
+.mobile-menu-panel nav small {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    margin-top: 4px;
+}
+.mobile-menu-panel nav b {
+    margin-left: auto;
+    color: var(--blue);
+    font-size: 22px;
+    font-weight: 400;
+}
+.mobile-menu-panel nav .active {
+    background: #edf6fd;
+    border-bottom-color: transparent;
+    color: var(--blue);
+}
+.mobile-menu-bottom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: auto;
+    padding-top: 36px;
+}
+body:has(.crica-mobile-menu[open]) {
+    overflow: hidden;
+}
+@keyframes crica-drawer-in {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+@media (max-width: 1000px) {
+    .navigation-signature {
+        display: none;
+    }
+    .crica-navigation .header-inner {
+        justify-content: space-between;
+        gap: 28px;
+    }
+}
+@media (max-width: 700px) {
+    .crica-navigation .header-inner {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        min-height: 76px;
+        gap: 20px;
+        padding-block: 0;
+    }
+    .crica-navigation .brand {
+        padding: 12px 0;
+    }
+    .crica-navigation .brand img {
+        width: 115px;
+        height: auto;
+    }
+    .crica-navigation .header-inner .desktop-navigation {
+        display: none;
+    }
+    .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        min-height: 44px;
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 100px;
+        font-size: 12px;
+    }
+    .mobile-menu-toggle svg {
+        width: 22px;
+        height: 22px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .crica-mobile-menu[open] {
+        animation: none;
+    }
+}

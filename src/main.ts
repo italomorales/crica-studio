@@ -9,6 +9,7 @@ import { HeaderComponent, FooterComponent } from './app/components/shared';
 import { ShopComponent, SuppliersComponent, StorefrontComponent } from './app/pages';
 import { ProductDetailComponent } from './app/product-detail';
 import './styles.css';
+import './app/components/navigation.css';
 import './admin.css';
 import { LoginComponent } from './app/admin/login';
 import type { AdminComponent } from './app/admin/admin';
@@ -19,6 +20,7 @@ import { whatsappUrl } from './app/services/contact';
 import { installWhatsAppTracking } from './app/services/whatsapp-tracking';
 import appTemplate from './app.html?raw';
 import { currentSiteMarket, publicHomePath } from './app/services/site-market';
+import { HomeComponent } from './app/home';
 
 const shopGuard = () =>
     currentSiteMarket() === 'international' ? inject(Router).parseUrl('/fornecedores') : true;
@@ -58,7 +60,7 @@ initializeLanguage()
             providers: [
                 provideRouter(
                     [
-                        { path: '', redirectTo: publicHomePath().slice(1), pathMatch: 'full' },
+                        { path: '', component: HomeComponent, pathMatch: 'full' },
                         {
                             path: 'loja',
                             canMatch: [shopGuard],

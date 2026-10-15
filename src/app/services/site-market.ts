@@ -14,5 +14,5 @@ export function currentSiteMarket(): SiteMarket {
     return marketForHostname(window.location.hostname || '');
 }
 
-export function publicHomePath() { return currentSiteMarket() === 'international' ? '/fornecedores' : '/loja'; }
+export function publicHomePath() { return '/'; }
 export function publicSiteUrl() { return currentSiteMarket() === 'international' ? 'https://www.cricastudio.com' : 'https://www.cricastudio.com.br'; }

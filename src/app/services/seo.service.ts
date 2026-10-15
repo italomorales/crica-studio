@@ -24,6 +24,11 @@ const DEFAULT_PAGE: PageSeo = {
 };
 
 const PAGES: Record<string, PageSeo> = {
+    '/': {
+        title: 'Presentes, ideias e conexões | Crica Studio',
+        description: 'Descubra presentes personalizados, histórias que inspiram, vitrines e fornecedores para dar forma às suas ideias. Conheça o universo Crica Studio.',
+        path: '/',
+    },
     '/loja': DEFAULT_PAGE,
     '/fornecedores': {
         title: 'Máquinas de Bottons e Canecas para Personalizar | Crica Studio',

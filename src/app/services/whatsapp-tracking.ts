@@ -1,7 +1,7 @@
 /** A click expresses contact intent; it does not confirm a message or a sale. */
 export const WHATSAPP_CONVERSION = 'AW-617194162/2xFkCM-lm4wdELLFpqYC';
 const GA_DESTINATION = 'G-6GMXMZH5KQ';
-const sources = ['floating', 'footer', 'bulk_order', 'construction', 'product', 'product_dialog'] as const;
+const sources = ['floating', 'footer', 'bulk_order', 'construction', 'product', 'product_dialog', 'home'] as const;
 export type WhatsAppSource = typeof sources[number];
 type Sender = (command: 'event', event: string, parameters: Record<string, unknown>) => void;
 interface Context { source: WhatsAppSource; productId?: string; quantity?: number }

@@ -20,7 +20,9 @@ test('CloudFront sends Brazil from .com to .com.br preserving paths and repeated
 test('foreign .com visitors stay international and shop URLs lead to suppliers; .com.br always stays Brazilian', () => {
     for (const country of ['US', 'ES', 'AR', undefined]) {
         assert.equal(handler(request('www.cricastudio.com', country)).uri, '/vitrine');
-        for (const path of ['/', '/index.html', '/loja', '/loja/caneca'])
+        for (const path of ['/', '/index.html'])
+            assert.equal(handler(request('www.cricastudio.com', country, path)).uri, path);
+        for (const path of ['/loja', '/loja/caneca'])
             assert.equal(handler(request('www.cricastudio.com', country, path)).headers.location.value, 'https://www.cricastudio.com/fornecedores');
         assert.equal(handler(request('www.cricastudio.com.br', country, '/loja')).uri, '/loja');
         assert.equal(handler(request('cricastudio.com.br', country, '/loja')).headers.location.value, 'https://www.cricastudio.com.br/loja');

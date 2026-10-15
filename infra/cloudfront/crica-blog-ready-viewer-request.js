@@ -26,7 +26,7 @@ function handler(event) {
         targetHost = 'www.cricastudio.com.br';
     } else if (international) {
         targetHost = 'www.cricastudio.com';
-        if (path === '/' || path === '/index.html' || path === '/loja' || path.indexOf('/loja/') === 0) path = '/fornecedores';
+        if (path === '/loja' || path.indexOf('/loja/') === 0) path = '/fornecedores';
     } else {
         targetHost = 'www.cricastudio.com.br';
     }

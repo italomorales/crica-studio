@@ -1,0 +1,495 @@
+<main id="main" class="crica-home">
+    <section class="home-hero container" aria-labelledby="home-title">
+        <div class="home-hero-copy">
+            <span class="home-kicker">
+                <i aria-hidden="true"></i>
+                {{ t('welcome') }}
+            </span>
+            <h1 id="home-title">
+                {{ t('title') }}
+                <br />
+                <em>{{ t('titleEnd') }}</em>
+            </h1>
+            <p>{{ t('intro') }}</p>
+            <div class="home-actions">
+                <a class="home-button" [routerLink]="showShop ? '/loja' : '/vitrine'">
+                    {{ t(showShop ? 'shop' : 'allStorefronts') }}
+                </a>
+                <a class="home-button home-button-secondary" routerLink="/blog">
+                    {{ t('inspiration') }}
+                </a>
+            </div>
+        </div>
+        <div class="home-hero-art">
+            <img
+                class="home-hero-photo"
+                [src]="heroImage"
+                [alt]="t('image')"
+                width="560"
+                height="560"
+                fetchpriority="high" />
+        </div>
+    </section>
+
+    <nav class="home-paths container" [attr.aria-label]="t('scroll')">
+        <a routerLink="/blog">
+            <svg
+                class="home-path-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+                <rect x="4" y="3" width="16" height="18" rx="3" />
+                <path d="M8 7h8M8 11h3M8 15h8M8 18h5" />
+                <path d="M14 10h2v2h-2z" />
+            </svg>
+            <span class="home-path-copy">
+                <strong>Crica News</strong>
+                <small>{{ t('creative') }}</small>
+            </span>
+        </a>
+        @if (showShop) {
+        <a routerLink="/loja">
+            <svg
+                class="home-path-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M5 7h14l1 12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2L5 7Z" />
+                <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+            </svg>
+            <span class="home-path-copy">
+                <strong>{{ 'Loja' | translate }}</strong>
+                <small>{{ t('gifts') }}</small>
+            </span>
+        </a>
+        }
+        <a routerLink="/fornecedores">
+            <svg
+                class="home-path-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" />
+                <path d="m4 7.5 8 4.5 8-4.5M12 12v9M8 5.3l8 4.5" />
+            </svg>
+            <span class="home-path-copy">
+                <strong>{{ 'Fornecedores' | translate }}</strong>
+                <small>{{ t('make') }}</small>
+            </span>
+        </a>
+        <a routerLink="/vitrine">
+            <svg
+                class="home-path-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M4 10v10h16V10M3 10l2-7h14l2 7" />
+                <path
+                    d="M3 10a3 3 0 0 0 5 2 3 3 0 0 0 4 0 3 3 0 0 0 4 0 3 3 0 0 0 5-2M9 20v-5h6v5" />
+            </svg>
+            <span class="home-path-copy">
+                <strong>{{ 'Vitrines' | translate }}</strong>
+                <small>{{ t('discover') }}</small>
+            </span>
+        </a>
+    </nav>
+
+    <section class="home-section container" aria-labelledby="home-news-title">
+        <div class="home-section-head">
+            <div>
+                <span class="home-kicker">CRICA NEWS</span>
+                <h2 id="home-news-title">{{ t('news') }}</h2>
+                <p>{{ t('newsIntro') }}</p>
+            </div>
+            <a class="home-text-link" routerLink="/blog">
+                {{ t('allNews') }}
+                <svg
+                    class="home-link-icon"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="m8 5 5 5-5 5" />
+                </svg>
+            </a>
+        </div>
+        @if (newsLoading()) {
+        <div class="home-skeleton-grid" role="status">
+            <span class="sr-only">{{ t('loading') }}</span>
+            <i></i>
+            <i></i>
+            <i></i>
+        </div>
+        } @else if (newsError()) {
+        <div class="home-empty">
+            <p>{{ t('unavailable') }}</p>
+            <button type="button" class="home-text-link" (click)="loadNews()">
+                {{ t('retry') }} ↻
+            </button>
+        </div>
+        } @else {
+        <div class="home-news-grid" [class.home-news-single]="posts().length === 1">
+            @for (post of posts(); track post.id) {
+            <a class="home-news-card" [routerLink]="postPath(post)">
+                <div class="home-news-photo">
+                    <crica-product-image
+                        [src]="post.cover"
+                        [alt]="version(post).title"
+                        label="CRICA NEWS" />
+                    <span>{{ post.category || 'Crica News' }}</span>
+                </div>
+                <div class="home-news-copy">
+                    <span class="home-mini-label">
+                        CRICA NEWS
+                        <i aria-hidden="true">/</i>
+                        {{ post.author }}
+                    </span>
+                    <h3>{{ version(post).title }}</h3>
+                    <p>{{ version(post).summary }}</p>
+                    <span class="home-text-link">
+                        {{ t('read') }}
+                        <svg
+                            class="home-link-icon"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true">
+                            <path d="M6 14 14 6M6 6h8v8" />
+                        </svg>
+                    </span>
+                </div>
+            </a>
+            } @empty {
+            <div class="home-empty">
+                <p>{{ t('emptyNews') }}</p>
+                <a class="home-text-link" routerLink="/blog">{{ t('allNews') }}</a>
+            </div>
+            }
+        </div>
+        }
+    </section>
+
+    @if (showShop) {
+    <section class="home-shop-wrap" aria-labelledby="home-shop-title">
+        <div class="home-section container">
+            <div class="home-section-head">
+                <div>
+                    <span class="home-kicker">{{ 'LOJA CRICA' | translate }}</span>
+                    <h2 id="home-shop-title">{{ t('products') }}</h2>
+                    <p>{{ t('productsIntro') }}</p>
+                </div>
+                <a class="home-text-link" routerLink="/loja">
+                    {{ t('allProducts') }}
+                    <svg
+                        class="home-link-icon"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="m8 5 5 5-5 5" />
+                    </svg>
+                </a>
+            </div>
+            @if (catalog.productsLoading() && !products().length) {
+            <div class="home-skeleton-grid" role="status">
+                <span class="sr-only">{{ t('loading') }}</span>
+                <i></i>
+                <i></i>
+                <i></i>
+            </div>
+            } @else {
+            <div class="home-product-grid">
+                @for (product of products(); track product.id) {
+                <a class="home-product-card" [routerLink]="productPath(product)">
+                    <div class="home-product-photo">
+                        <crica-product-image [src]="product.images[0]" [alt]="product.name" />
+                    </div>
+                    <div class="home-product-copy">
+                        <span class="home-mini-label">{{ product.category }}</span>
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.description }}</p>
+                        <div class="home-product-bottom">
+                            <strong>
+                                @if ((product.priceMode === 'fixed' || product.priceMode === 'from')
+                                && product.price != null) { {{ price(product) }} } @else { {{
+                                t('consult') }} }
+                            </strong>
+                            <span>
+                                {{ t('product') }}
+                                <svg
+                                    class="home-link-icon"
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.7"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true">
+                                    <path d="m8 5 5 5-5 5" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                } @empty {
+                <div class="home-empty">
+                    <p>{{ catalog.productsError() ? t('unavailable') : t('emptyShop') }}</p>
+                    @if (catalog.productsError()) {
+                    <button class="home-text-link" type="button" (click)="loadShop()">
+                        {{ t('retry') }} ↻
+                    </button>
+                    } @else {
+                    <a class="home-text-link" routerLink="/loja">{{ t('allProducts') }}</a>
+                    }
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </section>
+    }
+
+    <section class="home-storefront-section container" aria-labelledby="home-storefront-title">
+        <div class="home-storefront-heading">
+            <div>
+                <span class="home-kicker">{{ 'VITRINES CRICA' | translate }}</span>
+                <h2 id="home-storefront-title">{{ t('storefronts') }}</h2>
+                <p>{{ t('storefrontsIntro') }}</p>
+            </div>
+            <a class="home-text-link" routerLink="/vitrine">
+                {{ t('allStorefronts') }}
+                <svg
+                    class="home-link-icon"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="m8 5 5 5-5 5" />
+                </svg>
+            </a>
+        </div>
+        @if (storefrontsLoading()) {
+        <p class="home-inline-status" role="status">{{ t('loading') }}</p>
+        } @else if (storefrontsError()) {
+        <div class="home-empty">
+            <p>{{ t('unavailable') }}</p>
+            <button class="home-text-link" type="button" (click)="loadStorefronts()">
+                {{ t('retry') }} ↻
+            </button>
+        </div>
+        } @else {
+        <div class="home-storefront-grid">
+            @for (storefront of storefronts(); track storefront.id) {
+            <article
+                class="home-storefront-card"
+                [class.home-storefront-tiktok]="storefront.code === 'tiktok'"
+                [class.home-storefront-shopee]="storefront.code === 'shopee'"
+                [class.home-storefront-mercado]="storefront.code === 'mercado'">
+                <div class="home-storefront-card-top">
+                    <div class="home-platform-logo">
+                        @if (platformLogo(storefront)) {
+                        <img
+                            [src]="platformLogo(storefront)"
+                            alt=""
+                            width="64"
+                            height="64"
+                            loading="lazy" />
+                        } @else {
+                        <svg
+                            viewBox="0 0 24 24"
+                            width="36"
+                            height="36"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            aria-hidden="true">
+                            <path d="M4 10v10h16V10M3 10l2-7h14l2 7M9 20v-5h6v5" />
+                        </svg>
+                        }
+                    </div>
+                    @if (storefront.mobileOnly) {
+                    <span class="home-storefront-badge">
+                        <svg
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            aria-hidden="true">
+                            <rect x="5" y="2" width="10" height="16" rx="2" />
+                            <path d="M8 15h4" />
+                        </svg>
+                        {{ t('mobileOnly') }}
+                    </span>
+                    }
+                </div>
+                <div class="home-storefront-card-copy">
+                    <span class="home-mini-label">CRICA STUDIO</span>
+                    <h3>{{ storefront | content:'name' }}</h3>
+                    <p>{{ t(storefront.mobileOnly ? 'mobileStoreHint' : 'storeHint') }}</p>
+                </div>
+                <div class="home-storefront-card-actions">
+                    @if (storefront.mobileOnly) {
+                    <a
+                        class="home-storefront-button home-storefront-mobile-link"
+                        [href]="externalUrl(storefront.url || '')"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        [attr.aria-label]="t('openStore') + ' — ' + (storefront | content:'name') + ' (' + ('nova aba' | translate) + ')'">
+                        {{ t('openStore') }}
+                    </a>
+                    <a
+                        class="home-storefront-button home-storefront-desktop-link"
+                        routerLink="/vitrine"
+                        [attr.aria-label]="t('howToAccess') + ' — ' + (storefront | content:'name')">
+                        {{ t('howToAccess') }}
+                    </a>
+                    } @else {
+                    <a
+                        class="home-storefront-button"
+                        [href]="externalUrl(storefront.url || '')"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        [attr.aria-label]="t('openStore') + ' — ' + (storefront | content:'name') + ' (' + ('nova aba' | translate) + ')'">
+                        {{ t('openStore') }}
+                    </a>
+                    }
+                </div>
+            </article>
+            } @empty {
+            <a class="home-empty home-text-link" routerLink="/vitrine">
+                {{ t('emptyStorefronts') }}
+            </a>
+            }
+        </div>
+        }
+    </section>
+
+    <section class="home-suppliers-wrap" aria-labelledby="home-suppliers-title">
+        <div class="home-section container">
+            <div class="home-section-head">
+                <div>
+                    <span class="home-kicker">{{ t('supplierLabel') }}</span>
+                    <h2 id="home-suppliers-title">{{ t('suppliers') }}</h2>
+                    <p>{{ t('suppliersIntro') }}</p>
+                </div>
+                <a class="home-text-link" routerLink="/fornecedores">
+                    {{ t('allSuppliers') }}
+                    <svg
+                        class="home-link-icon"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="m8 5 5 5-5 5" />
+                    </svg>
+                </a>
+            </div>
+            @if (catalog.affiliatesLoading() && !suppliers().length) {
+            <div class="home-skeleton-grid" role="status">
+                <span class="sr-only">{{ t('loading') }}</span>
+                <i></i>
+                <i></i>
+                <i></i>
+            </div>
+            } @else {
+            <div class="home-supplier-grid">
+                @for (supplier of suppliers(); track supplier.id) {
+                <a
+                    class="home-supplier-card"
+                    [href]="externalUrl(supplier.url || '') || '/fornecedores'"
+                    [attr.target]="externalUrl(supplier.url || '') ? '_blank' : null"
+                    rel="sponsored noopener noreferrer"
+                    [attr.aria-label]="supplierName(supplier) + (externalUrl(supplier.url || '') ? ' — ' + ('nova aba' | translate) : '')">
+                    <div class="home-supplier-photo">
+                        <crica-product-image
+                            [src]="supplier.image || supplier.images?.[0]"
+                            [alt]="supplier | content:'name'" />
+                    </div>
+                    <div>
+                        <span class="home-mini-label">{{ supplier.platform }}</span>
+                        <h3>{{ supplier | content:'name' }}</h3>
+                        <span class="home-text-link">
+                            {{ t('seeFind') }}
+                            <svg
+                                class="home-link-icon"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true">
+                                <path d="M6 14 14 6M6 6h8v8" />
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+                } @empty {
+                <div class="home-empty">
+                    <p>{{ catalog.affiliatesError() ? t('unavailable') : t('emptySuppliers') }}</p>
+                    @if (catalog.affiliatesError()) {
+                    <button class="home-text-link" type="button" (click)="loadSuppliers()">
+                        {{ t('retry') }} ↻
+                    </button>
+                    } @else {
+                    <a class="home-text-link" routerLink="/fornecedores">{{ t('allSuppliers') }}</a>
+                    }
+                </div>
+                }
+            </div>
+            } @if (suppliers().length) {
+            <p class="home-affiliate-note">{{ t('affiliateNote') }}</p>
+            }
+        </div>
+    </section>
+
+    @if (showShop) {
+    <section class="home-contact container" aria-labelledby="home-contact-title">
+        <span class="home-contact-star" aria-hidden="true">✳</span>
+        <div>
+            <h2 id="home-contact-title">{{ t('ctaTitle') }}</h2>
+            <p>{{ t('ctaText') }}</p>
+        </div>
+        <a
+            class="home-button"
+            [href]="contactUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-whatsapp-source="home">
+            {{ t('contact') }}
+            <span class="sr-only">({{ 'nova aba' | translate }})</span>
+        </a>
+    </section>
+    }
+</main>

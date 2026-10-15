@@ -1,5 +1,5 @@
 <a class="skip" href="#main">{{ 'Pular para o conteúdo' | translate }}</a>
-<header class="site-header">
+<header class="site-header crica-navigation">
     <div class="container header-inner">
         <a
             [routerLink]="homePath"
@@ -11,19 +11,87 @@
                 width="140"
                 height="51" />
         </a>
-        <nav [class.has-shop]="showShop" [attr.aria-label]="'Navegação principal' | translate">
-            @if (showShop) {
-            <a routerLink="/loja" routerLinkActive="active" ariaCurrentWhenActive="page">
-                {{ 'Loja' | translate }}
+        <nav class="desktop-navigation" [attr.aria-label]="'Navegação principal' | translate">
+            @for (link of links; track link.path) {
+            <a
+                [routerLink]="link.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: link.path === '/' }"
+                ariaCurrentWhenActive="page">
+                {{ link.label | translate }}
             </a>
             }
-            <a routerLink="/fornecedores" routerLinkActive="active" ariaCurrentWhenActive="page">
-                {{ 'Fornecedores' | translate }}
-            </a>
-            <a routerLink="/vitrine" routerLinkActive="active" ariaCurrentWhenActive="page">
-                {{ 'Vitrines' | translate }}
-            </a>
-            <a routerLink="/blog" routerLinkActive="active" ariaCurrentWhenActive="page">News</a>
         </nav>
+        <span class="navigation-signature">{{ 'Ideias que ganham forma.' | translate }}</span>
+        <button
+            class="mobile-menu-toggle"
+            type="button"
+            (click)="openMenu()"
+            aria-haspopup="dialog"
+            aria-controls="crica-mobile-menu"
+            [attr.aria-label]="'Abrir menu' | translate">
+            <span>{{ 'Menu' | translate }}</span>
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+        </button>
     </div>
 </header>
+<dialog
+    #mobileMenu
+    id="crica-mobile-menu"
+    class="crica-mobile-menu"
+    aria-labelledby="mobile-menu-title"
+    (click)="onBackdrop($event)">
+    <div class="mobile-menu-panel">
+        <div class="mobile-menu-top">
+            <img
+                src="/assets/crica-studio-logo-transparent.png"
+                alt="Crica Studio"
+                width="112"
+                height="41" />
+            <button
+                type="button"
+                class="mobile-menu-close"
+                (click)="closeMenu()"
+                [attr.aria-label]="'Fechar menu' | translate"
+                autofocus>
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    aria-hidden="true">
+                    <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+            </button>
+        </div>
+        <p id="mobile-menu-title">{{ 'Explore o universo Crica.' | translate }}</p>
+        <nav [attr.aria-label]="'Navegação principal' | translate">
+            @for (link of links; track link.path; let i = $index) {
+            <a
+                [routerLink]="link.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: link.path === '/' }"
+                ariaCurrentWhenActive="page"
+                (click)="closeMenu()">
+                <span class="mobile-menu-number" aria-hidden="true">0{{ i + 1 }}</span>
+                <span>
+                    <strong>{{ link.label | translate }}</strong>
+                    <small>{{ link.detail | translate }}</small>
+                </span>
+                <b aria-hidden="true">↗</b>
+            </a>
+            }
+        </nav>
+        <div class="mobile-menu-bottom">
+            <img src="/assets/crica-heart.svg" alt="" width="24" height="24" />
+            <span>{{ 'Ideias que ganham forma.' | translate }}</span>
+        </div>
+    </div>
+</dialog>
