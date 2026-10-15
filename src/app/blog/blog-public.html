@@ -1,5 +1,5 @@
 <main id="main" class="blog-page container">
-    @if (loading()) {
+    @if (loading() && !slug()) {
     <p role="status">Carregando histórias…</p>
     } @if (notice()) {
     <p role="status">{{ notice() }}</p>
@@ -197,7 +197,7 @@
             }
         </div>
     </section>
-    } } @else {
+    } } @else if (!loading()) {
     <section class="empty">
         <h1>Esta história ainda não está disponível.</h1>
         <p>Ela pode estar em tradução ou aguardando publicação.</p>

@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -12,6 +12,7 @@ import {
 } from './blog-data';
 import { BlogStore } from './blog-store';
 import { BlogApi, type Category } from './blog-api';
+import type { ResolvedArticle } from './blog-article-resolver';
 import { SeoService } from '../services/seo.service';
 import { BlogInteractionsComponent } from './blog-interactions';
 import template from './blog-public.html?raw';
@@ -35,12 +36,37 @@ export class BlogPublicComponent {
     }
     total = signal(0);
     currentPost = signal<BlogPost | undefined>(undefined);
-    loading = signal(false);
+    loading = signal(true);
+    private readonly resolvedArticle = signal<ResolvedArticle>({});
     private requestId = 0;
     async load() {
         const id = ++this.requestId;
         this.loading.set(true);
+        this.currentPost.set(undefined);
         try {
+            if (this.slug()) {
+                const { post, error } = this.resolvedArticle();
+                if (!this.previewMode() && post) {
+                    this.currentPost.set(post);
+                    const v = post.versions[this.locale()];
+                    this.seo.setBlog(
+                        v.seoTitle || v.title, v.seoDescription || v.summary,
+                        blogPath(post, this.locale()), post.cover, post.versions,
+                        {
+                            headline: v.title, description: v.summary, image: post.cover,
+                            inLanguage: this.locale(), datePublished: v.publishedAt || v.publishAt,
+                            dateModified: v.updatedAt,
+                            author: { '@type': 'Person', name: post.author, image: post.authorProfile?.photo || undefined },
+                        },
+                    );
+                }
+                if (error) this.notice.set(error);
+                this.loading.set(false);
+                // Suggestions are optional and must never delay or hide the article.
+                const data = await this.api.list(false, { locale: this.locale(), page: 1, pageSize: 6 });
+                if (id === this.requestId) this.store.posts.set(data.items);
+                return;
+            }
             const categories = await this.api.categories(false, this.locale());
             if (id !== this.requestId) return;
             this.categoryRows = categories;
@@ -57,40 +83,13 @@ export class BlogPublicComponent {
             if (id !== this.requestId) return;
             this.store.posts.set(data.items);
             this.total.set(data.total);
-            if (this.slug() && !this.previewMode()) {
-                const post = await this.api.article(this.locale(), this.slug());
-                if (id !== this.requestId) return;
-                this.currentPost.set(post);
-                const v = post.versions[this.locale()];
-                this.seo.setBlog(
-                    v.seoTitle || v.title,
-                    v.seoDescription || v.summary,
-                    blogPath(post, this.locale()),
-                    post.cover,
-                    post.versions,
-                    {
-                        headline: v.title,
-                        description: v.summary,
-                        image: post.cover,
-                        inLanguage: this.locale(),
-                        datePublished: v.publishedAt || v.publishAt,
-                        dateModified: v.updatedAt,
-                        author: {
-                            '@type': 'Person',
-                            name: post.author,
-                            image: post.authorProfile?.photo || undefined,
-                        },
-                    },
-                );
-            } else if (!this.slug())
-                this.seo.setBlog(
+            this.seo.setBlog(
                     'Crica News',
                     'Inspiração, histórias e detalhes para criar algo que tenha a sua essência.',
                     '/blog',
                 );
         } catch (e) {
-            if (id === this.requestId) {
-                this.currentPost.set(undefined);
+            if (id === this.requestId && !this.slug()) {
                 this.notice.set((e as Error).message);
             }
         } finally {
@@ -107,6 +106,9 @@ export class BlogPublicComponent {
     readonly notice = signal('');
     private readonly subscriptions = new Subscription();
     constructor() {
+        this.subscriptions.add(this.route.data.subscribe(data => {
+            this.resolvedArticle.set(data['article'] || {});
+        }));
         this.subscriptions.add(
             this.route.paramMap.subscribe((params) => {
                 this.slug.set(params.get('slug') || '');
@@ -139,7 +141,8 @@ export class BlogPublicComponent {
             this.query();
             this.category();
             this.page();
-            void this.load();
+            this.resolvedArticle();
+            untracked(() => void this.load());
         });
         effect(() => {
             const locale = language();
@@ -148,6 +151,7 @@ export class BlogPublicComponent {
         });
     }
     ngOnDestroy() {
+        ++this.requestId;
         this.subscriptions.unsubscribe();
     }
     get results() {

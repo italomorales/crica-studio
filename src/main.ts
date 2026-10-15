@@ -22,6 +22,7 @@ import appTemplate from './app.html?raw';
 import { currentSiteMarket, publicHomePath } from './app/services/site-market';
 import { HomeComponent } from './app/home';
 import { NotFoundComponent } from './app/not-found';
+import { resolveBlogArticle } from './app/blog/blog-article-resolver';
 
 const shopGuard = () =>
     currentSiteMarket() === 'international' ? inject(Router).parseUrl('/fornecedores') : true;
@@ -81,7 +82,7 @@ initializeLanguage()
                             component: StorefrontComponent,
                         },
                         { path: 'blog', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
-                        { path: 'blog/:locale/:slug', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
+                        { path: 'blog/:locale/:slug', resolve: { article: resolveBlogArticle }, runGuardsAndResolvers: 'paramsOrQueryParamsChange', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
                         { canActivate: [authGuard], path: 'admin/blog/autores', loadComponent: () => import('./app/blog/blog-author-admin').then(module => module.BlogAuthorAdminComponent) },
                         { canActivate: [authGuard], path: 'admin/blog/categorias', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'categories' } },
                         { canActivate: [authGuard], path: 'admin/blog/comentarios', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'moderation' } },
