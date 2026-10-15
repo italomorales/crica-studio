@@ -378,12 +378,12 @@
 }
 .home-product-photo {
     position: relative;
-    aspect-ratio: 1.15;
+    aspect-ratio: 1;
     overflow: hidden;
     background: #f0f1ef;
 }
 .home-product-photo crica-product-image img {
-    object-fit: contain;
+    object-fit: cover;
     mix-blend-mode: multiply;
 }
 .home-circle-arrow {
@@ -705,11 +705,6 @@
     background: #eaf4fc;
     width: min(1200px, calc(100% - 64px));
 }
-.home-contact-star {
-    font-size: 72px;
-    color: var(--blue);
-    line-height: 1;
-}
 .home-contact h2 {
     font-size: 32px;
     margin: 0 0 12px;
@@ -780,9 +775,6 @@
     .home-contact {
         gap: 20px;
         padding: 32px;
-    }
-    .home-contact-star {
-        display: none;
     }
 }
 @media (max-width: 700px) {
@@ -871,9 +863,6 @@
     }
     .home-product-card {
         border-radius: 24px;
-    }
-    .home-product-photo {
-        aspect-ratio: 1.3;
     }
     .home-product-copy {
         padding: 22px;
