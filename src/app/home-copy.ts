@@ -1,18 +1,19 @@
 export const homeCopy = {
     welcome: [
-        'BEM-VINDO AO UNIVERSO CRICA',
-        'WELCOME TO THE CRICA UNIVERSE',
-        'BIENVENIDO AL UNIVERSO CRICA',
+        'SEU PRÓXIMO COMEÇO',
+        'YOUR NEXT BEGINNING',
+        'TU PRÓXIMO COMIENZO',
     ],
-    title: ['Pequenos detalhes.', 'Little details.', 'Pequeños detalles.'],
-    titleEnd: ['Grandes conexões.', 'Meaningful connections.', 'Grandes conexiones.'],
+    title: ['Comece com bottons.', 'Start making buttons.', 'Empieza con chapas.'],
+    titleEnd: ['Crie algo seu.', 'Make something yours.', 'Crea algo tuyo.'],
     intro: [
-        'Presentes que contam histórias. Ideias que inspiram. Descubra um jeito mais criativo de presentear, criar e se conectar.',
-        'Gifts that tell stories. Ideas that inspire. Discover a more creative way to give, make and connect.',
-        'Regalos que cuentan historias. Ideas que inspiran. Descubre una forma más creativa de regalar, crear y conectar.',
+        'Máquinas e materiais que indico nas lives do TikTok Shop, com dicas e histórias reais para você dar os primeiros passos e buscar uma renda extra.',
+        'Machines and materials I recommend on TikTok Shop LIVE, with tips and real stories to help you take your first steps and explore a new source of income.',
+        'Máquinas y materiales que recomiendo en mis directos de TikTok Shop, con consejos e historias reales para dar tus primeros pasos y buscar un ingreso extra.',
     ],
     shop: ['Explorar a Loja', 'Explore the shop', 'Explorar la tienda'],
-    inspiration: ['Conhecer o Crica News', 'Explore Crica News', 'Conocer Crica News'],
+    heroSuppliers: ['Ver máquinas e materiais', 'Find machines and materials', 'Ver máquinas y materiales'],
+    inspiration: ['Aprender no Crica News', 'Learn with Crica News', 'Aprender en Crica News'],
     signature: [
         'Um toque de Crica no seu dia.',
         'A touch of Crica in your day.',

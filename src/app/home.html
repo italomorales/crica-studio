@@ -12,8 +12,8 @@
             </h1>
             <p>{{ t('intro') }}</p>
             <div class="home-actions">
-                <a class="home-button" [routerLink]="showShop ? '/loja' : '/vitrine'">
-                    {{ t(showShop ? 'shop' : 'allStorefronts') }}
+                <a class="home-button" routerLink="/fornecedores">
+                    {{ t('heroSuppliers') }}
                 </a>
                 <a class="home-button home-button-secondary" routerLink="/blog">
                     {{ t('inspiration') }}
