@@ -41,19 +41,10 @@ export class BlogInteractionsComponent {
         return interactionCopy[key][this.locale === 'en' ? 1 : this.locale === 'es' ? 2 : 0];
     }
     get liked() {
-        return (
-            this.engagement.myLikeStatus === 'approved' ||
-            this.engagement.myLikeStatus === 'pending'
-        );
+        return this.engagement.myLikeStatus === 'approved';
     }
     get likeLabel() {
-        return this.t(
-            this.engagement.myLikeStatus === 'pending'
-                ? 'pendingLike'
-                : this.liked
-                  ? 'liked'
-                  : 'like',
-        );
+        return this.t(this.liked ? 'liked' : 'like');
     }
     get shareWhatsApp() {
         return 'https://wa.me/?text=' + encodeURIComponent(this.title + ' ' + this.url);
@@ -155,19 +146,12 @@ export class BlogInteractionsComponent {
     }
     async like() {
         if (this.busy || !this.requireLogin('like')) return;
-        if (
-            this.engagement.myLikeStatus === 'rejected' ||
-            this.engagement.myLikeStatus === 'spam'
-        ) {
-            this.message = this.t('reviewedLike');
-            return;
-        }
         this.busy = true;
         this.error = '';
         try {
             await this.api.like(this.postId, this.locale, this.liked);
             this.engagement = await this.api.engagement(this.postId, this.locale);
-            this.message = this.engagement.myLikeStatus === 'pending' ? this.t('wait') : '';
+            this.message = '';
         } catch (e) {
             this.error = (e as Error).message;
         } finally {

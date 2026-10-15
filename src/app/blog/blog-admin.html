@@ -154,7 +154,7 @@
             <div>
                 <span class="eyebrow">CUIDE DA CONVERSA</span>
                 <h1>Moderação</h1>
-                <p>Revise comentários, respostas, curtidas e registros de compartilhamento do News.</p>
+                <p>Revise os comentários e respostas antes de aparecerem no News.</p>
             </div>
             <span class="blog-state pending">{{ pendingCount }} aguardando revisão</span>
         </div>
@@ -167,13 +167,10 @@
                     <option value="spam">Spam</option>
                     <option value="">Todos</option>
                 </select>
-                <select aria-label="Tipo de interação" [(ngModel)]="moderationKind" (ngModelChange)="loadModeration()">
-                    <option value="">Todas as interações</option><option value="comment">Comentários e respostas</option><option value="like">Curtidas</option><option value="share">Compartilhamentos</option>
-                </select>
                 <button class="secondary" (click)="loadModeration(moderationPage)" [disabled]="moderationLoading || busy">Atualizar</button>
             </div>
             <div class="admin-results">
-                <span>{{ moderationTotal }} interações</span>
+                <span>{{ moderationTotal }} comentários e respostas</span>
                 <label class="page-size">
                     <span>Por página</span>
                     <select [(ngModel)]="pageSize" (ngModelChange)="loadModeration()">

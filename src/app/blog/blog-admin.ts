@@ -207,7 +207,6 @@ export class BlogAdminComponent {
         this.cd.markForCheck();
     }
     moderationRows: BlogActivity[] = [];
-    moderationKind = '';
     moderationPage = 1;
     moderationTotal = 0;
     moderationPending = 0;
@@ -219,7 +218,7 @@ export class BlogAdminComponent {
     async loadModeration(page=1) {
         const request=++this.moderationRequest;this.moderationLoading=true;this.moderationPage=page;
         try {
-            const params=new URLSearchParams({status:this.moderationFilter,kind:this.moderationKind,page:String(page),pageSize:String(this.pageSize)});
+            const params=new URLSearchParams({status:this.moderationFilter,kind:'comment',page:String(page),pageSize:String(this.pageSize)});
             const [data,pending]=await Promise.all([
                 this.api.request<{items:BlogActivity[];total:number}>('/api/admin/blog/activity?'+params),
                 this.api.request<{total:number}>('/api/admin/blog/activity?status=pending&pageSize=1'),

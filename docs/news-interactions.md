@@ -7,20 +7,26 @@ Implementação local, sem publicação ou alteração no banco de produção.
 - Barra abaixo da matéria: curtir, compartilhar e mostrar/ocultar comentários. A conversa começa recolhida e só busca comentários quando aberta.
 - Modal de acesso Google/Facebook: fundo desfocado, cartão branco, detalhes azuis da Crica, logos dos provedores, foco preso pelo dialog nativo, Escape para fechar, foco visível e movimento reduzido.
 - Com sessão: comentário com até 1500 caracteres, resposta contextual a comentários/respostas aprovados, feedback de envio e indicação privada de pendência. Paginação de 20 comentários.
-- Compartilhamento: copiar link, WhatsApp, Facebook e compartilhamento nativo quando suportado. Exige sessão na interface e registra a ação no admin. Serviços externos não podem ter seu envio controlado pela moderação do site: a moderação aprova/rejeita o registro, não desfaz o envio externo.
+- Compartilhamento: copiar link, WhatsApp, Facebook e compartilhamento nativo quando suportado. Exige sessão na interface e registra a ação sem moderação.
 - Textos desta interação em PT, EN e ES seguem o idioma da matéria. Prévias administrativas não gravam interações.
 
 ## Persistência e moderação
 
-Aplicar `backend/sql/018_create_blog_interactions.sql` após 016 e 017. Ela cria visitantes e atividades (comentário, curtida, compartilhamento) sem inserir dados de demonstração.
+Aplicar `backend/sql/018_create_blog_interactions.sql` após 016 e 017 e, em seguida, `019_blog_reactions_without_moderation.sql`. A migration 019 libera as curtidas/compartilhamentos existentes e impede que essas atividades recebam status de moderação. Aplicada apenas no banco local isolado.
 
-Todas as novas atividades começam pendentes. O admin Moderação agora lê a API e oferece filtros por situação/tipo, paginação e revisão do texto integral/contexto da resposta. Aprovar, rejeitar, marcar spam e voltar à fila persistem no PostgreSQL.
+Somente comentários e respostas começam pendentes. O admin Moderação lista exclusivamente esses conteúdos, com filtro de situação, paginação e revisão do texto integral/contexto da resposta. Aprovar, rejeitar, marcar spam e voltar à fila persistem no PostgreSQL. A API também impede moderar curtidas e compartilhamentos.
 
-Comentários e respostas só ficam públicos após aprovação. Uma resposta só fica pública se toda a cadeia de comentários-pai estiver aprovada. Pendências próprias ficam visíveis somente ao visitante autenticado pelo identificador interno, não pelo nome. Uma curtida por visitante/matéria/idioma; apenas as aprovadas entram no contador. Curtidas repetidas são idempotentes. Comentários e registros de compartilhamento têm intervalo mínimo de 15 segundos por visitante.
+Comentários e respostas só ficam públicos após aprovação. Uma resposta só fica pública se toda a cadeia de comentários-pai estiver aprovada. Pendências próprias ficam visíveis somente ao visitante autenticado pelo identificador interno, não pelo nome. A curtida entra imediatamente no contador e pode ser retirada pelo próprio visitante. Uma curtida por visitante/matéria/idioma; curtidas repetidas são idempotentes. Comentários e registros de compartilhamento têm intervalo mínimo de 15 segundos por visitante.
 
 ## Ativar Google e Facebook
 
-Os aplicativos ainda não foram criados. Os botões não simulam contas: apresentam uma mensagem enquanto faltam credenciais. Nenhum segredo foi colocado no código.
+O cliente Google foi criado no projeto `crica-studio`. A configuração local é importada pelo script `backend/scripts/set-blog-google-local.ps1 -CredentialsPath <arquivo JSON baixado>`, que guarda os segredos em `%LOCALAPPDATA%/CricaStudio/Secrets/blog-google.json`, com acesso restrito ao usuário atual do Windows. `start-blog-local.ps1` carrega esse arquivo para a API de teste e desabilita a identidade simulada quando as credenciais reais estão presentes. O segredo não é gravado no repositório. A configuração de produção permanece separada. O aplicativo Facebook ainda não foi criado.
+
+Para teste Google no banco isolado, cadastrar também `http://localhost:5031/api/blog/auth/callback/google` como URI de redirecionamento autorizada. A página de teste e a API usam `http://localhost:5031`, sem alterar os processos de desenvolvimento em 4173/5030.
+
+No desenvolvimento normal, a API em `Development` também carrega o arquivo privado de credenciais. O frontend `http://localhost:4173` encaminha `/api` para 5030 e preserva o host público no callback: cadastrar `http://localhost:4173/api/blog/auth/callback/google`. Os cookies de visitantes são separados por banco para impedir que uma sessão do banco de teste seja usada no banco `app`. Após essa alteração, é necessário entrar novamente uma vez. `BLOG_TEST_API_URL=http://localhost:4173 node scripts/test-blog-google-local.mjs` verifica esse fluxo pelo proxy, sem abrir a conta Google.
+
+Para iniciar essa API local: compilar com `dotnet build CricaStudio.Api/CricaStudio.Api.csproj -o .blog-dev-build` e executar `scripts/start-blog-dev.ps1` (ou `-Restart` para reiniciar a API que ocupa 5030, após conferir a identidade do processo). O script mantém `Development` e a configuração do banco normal. Em 15/10/2026, o callback por 4173 passou nas seis verificações OAuth; os 17 testes de autenticação passaram, incluindo separação de cookies por banco. A migração 019 também foi aplicada ao banco local `app`, mantendo somente comentários/respostas na moderação.
 
 1. Criar um cliente OAuth de aplicação web no Google e um aplicativo Facebook com login web. Cadastrar as URLs de retorno exatas de ambos os domínios:
 
@@ -47,8 +53,12 @@ Referências: [Google OAuth web](https://developers.google.com/identity/protocol
 
 ## Validação local
 
-`backend/scripts/test-blog-interactions-local.mjs` faz 52 verificações de API no localhost/banco isolado: sessão, proteção CSRF, visitante sem acesso admin, JWT admin sem acesso de visitante, conteúdo pendente privado, aprovação, respostas entre matérias/idiomas bloqueadas, ocultação por rejeição do pai, curtidas idempotentes/moderadas e compartilhamentos na fila.
+`backend/scripts/test-blog-interactions-local.mjs` cobre sessão, proteção CSRF, visitante sem acesso admin, JWT admin sem acesso de visitante, conteúdo pendente privado, aprovação, respostas entre matérias/idiomas bloqueadas, ocultação por rejeição do pai, curtidas imediatas/idempotentes e compartilhamentos fora da fila. Pode usar `BLOG_TEST_API_URL=http://localhost:5032` para uma instância isolada com identidade de teste; não reabilitar essa identidade na API 5031 enquanto ela usa Google real.
+
+Reações sem moderação (15/10/2026): builds e 76 testes frontend passaram. `BlogReactionPersistenceTests` passou no PostgreSQL isolado, verificando curtida imediata, idempotência, descurtir, compartilhamento sem fila, rejeição da tentativa de moderar reações e manutenção da aprovação de comentários/respostas. A curtida real feita pelo proprietário com Google foi liberada e não há reações pendentes nesse banco.
 
 `BlogTest` + `BlogSocial:EnableTestLogin=true` oferece uma identidade de teste de loopback para verificar o UX sem acessar contas externas. Esses endpoints não são registrados em produção nem em Development. O roteiro `start-blog-local.ps1` habilita essa configuração exclusivamente no banco isolado. Não publicar com ambiente BlogTest.
 
-Resultado: 76 testes frontend, 77 testes backend e 52 verificações de API passaram. Seis testes antigos do catálogo foram ignorados por falta da configuração específica de integração. Builds frontend/backend aprovados. No navegador: modal anônimo, envio de resposta, curtida pendente, aprovação no admin e atualização para três comentários/uma curtida foram conferidos. Modal de compartilhamento validado em 390 × 844 sem rolagem horizontal. Login externo ainda depende dos aplicativos e das credenciais acima.
+Resultado: 76 testes frontend, 77 testes backend e 52 verificações de API passaram. Seis testes antigos do catálogo foram ignorados por falta da configuração específica de integração. Builds frontend/backend aprovados. No navegador: modal anônimo, envio de resposta, curtida pendente, aprovação no admin e atualização para três comentários/uma curtida foram conferidos. Modal de compartilhamento validado em 390 × 844 sem rolagem horizontal.
+
+Google local (15/10/2026): credenciais importadas do JSON informado pelo proprietário, fora do repositório e com ACL restrita. Google habilitado na API 5031; Facebook desabilitado. O proprietário confirmou o cadastro do callback localhost no Google Cloud. `test-blog-google-local.mjs` passou em seis chamadas locais: provedor habilitado, redirecionamento ao Google com PKCE/correlação e callback correto, retorno externo bloqueado, login simulado indisponível e callback inválido rejeitado sem criar sessão. Os 16 testes de autenticação passaram, incluindo rejeição de cookies antigos de identidade simulada ao habilitar o login real. O proprietário confirmou o retorno à matéria após login real no Google. O banco isolado confirmou um visitante Google e uma curtida pendente vinculada a esse visitante. Configuração de produção não foi alterada.

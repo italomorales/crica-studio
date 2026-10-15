@@ -5,7 +5,11 @@ export default defineConfig(({ mode }) => ({
         port: 4173,
         allowedHosts: true,
         proxy: {
-            '/api': loadEnv(mode, process.cwd(), '').CRICA_API_PROXY || 'http://localhost:5030',
+            '/api': {
+                target: loadEnv(mode, process.cwd(), '').CRICA_API_PROXY || 'http://localhost:5030',
+                // OAuth callbacks must return through the same origin as the browser.
+                changeOrigin: false,
+            },
         },
     },
     build: { outDir: 'dist', chunkSizeWarningLimit: 1500 },

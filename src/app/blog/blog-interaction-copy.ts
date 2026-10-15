@@ -1,7 +1,6 @@
 export const interactionCopy = {
     like: ['Curtir', 'Like', 'Me gusta'],
     liked: ['Você curtiu', 'Liked', 'Te gusta'],
-    pendingLike: ['Curtida em revisão', 'Like under review', 'Me gusta en revisión'],
     share: ['Compartilhar', 'Share', 'Compartir'],
     show: ['Mostrar comentários', 'Show comments', 'Mostrar comentarios'],
     hide: ['Ocultar comentários', 'Hide comments', 'Ocultar comentarios'],
@@ -97,15 +96,5 @@ export const interactionCopy = {
         'No se pudo copiar automáticamente. Selecciona el enlace de abajo.',
     ],
     link: ['Link da matéria', 'Article link', 'Enlace de la noticia'],
-    reviewedLike: [
-        'Esta curtida não foi aprovada pela moderação.',
-        'This like was not approved by moderation.',
-        'Este me gusta no fue aprobado por moderación.',
-    ],
-    likes: ['curtidas aprovadas', 'approved likes', 'me gusta aprobados'],
-    wait: [
-        'Sua curtida foi enviada para revisão.',
-        'Your like was submitted for review.',
-        'Tu me gusta se envió para revisión.',
-    ],
+    likes: ['curtidas', 'likes', 'me gusta'],
 } as const;
