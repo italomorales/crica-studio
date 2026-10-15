@@ -39,6 +39,9 @@ export class BlogInteractionsApi {
             this.user.set(null);
             throw new Error('Sua sessão terminou. Entre novamente para participar.');
         }
+        if (response.status !== 204 && !response.headers.get('content-type')?.includes('application/json')) {
+            throw new Error('As interações estão temporariamente indisponíveis. Tente novamente mais tarde.');
+        }
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
             throw new Error(

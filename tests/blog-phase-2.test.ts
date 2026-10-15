@@ -47,10 +47,11 @@ test('blog HTML and sitemap keep their origin paths while S3 SPA routes get an e
         '/assets/blog.css',
     ])
         assert.equal(handler({ request: request(path) }).uri, path);
-    for (const path of ['/admin/blog/editar/123', '/loja/caneca', '/login'])
-        assert.equal(handler({ request: request(path) }).uri, '/index.html');
+    for (const [path, expected] of [['/admin/blog/editar/123','/admin/index.html'], ['/loja/caneca','/loja/index.html'], ['/loja','/loja/index.html'], ['/fornecedores','/fornecedores/index.html'], ['/vitrine','/vitrine/index.html'], ['/login','/login/index.html']])
+        assert.equal(handler({ request: request(path) }).uri, expected);
     const unknown = handler({ request: request('/missing') });
-    assert.equal(unknown.uri, '/missing');
+    assert.equal(unknown.statusCode, 404);
+    assert.equal(unknown.headers['x-robots-tag'].value, 'noindex');
 });
 test('prepared distribution routes blog to HTTPS API and keeps real 404 without losing existing origins', () => {
     const dir = mkdtempSync(join(tmpdir(), 'crica-blog-cdn-'));

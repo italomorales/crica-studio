@@ -67,7 +67,7 @@ function withSeo(html, route) {
         <meta property="og:title" content="${escapeHtml(page.title)}" />
         <meta property="og:description" content="${escapeHtml(page.description)}" />
         <meta property="og:url" content="${canonical}" />
-        <meta property="og:image" content="${siteUrl}/assets/hero.webp" />
+        <meta property="og:image" content="${siteUrl}/assets/home-atelier-canecas-bottons-v3.webp" />
         <meta name="twitter:card" content="summary_large_image" />`;
     return html.replace(/<title>[\s\S]*?<\/title>[\s\S]*?<link rel="icon"/, `${tags}\n        <link rel="icon"`);
 }

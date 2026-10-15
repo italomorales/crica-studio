@@ -21,6 +21,7 @@ import { installWhatsAppTracking } from './app/services/whatsapp-tracking';
 import appTemplate from './app.html?raw';
 import { currentSiteMarket, publicHomePath } from './app/services/site-market';
 import { HomeComponent } from './app/home';
+import { NotFoundComponent } from './app/not-found';
 
 const shopGuard = () =>
     currentSiteMarket() === 'international' ? inject(Router).parseUrl('/fornecedores') : true;
@@ -119,7 +120,7 @@ initializeLanguage()
                             data: { section },
                             title: 'Administração | Crica Studio',
                         })),
-                        { path: '**', redirectTo: publicHomePath().slice(1) },
+                        { path: '**', component: NotFoundComponent },
                     ],
                     withInMemoryScrolling({
                         scrollPositionRestoration: 'enabled',

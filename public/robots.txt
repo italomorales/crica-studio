@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.cricastudio.com.br/sitemap.xml
+Sitemap: https://www.cricastudio.com.br/blog-sitemap.xml

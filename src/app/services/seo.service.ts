@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 import type { Product } from '../data/models';
 import { productPath } from './product-url';
 import { publicSiteUrl } from './site-market';
+import { siteTitle } from './seo-title';
 
 const SITE_URL = publicSiteUrl();
 
@@ -25,7 +26,7 @@ const DEFAULT_PAGE: PageSeo = {
 
 const PAGES: Record<string, PageSeo> = {
     '/': {
-        title: 'Presentes, ideias e conexões | Crica Studio',
+        title: 'Canecas e Bottons Personalizados | Crica Studio',
         description: 'Descubra presentes personalizados, histórias que inspiram, vitrines e fornecedores para dar forma às suas ideias. Conheça o universo Crica Studio.',
         path: '/',
     },
@@ -76,7 +77,7 @@ export class SeoService {
         versions?: Record<string, { slug: string; status: string }>,
         schema?: Record<string, unknown>,
     ) {
-        this.apply({ title: title + ' | Crica Studio', description, path }, image);
+        this.apply({ title: siteTitle(title), description, path }, image);
         this.setProperty('og:type', versions ? 'article' : 'website');
         document.querySelectorAll('link[data-blog-alternate]').forEach((e) => e.remove());
         for (const [locale, v] of Object.entries(versions || {}))
@@ -143,7 +144,7 @@ export class SeoService {
                     path,
                     indexable: url.includes('preview=1') ? false : true,
                 }
-              : (PAGES[path] ?? DEFAULT_PAGE);
+              : (PAGES[path] ?? { title: 'Página não encontrada | Crica Studio', description: 'Esta página não foi encontrada.', path, indexable: false });
         this.apply(
             page.indexable === false
                 ? page
@@ -173,7 +174,7 @@ export class SeoService {
         this.setProperty('og:url', canonical);
         this.setProperty(
             'og:image',
-            image?.startsWith('http') ? image : `${SITE_URL}${image || '/assets/hero.webp'}`,
+            image?.startsWith('http') ? image : `${SITE_URL}${image || '/assets/home-atelier-canecas-bottons-v3.webp'}`,
         );
         this.setName('twitter:card', 'summary_large_image');
 

@@ -21,7 +21,7 @@ function handler(event) {
     var targetHost = host;
     var path = request.uri;
     var temporary = international;
-    var news = path === '/blog' || path.indexOf('/blog/') === 0 || path.indexOf('/api/blog/') === 0;
+    var news = path === '/blog' || path.indexOf('/blog/') === 0 || path === '/blog-sitemap.xml' || path.indexOf('/api/blog/') === 0;
     if (international && country && country.value === 'BR' && !news) {
         targetHost = 'www.cricastudio.com.br';
     } else if (international) {
@@ -31,7 +31,7 @@ function handler(event) {
         targetHost = 'www.cricastudio.com.br';
     }
     if (targetHost === host && path === request.uri) {
-        if (path.indexOf('/api/blog/') === 0) request.headers['x-crica-viewer-host'] = {value: host};
+        if (news) request.headers['x-crica-viewer-host'] = {value: host};
         // The origin policy excludes Host. Pass the viewer's News language explicitly.
         if (path === '/blog' && !request.querystring.idioma) {
             var accepted = request.headers['accept-language'];
@@ -45,8 +45,20 @@ function handler(event) {
         // API-rendered HTML and genuine 404s must reach the blog origin unchanged.
         if (path === '/blog' || path.indexOf('/blog/') === 0 || path === '/blog-sitemap.xml' || path.indexOf('/api/') === 0) return request;
         // Replace the global S3 error fallback with explicit SPA route rewrites.
-        if (path === '/' || path === '/loja' || path.indexOf('/loja/') === 0 || path === '/fornecedores' || path === '/vitrine' || path === '/login' || path === '/admin' || path.indexOf('/admin/') === 0) request.uri = '/index.html';
-        return request;
+        if (path === '/' || path === '/index.html') { request.uri = '/index.html'; return request; }
+        var page = path.replace(/\/$/, '');
+        if (page === '/loja' || page === '/fornecedores' || page === '/vitrine' || page === '/login') {
+            request.uri = page + '/index.html'; return request;
+        }
+        if (path.indexOf('/loja/') === 0) { request.uri = '/loja/index.html'; return request; }
+        if (page === '/admin' || path.indexOf('/admin/') === 0) { request.uri = '/admin/index.html'; return request; }
+        if (path.indexOf('/assets/') === 0 || path.indexOf('/catalog/') === 0
+            || /^\/(robots\.txt|sitemap\.xml|blog-shell\.json|favicon[^/]*|apple-touch-icon\.png)$/.test(path)) return request;
+        return {
+            statusCode: 404, statusDescription: 'Not Found',
+            headers: {'content-type': {value: 'text/html; charset=utf-8'}, 'x-robots-tag': {value: 'noindex'}, 'cache-control': {value: 'public, max-age=60'}},
+            body: '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Página não encontrada | Crica Studio</title><body style="font-family:Arial,sans-serif;margin:12vh auto;padding:24px;max-width:600px;color:#172235"><h1>Esta página não foi encontrada.</h1><p>Você pode continuar explorando a Crica.</p><a style="color:#0255a5" href="/">Voltar para a Home</a></body></html>'
+        };
     }
 
     var query = [];
