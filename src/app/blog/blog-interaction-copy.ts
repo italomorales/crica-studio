@@ -10,9 +10,9 @@ export const interactionCopy = {
         'Una buena conversación empieza contigo.',
     ],
     intro: [
-        'Entre para curtir, compartilhar e conversar sobre esta ideia.',
-        'Sign in to like, share and talk about this idea.',
-        'Inicia sesión para dar me gusta, compartir y conversar sobre esta idea.',
+        'Entre para curtir e conversar sobre esta ideia.',
+        'Sign in to like and talk about this idea.',
+        'Inicia sesión para dar me gusta y conversar sobre esta idea.',
     ],
     google: ['Continuar com Google', 'Continue with Google', 'Continuar con Google'],
     facebook: ['Continuar com Facebook', 'Continue with Facebook', 'Continuar con Facebook'],

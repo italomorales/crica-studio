@@ -36,7 +36,7 @@ export class BlogInteractionsComponent {
     text = '';
     replyTo: BlogActivity | null = null;
     private request = 0;
-    private intent: 'like' | 'share' | 'comment' = 'comment';
+    private intent: 'like' | 'comment' = 'comment';
     t(key: keyof typeof interactionCopy) {
         return interactionCopy[key][this.locale === 'en' ? 1 : this.locale === 'es' ? 2 : 0];
     }
@@ -104,7 +104,7 @@ export class BlogInteractionsComponent {
             this.cd.markForCheck();
         }
     }
-    requireLogin(intent: 'like' | 'share' | 'comment') {
+    requireLogin(intent: 'like' | 'comment') {
         if (this.preview) {
             this.message = this.t('preview');
             return false;
@@ -160,17 +160,19 @@ export class BlogInteractionsComponent {
         }
     }
     share() {
-        if (this.requireLogin('share')) {
-            this.shareError = '';
-            this.shareDialog.nativeElement.showModal();
+        if (this.preview) {
+            this.message = this.t('preview');
+            return;
         }
+        this.shareError = '';
+        this.shareDialog.nativeElement.showModal();
     }
     async recordShare() {
+        if (this.preview || !this.api.user()) return;
         try {
             await this.api.share(this.postId, this.locale);
-        } catch (e) {
-            this.error = (e as Error).message;
-            this.cd.markForCheck();
+        } catch {
+            // Optional activity recording must not interrupt public sharing.
         }
     }
     async copyLink() {
