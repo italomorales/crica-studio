@@ -399,8 +399,7 @@
         background 0.2s,
         transform 0.2s;
 }
-.news-provider > svg,
-.news-provider > .news-channel {
+.news-provider > svg {
     width: 22px;
     height: 22px;
     flex: 0 0 22px;
@@ -413,19 +412,6 @@
     background: #f7fbfd;
     border-color: #b5d9f0;
     box-shadow: 0 3px 12px #123b5510;
-}
-.news-channel {
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    font-size: 15px;
-    color: white;
-}
-.news-channel.whatsapp {
-    background: #198e63;
-}
-.news-channel.facebook {
-    background: #1877f2;
 }
 .news-privacy {
     display: flex;
