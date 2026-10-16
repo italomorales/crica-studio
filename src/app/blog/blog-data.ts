@@ -5,6 +5,7 @@ export type BlogVersion = {
     summary: string;
     slug: string;
     html: string;
+    readingMinutes?: number;
     document?: object;
     publishAt?: string | null;
     publishedAt?: string | null;

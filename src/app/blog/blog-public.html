@@ -31,7 +31,7 @@
             <div class="blog-meta">
                 {{ date(post.date) }}
                 <span>·</span>
-                {{ minutes(post.versions[locale()].html) }} min de leitura
+                {{ minutes(post.versions[locale()]) }} min de leitura
             </div>
             <span class="blog-text-link">Uma boa ideia começa aqui →</span>
         </div>
@@ -80,7 +80,7 @@
                     <h3>{{ post.versions[locale()].title }}</h3>
                     <p>{{ post.versions[locale()].summary }}</p>
                     <div class="blog-meta">
-                        {{ date(post.date) }} · {{ minutes(post.versions[locale()].html) }} min
+                        {{ date(post.date) }} · {{ minutes(post.versions[locale()]) }} min
                     </div>
                 </div>
             </a>
@@ -146,7 +146,7 @@
                 <div>
                     <strong>{{ post.author }}</strong>
                     <div class="blog-meta">
-                        {{ date(post.date) }} · {{ minutes(version.html) }} min de leitura
+                        {{ date(post.date) }} · {{ minutes(version) }} min de leitura
                     </div>
                 </div>
             </div>

@@ -13,6 +13,7 @@ import {
 import { BlogStore } from './blog-store';
 import { BlogApi, type Category } from './blog-api';
 import type { ResolvedArticle } from './blog-article-resolver';
+import { blogReadingMinutes } from './blog-reading-time';
 import { SeoService } from '../services/seo.service';
 import { BlogInteractionsComponent } from './blog-interactions';
 import template from './blog-public.html?raw';
@@ -196,9 +197,7 @@ export class BlogPublicComponent {
             { day: 'numeric', month: 'long', year: 'numeric' },
         );
     }
-    minutes(html: string) {
-        return Math.max(1, Math.ceil(html.replace(/<[^>]*>/g, '').split(/\s+/).length / 200));
-    }
+    readonly minutes = blogReadingMinutes;
     filters(query = this.query(), category = this.category(), page = 1) {
         this.query.set(query);
         this.category.set(category);
