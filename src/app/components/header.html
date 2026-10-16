@@ -74,14 +74,13 @@
         </div>
         <p id="mobile-menu-title">{{ 'Explore o universo Crica.' | translate }}</p>
         <nav [attr.aria-label]="'Navegação principal' | translate">
-            @for (link of links; track link.path; let i = $index) {
+            @for (link of links; track link.path) {
             <a
                 [routerLink]="link.path"
                 routerLinkActive="active"
                 [routerLinkActiveOptions]="{ exact: link.path === '/' }"
                 ariaCurrentWhenActive="page"
                 (click)="closeMenu()">
-                <span class="mobile-menu-number" aria-hidden="true">0{{ i + 1 }}</span>
                 <span>
                     <strong>{{ link.label | translate }}</strong>
                     <small>{{ link.detail | translate }}</small>
