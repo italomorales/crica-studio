@@ -60,10 +60,6 @@
             </button>
             }
         </div>
-        <p class="blog-result-count" aria-live="polite">
-            {{ total() }} matérias · {{ locale() === 'pt' ? 'Português' : locale() === 'en' ?
-            'English' : 'Español' }}
-        </p>
         <div class="blog-grid">
             @for (post of visiblePosts; track post.id) {
             <a class="blog-card" [routerLink]="path(post)">

@@ -1,13 +1,13 @@
 import type { CatalogState, Product, AffiliateProduct, CatalogType } from '../data/models';
 import { normalize, externalUrl } from './contact.ts';
 export const STORAGE_KEY = 'crica.catalog.v1';
-export const PRICE_LABELS = { consult: 'Sob consulta', fixed: 'Preço fixo', from: 'À partir de' };
+export const PRICE_LABELS = { consult: 'Sob consulta', fixed: 'Preço fixo', from: 'A partir de' };
 export function priceLabel(p: Product): string {
     if (!p.priceMode || p.priceMode === 'consult' || p.price === undefined) return 'Sob consulta';
     const value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
         p.price,
     );
-    return (p.priceMode === 'from' ? 'À partir de ' : '') + value;
+    return (p.priceMode === 'from' ? 'A partir de ' : '') + value;
 }
 export function safeImage(url: string): boolean {
     return (

@@ -167,12 +167,7 @@
     font-size: 16px;
 }
 .blog-categories {
-    margin: 26px 0 16px;
-}
-.blog-result-count {
-    font-size: 13px;
-    color: var(--muted);
-    margin: 16px 0 24px;
+    margin: 26px 0 24px;
 }
 .blog-grid {
     display: grid;
