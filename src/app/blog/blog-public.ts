@@ -2,7 +2,7 @@ import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { language, setLanguage } from '../services/language';
+import { language, setLanguage, translate } from '../services/language';
 import {
     BLOG_CATEGORIES,
     blogPath,
@@ -61,7 +61,7 @@ export class BlogPublicComponent {
                         },
                     );
                 }
-                if (error) this.notice.set(error);
+                if (error) this.notice.set(this.t('Não foi possível carregar esta história. Tente novamente.'));
                 this.loading.set(false);
                 // Suggestions are optional and must never delay or hide the article.
                 const data = await this.api.list(false, { locale: this.locale(), page: 1, pageSize: 6 });
@@ -86,12 +86,12 @@ export class BlogPublicComponent {
             this.total.set(data.total);
             this.seo.setBlog(
                     'Crica News',
-                    'Inspiração, histórias e detalhes para criar algo que tenha a sua essência.',
+                    this.t('Inspiração, histórias e detalhes para criar algo que tenha a sua essência.'),
                     '/blog',
                 );
         } catch (e) {
             if (id === this.requestId && !this.slug()) {
-                this.notice.set((e as Error).message);
+                this.notice.set(this.t('Não foi possível carregar as histórias. Tente novamente.'));
             }
         } finally {
             if (id === this.requestId) this.loading.set(false);
@@ -198,6 +198,12 @@ export class BlogPublicComponent {
         );
     }
     readonly minutes = blogReadingMinutes;
+    t(text: string, params: Record<string, string | number> = {}) {
+        return translate(text, params, this.locale());
+    }
+    categoryName(post: BlogPost) {
+        return this.t(post.categoryTranslations?.[this.locale()]?.trim() || post.category);
+    }
     filters(query = this.query(), category = this.category(), page = 1) {
         this.query.set(query);
         this.category.set(category);
@@ -209,7 +215,7 @@ export class BlogPublicComponent {
             const post = this.post;
             const version = post.versions[locale];
             if (!version.title || (!this.previewMode() && version.status !== 'published')) {
-                this.notice.set('Esta versão ainda está aguardando tradução ou publicação.');
+                this.notice.set(this.t('Esta versão ainda está aguardando tradução ou publicação.'));
                 setLanguage(this.locale());
                 return;
             }

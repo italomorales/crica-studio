@@ -1,6 +1,6 @@
 <main id="main" class="blog-page container">
     @if (loading() && !slug()) {
-    <p role="status">Carregando histórias…</p>
+    <p role="status">{{ t('Carregando histórias…') }}</p>
     } @if (notice()) {
     <p role="status">{{ notice() }}</p>
     }
@@ -8,12 +8,11 @@
     <header class="blog-intro">
         <span class="eyebrow">CRICA NEWS</span>
         <h1>
-            Entre uma ideia
+            {{ t('Entre uma ideia') }}
             <br />
-            e
-            <span>outra.</span>
+            <span>{{ t('e outra.') }}</span>
         </h1>
-        <p>Inspiração, histórias e detalhes para criar algo que tenha a sua essência.</p>
+        <p>{{ t('Inspiração, histórias e detalhes para criar algo que tenha a sua essência.') }}</p>
     </header>
     @if (featured; as post) {
     <a class="blog-featured" [routerLink]="path(post)">
@@ -25,38 +24,38 @@
                 height="640" />
         </div>
         <div class="blog-featured-copy">
-            <span class="blog-tag">EM DESTAQUE · {{ post.category }}</span>
+            <span class="blog-tag">{{ t('EM DESTAQUE') }} · {{ categoryName(post) }}</span>
             <h2>{{ post.versions[locale()].title }}</h2>
             <p>{{ post.versions[locale()].summary }}</p>
             <div class="blog-meta">
                 {{ date(post.date) }}
                 <span>·</span>
-                {{ minutes(post.versions[locale()]) }} min de leitura
+                {{ t('{minutes} min de leitura', {minutes: minutes(post.versions[locale()])}) }}
             </div>
-            <span class="blog-text-link">Uma boa ideia começa aqui →</span>
+            <span class="blog-text-link">{{ t('Uma boa ideia começa aqui') }} →</span>
         </div>
     </a>
     }
-    <section class="blog-feed" aria-label="Matérias do Crica News">
+    <section class="blog-feed" [attr.aria-label]="t('Matérias do Crica News')">
         <div class="blog-feed-heading">
             <div>
-                <span class="eyebrow">PARA LER COM CALMA</span>
-                <h2>Mais ideias para você.</h2>
+                <span class="eyebrow">{{ t('PARA LER COM CALMA') }}</span>
+                <h2>{{ t('Mais ideias para você.') }}</h2>
             </div>
             <label class="blog-search">
-                Buscar matérias
+                {{ t('Buscar matérias') }}
                 <input
                     type="search"
-                    placeholder="Uma ideia, um tema, uma ocasião…"
+                    [placeholder]="t('Uma ideia, um tema, uma ocasião…')"
                     [ngModel]="query()"
                     (ngModelChange)="filters($event)" />
             </label>
         </div>
-        <div class="blog-categories" aria-label="Categorias">
-            <button [class.active]="!category()" (click)="filters(query(), '')">Todas</button>
+        <div class="blog-categories" [attr.aria-label]="t('Categorias')">
+            <button [class.active]="!category()" (click)="filters(query(), '')">{{ t('Todas') }}</button>
             @for (item of categoryRows; track item.id) {
             <button [class.active]="category() === item.id" (click)="filters(query(), item.id)">
-                {{ item.name }}
+                {{ t(item.name) }}
             </button>
             }
         </div>
@@ -72,7 +71,7 @@
                         height="640" />
                 </div>
                 <div class="blog-card-copy">
-                    <span class="eyebrow">{{ post.category }}</span>
+                    <span class="eyebrow">{{ categoryName(post) }}</span>
                     <h3>{{ post.versions[locale()].title }}</h3>
                     <p>{{ post.versions[locale()].summary }}</p>
                     <div class="blog-meta">
@@ -82,16 +81,16 @@
             </a>
             } @empty {
             <div class="empty">
-                <h3>Nenhuma matéria por aqui.</h3>
-                <p>Experimente outro tema ou uma busca mais curta.</p>
-                <button class="secondary" (click)="filters('', '')">Limpar filtros</button>
+                <h3>{{ t('Nenhuma matéria por aqui.') }}</h3>
+                <p>{{ t('Experimente outro tema ou uma busca mais curta.') }}</p>
+                <button class="secondary" (click)="filters('', '')">{{ t('Limpar filtros') }}</button>
             </div>
             }
         </div>
         @if (pages.length > 1) {
-        <nav class="blog-pagination" aria-label="Páginas do Crica News">
+        <nav class="blog-pagination" [attr.aria-label]="t('Páginas do Crica News')">
             <button [disabled]="page() === 1" (click)="filters(query(), category(), page() - 1)">
-                ← Anterior
+                ← {{ t('Anterior') }}
             </button>
             @for (number of pages; track number) {
             <button
@@ -104,27 +103,26 @@
             <button
                 [disabled]="page() * 6 >= total()"
                 (click)="filters(query(), category(), page() + 1)">
-                Próxima →
+                {{ t('Próxima') }} →
             </button>
         </nav>
         }
     </section>
     } @else if (post; as post) { @if (version; as version) { @if (previewMode()) {
     <div class="blog-preview-notice">
-        Prévia editorial · {{ version.status === 'published' ? 'Publicada nesta sessão' : 'Versão
-        não publicada' }}
+        {{ t('Prévia editorial') }} · {{ t(version.status === 'published' ? 'Publicada nesta sessão' : 'Versão não publicada') }}
         <a [routerLink]="['/admin/blog/editar', post.id]" [queryParams]="{idioma: locale()}">
-            ← Voltar à edição
+            ← {{ t('Voltar à edição') }}
         </a>
     </div>
     }
     <a class="back-link" [routerLink]="['/blog']" [queryParams]="{idioma: locale()}">
-        ← Todas as histórias
+        ← {{ t('Todas as histórias') }}
     </a>
     <article class="blog-article">
         <header class="blog-article-heading">
-            <span class="eyebrow">{{ post.category }}</span>
-            <h1>{{ version.title || 'Sua próxima matéria' }}</h1>
+            <span class="eyebrow">{{ categoryName(post) }}</span>
+            <h1>{{ version.title || t('Sua próxima matéria') }}</h1>
             <p class="blog-deck">{{ version.summary }}</p>
             <div class="blog-byline">
                 @if(post.authorProfile?.photo) {
@@ -142,14 +140,14 @@
                 <div>
                     <strong>{{ post.author }}</strong>
                     <div class="blog-meta">
-                        {{ date(post.date) }} · {{ minutes(version) }} min de leitura
+                        {{ date(post.date) }} · {{ t('{minutes} min de leitura', {minutes: minutes(version)}) }}
                     </div>
                 </div>
             </div>
         </header>
         <figure class="blog-article-cover">
             <img [src]="post.cover" [alt]="version.title" width="1200" height="800" />
-            <figcaption>Ideias que ganham forma, do seu jeito.</figcaption>
+            <figcaption>{{ t('Ideias que ganham forma, do seu jeito.') }}</figcaption>
         </figure>
         <div class="blog-prose" [innerHTML]="version.html"></div>
     </article>
@@ -161,9 +159,9 @@
         <span class="blog-author-card-photo blog-author-card-initial" aria-hidden="true">{{ author.name.charAt(0) }}</span>
         }
         <div class="blog-author-card-copy">
-            <span class="blog-author-card-label">{{ locale() === 'en' ? 'About the author' : locale() === 'es' ? 'Sobre el autor' : 'Sobre o autor' }}</span>
+            <span class="blog-author-card-label">{{ t('Sobre o autor') }}</span>
             <h2 id="blog-about-author-name">{{ author.name }}</h2>
-            @if(author.bio) { <p>{{ author.bio }}</p> }
+            @if(author.bio) { <p>{{ t(author.bio) }}</p> }
         </div>
     </section>
     }
@@ -175,8 +173,8 @@
         [preview]="previewMode()" />
     <section class="blog-related">
         <div class="blog-section-title">
-            <span class="eyebrow">CONTINUE EXPLORANDO</span>
-            <h2>Uma ideia leva a outra.</h2>
+            <span class="eyebrow">{{ t('CONTINUE EXPLORANDO') }}</span>
+            <h2>{{ t('Uma ideia leva a outra.') }}</h2>
         </div>
         <div class="blog-grid">
             @for (item of related; track item.id) {
@@ -185,9 +183,9 @@
                     <img [src]="item.cover" [alt]="item.versions[locale()].title" loading="lazy" />
                 </div>
                 <div class="blog-card-copy">
-                    <span class="eyebrow">{{ item.category }}</span>
+                    <span class="eyebrow">{{ categoryName(item) }}</span>
                     <h3>{{ item.versions[locale()].title }}</h3>
-                    <span class="blog-text-link">Ler história →</span>
+                    <span class="blog-text-link">{{ t('Ler história') }} →</span>
                 </div>
             </a>
             }
@@ -195,9 +193,9 @@
     </section>
     } } @else if (!loading()) {
     <section class="empty">
-        <h1>Esta história ainda não está disponível.</h1>
-        <p>Ela pode estar em tradução ou aguardando publicação.</p>
-        <a class="primary" routerLink="/blog">Explorar o blog</a>
+        <h1>{{ t('Esta história ainda não está disponível.') }}</h1>
+        <p>{{ t('Ela pode estar em tradução ou aguardando publicação.') }}</p>
+        <a class="primary" routerLink="/blog" [queryParams]="{idioma: locale()}">{{ t('Explorar o blog') }}</a>
     </section>
     }
 </main>

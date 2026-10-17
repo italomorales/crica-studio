@@ -17,6 +17,7 @@ export type BlogVersion = {
 export type BlogPost = {
     id: string;
     category: string;
+    categoryTranslations?: Record<string, string>;
     categoryId?: string;
     products?: {
         id: string;
