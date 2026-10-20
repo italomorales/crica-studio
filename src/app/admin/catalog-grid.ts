@@ -23,6 +23,7 @@ import {
 } from 'ag-grid-community';
 import type { Product, AffiliateProduct } from '../data/models';
 import { priceLabel } from '../services/local-store';
+import { externalUrl } from '../services/contact';
 ModuleRegistry.registerModules([AllCommunityModule]);
 export type CatalogRow = Product | AffiliateProduct;
 export type CatalogAction = {
@@ -177,6 +178,23 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
                             ? (p.data as AffiliateProduct).platform
                             : priceLabel(p.data as Product)
                         : '',
+                cellRenderer: this.suppliers ? (p: ICellRendererParams<CatalogRow>) => {
+                    const item = p.data as AffiliateProduct | undefined;
+                    const href = externalUrl(item?.url);
+                    const element = document.createElement(href ? 'a' : 'span');
+                    element.textContent = item?.platform || '';
+                    if (href) {
+                        const link = element as HTMLAnchorElement;
+                        link.href = href;
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        link.className = 'catalog-platform-link';
+                        link.setAttribute('aria-label', `${item!.platform}: abrir ${item!.name} em nova aba`);
+                        link.title = 'Abrir anúncio em nova aba';
+                        link.onclick = event => event.stopPropagation();
+                    }
+                    return element;
+                } : undefined,
                 comparator: (a, b, nodeA, nodeB) =>
                     this.suppliers
                         ? String(a).localeCompare(String(b))

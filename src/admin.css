@@ -1406,6 +1406,16 @@ crica-platform-grid {
   background: #fff0ee;
   color: #b33b39;
 }
+.catalog-platform-link {
+  color: var(--blue);
+  text-decoration: underline;
+  text-decoration-color: #0255a540;
+  text-underline-offset: 3px;
+}
+.catalog-platform-link:hover {
+  color: var(--blue-hover);
+  text-decoration-color: currentColor;
+}
 .catalog-actions {
   display: flex;
   align-items: center;
