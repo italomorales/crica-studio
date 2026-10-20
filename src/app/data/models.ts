@@ -38,6 +38,9 @@ export interface Product extends ManagedFields {
     price?: number;
 }
 export interface AffiliateProduct extends ManagedFields, TranslatableContent {
+    lastStorePrice?: number | null;
+    linkStatus?: 'unchecked' | 'ok' | 'broken';
+    stockStatus?: 'unchecked' | 'in_stock' | 'out_of_stock';
     platformContent?: TranslatableContent;
     id: string;
     name: string;

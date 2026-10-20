@@ -441,6 +441,9 @@ export class AdminComponent {
                 seller: '',
                 url: '',
                 demoListing: false,
+                lastStorePrice: null,
+                linkStatus: 'unchecked',
+                stockStatus: 'unchecked',
             };
             this.images = [];
             this.characteristics = '';
@@ -460,6 +463,9 @@ export class AdminComponent {
             themeIds: [],
             international: false,
             images: [],
+            lastStorePrice: null,
+            linkStatus: 'unchecked',
+            stockStatus: 'unchecked',
             characteristics: [],
             personalization: [],
             demo: true,

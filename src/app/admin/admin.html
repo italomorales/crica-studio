@@ -449,6 +449,27 @@
                         </p>
                     </section>
                     }
+                    @if (section === 'fornecedores') {
+                    <section class="admin-panel">
+                        <h2>Acompanhamento da loja</h2>
+                        <p class="field-help">Controle interno, visível apenas na administração. Atualize estes dados ao consultar o anúncio.</p>
+                        <label for="last-store-price">Último preço encontrado (R$)</label>
+                        <input id="last-store-price" name="lastStorePrice" type="number" min="0" max="9999999999.99" step="0.01" [(ngModel)]="draft.lastStorePrice" placeholder="Não informado" />
+                        <label for="supplier-link-status">Situação do link</label>
+                        <select id="supplier-link-status" name="linkStatus" [(ngModel)]="draft.linkStatus">
+                            <option value="unchecked">Não verificado</option>
+                            <option value="ok">Funcionando</option>
+                            <option value="broken">Link quebrado</option>
+                        </select>
+                        <label for="supplier-stock-status">Estoque na loja</label>
+                        <select id="supplier-stock-status" name="stockStatus" [(ngModel)]="draft.stockStatus">
+                            <option value="unchecked">Não verificado</option>
+                            <option value="in_stock">Em estoque</option>
+                            <option value="out_of_stock">Sem estoque</option>
+                        </select>
+                        <p class="field-help">O preço e os status são registros manuais. Marcar um problema não altera a publicação do item.</p>
+                    </section>
+                    }
                     <section class="admin-panel">
                         <h2>Publicação</h2>
                         <label for="status">Status</label>

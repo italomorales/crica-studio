@@ -1402,6 +1402,10 @@ crica-platform-grid {
   background: #fff5df;
   color: #8b651b;
 }
+.catalog-status.problem {
+  background: #fff0ee;
+  color: #b33b39;
+}
 .catalog-actions {
   display: flex;
   align-items: center;

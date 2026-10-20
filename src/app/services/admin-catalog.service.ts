@@ -186,7 +186,14 @@ export class AdminCatalogService {
         });
     }
     async saveAffiliate(product: AffiliateProduct) {
+        if (product.lastStorePrice != null && (!Number.isFinite(product.lastStorePrice) || product.lastStorePrice < 0 || product.lastStorePrice > 9999999999.99 || Math.abs(product.lastStorePrice * 100 - Math.round(product.lastStorePrice * 100)) > 0.0001))
+            throw new Error('Informe um preço válido, com até duas casas decimais.');
         await this.write('affiliates', product.id, {
+            management: {
+                lastStorePrice: product.lastStorePrice ?? null,
+                linkStatus: product.linkStatus ?? 'unchecked',
+                stockStatus: product.stockStatus ?? 'unchecked',
+            },
             typeId: product.typeId,
             name: product.name,
             translations: product.translations,

@@ -125,3 +125,28 @@ test('new types POST a valid GUID placeholder; saved types PUT their ID and refr
         body: { ...saved, active: false },
     });
 });
+
+test('supplier management survives reload, clearing price and changing link and stock independently', async t => {
+    const injector = runtime.createEnvironmentInjector([{provide:runtime.AuthService,useValue:{accessToken:()=> 'test-token'}}]);
+    const service = runtime.runInInjectionContext(injector,()=>new runtime.AdminCatalogService());
+    t.after(()=>injector.destroy());
+    const item = {id:'12345678-1234-4234-8234-123456789abc',name:'Material',platform:'Shopee',status:'published'};
+    let management: any = {};
+    t.mock.method(globalThis,'fetch',async (url:string,options:any)=>{
+        if(options.method){management=JSON.parse(options.body).management; return Response.json({id:item.id});}
+        return Response.json(url.endsWith('/affiliates')?[{...item,...management}]:url.endsWith('/settings')?{whatsappNumber:''}:[]);
+    });
+    await service.saveAffiliate({...item,lastStorePrice:149.9,linkStatus:'ok',stockStatus:'out_of_stock'});
+    assert.equal(service.allAffiliates[0].lastStorePrice,149.9);
+    assert.equal(service.allAffiliates[0].linkStatus,'ok');
+    assert.equal(service.allAffiliates[0].stockStatus,'out_of_stock');
+    await service.saveAffiliate({...service.allAffiliates[0],lastStorePrice:null,linkStatus:'broken',stockStatus:'in_stock'});
+    assert.equal(service.allAffiliates[0].lastStorePrice,null);
+    assert.equal(service.allAffiliates[0].linkStatus,'broken');
+    assert.equal(service.allAffiliates[0].stockStatus,'in_stock');
+    assert.equal(service.allAffiliates[0].status,'published');
+    for(const price of [-1,Infinity,NaN,1.234,10000000000])
+        await assert.rejects(()=>service.saveAffiliate({...item,lastStorePrice:price}),/preço válido/);
+    await service.saveAffiliate({...item,lastStorePrice:0});
+    assert.equal(service.allAffiliates[0].lastStorePrice,0);
+});

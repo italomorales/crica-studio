@@ -183,6 +183,29 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
                         : ((nodeA.data as Product)?.price ?? 0) -
                           ((nodeB.data as Product)?.price ?? 0),
             });
+        if (this.suppliers && !this.organizing) {
+            columns.push({
+                headerName: 'Preço na loja', colId: 'lastStorePrice', width: 150,
+                valueGetter: p => (p.data as AffiliateProduct)?.lastStorePrice ?? null,
+                valueFormatter: p => p.value == null ? 'Não informado' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.value),
+            });
+            for (const field of ['linkStatus', 'stockStatus'] as const) {
+                const labels: Record<string, string> = field === 'linkStatus'
+                    ? { unchecked: 'Não verificado', ok: 'Funcionando', broken: 'Link quebrado' }
+                    : { unchecked: 'Não verificado', in_stock: 'Em estoque', out_of_stock: 'Sem estoque' };
+                columns.push({
+                    headerName: field === 'linkStatus' ? 'Link' : 'Estoque', colId: field, width: 150,
+                    valueGetter: p => labels[(p.data as AffiliateProduct)?.[field] || 'unchecked'],
+                    cellRenderer: (p: ICellRendererParams<CatalogRow>) => {
+                        const state = (p.data as AffiliateProduct)?.[field] || 'unchecked';
+                        const span = document.createElement('span');
+                        span.className = 'catalog-status ' + (state === 'broken' || state === 'out_of_stock' ? 'problem' : state === 'ok' || state === 'in_stock' ? 'published' : '');
+                        span.textContent = labels[state];
+                        return span;
+                    },
+                });
+            }
+        }
         columns.push({
             headerName: 'Status',
             field: 'status',
