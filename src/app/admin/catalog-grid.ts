@@ -21,7 +21,7 @@ import {
     type ColDef,
     type ICellRendererParams,
 } from 'ag-grid-community';
-import type { Product, AffiliateProduct } from '../data/models';
+import type { Product, AffiliateProduct, SupplierManagementField } from '../data/models';
 import { priceLabel } from '../services/local-store';
 import { externalUrl } from '../services/contact';
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -30,6 +30,7 @@ export type CatalogAction = {
     kind: 'edit' | 'duplicate' | 'delete' | 'toggle' | 'feature';
     item: CatalogRow;
 };
+export type SupplierCellEdit = { item: AffiliateProduct; field: SupplierManagementField; value: number | string | null };
 const paths = {
     edit: 'm16 3 5 5-12 12H4v-5L16 3Zm-2 2 5 5',
     duplicate: 'M9 9h12v12H9zM15 9V3H3v12h6',
@@ -78,9 +79,11 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
     @Input() busy = false;
     @Input() pageSize = 20;
     @Input() selectedId = '';
+    @Input() savingIds: ReadonlySet<string> = new Set();
     @Output() action = new EventEmitter<CatalogAction>();
     @Output() reordered = new EventEmitter<CatalogRow[]>();
     @Output() selected = new EventEmitter<string>();
+    @Output() managementEdit = new EventEmitter<SupplierCellEdit>();
     private zone = inject(NgZone);
     private api?: GridApi<CatalogRow>;
     private displayed: CatalogRow[] = [];
@@ -95,6 +98,14 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
             headerHeight: 46,
             animateRows: false,
             suppressScrollOnNewData: true,
+            singleClickEdit: true,
+            readOnlyEdit: true,
+            stopEditingWhenCellsLoseFocus: true,
+            onCellEditRequest: event => {
+                const field = event.column.getColId();
+                if (!event.data || !['lastStorePrice', 'linkStatus', 'stockStatus'].includes(field) || event.newValue === event.oldValue) return;
+                this.zone.run(() => this.managementEdit.emit({ item: event.data as AffiliateProduct, field: field as SupplierManagementField, value: event.newValue ?? null }));
+            },
             pagination: !this.organizing,
             paginationPageSize: this.pageSize,
             paginationPageSizeSelector: false,
@@ -103,6 +114,7 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
             suppressDragLeaveHidesColumns: true,
             rowClassRules: {
                 'catalog-row-selected': (p) => this.organizing && p.data?.id === this.selectedId,
+                'catalog-row-saving': p => !!p.data && this.savingIds.has(p.data.id),
             },
             onRowClicked: (e) => {
                 if (this.organizing && e.data) this.zone.run(() => this.selected.emit(e.data!.id));
@@ -139,6 +151,12 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
         if (changes['pageSize']) this.api.setGridOption('paginationPageSize', this.pageSize);
         if (changes['busy']) this.api.setGridOption('suppressRowDrag', this.busy);
         if (changes['selectedId']) this.api.redrawRows();
+        if (changes['savingIds']) {
+            const previous = changes['savingIds'].previousValue as ReadonlySet<string> | undefined;
+            const ids = new Set([...(previous || []), ...this.savingIds]);
+            const nodes = [...ids].flatMap(id => { const node = this.api!.getRowNode(id); return node ? [node] : []; });
+            if (nodes.length) this.api.redrawRows({ rowNodes: nodes });
+        }
     }
     reveal(id: string) {
         const node = this.api?.getRowNode(id);
@@ -204,6 +222,11 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
         if (this.suppliers && !this.organizing) {
             columns.push({
                 headerName: 'Preço na loja', colId: 'lastStorePrice', width: 150,
+                editable: p => !this.busy && !this.savingIds.has(p.data!.id),
+                cellClass: 'catalog-cell-editable',
+                cellEditor: 'agNumberCellEditor',
+                cellEditorParams: { min: 0, max: 9999999999.99, precision: 2, step: 0.01 },
+                tooltipValueGetter: () => 'Clique para editar. Enter salva; Esc cancela.',
                 valueGetter: p => (p.data as AffiliateProduct)?.lastStorePrice ?? null,
                 valueFormatter: p => p.value == null ? 'Não informado' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.value),
             });
@@ -213,7 +236,13 @@ export class CatalogGridComponent implements AfterViewInit, OnChanges, OnDestroy
                     : { unchecked: 'Não verificado', in_stock: 'Em estoque', out_of_stock: 'Sem estoque' };
                 columns.push({
                     headerName: field === 'linkStatus' ? 'Link' : 'Estoque', colId: field, width: 150,
-                    valueGetter: p => labels[(p.data as AffiliateProduct)?.[field] || 'unchecked'],
+                    editable: p => !this.busy && !this.savingIds.has(p.data!.id),
+                    cellClass: 'catalog-cell-editable',
+                    cellEditor: 'agSelectCellEditor',
+                    cellEditorParams: { values: Object.keys(labels) },
+                    tooltipValueGetter: () => 'Clique para alterar a situação.',
+                    valueGetter: p => (p.data as AffiliateProduct)?.[field] || 'unchecked',
+                    valueFormatter: p => labels[p.value] || labels['unchecked'],
                     cellRenderer: (p: ICellRendererParams<CatalogRow>) => {
                         const state = (p.data as AffiliateProduct)?.[field] || 'unchecked';
                         const span = document.createElement('span');

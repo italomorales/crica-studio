@@ -150,3 +150,37 @@ test('supplier management survives reload, clearing price and changing link and 
     await service.saveAffiliate({...item,lastStorePrice:0});
     assert.equal(service.allAffiliates[0].lastStorePrice,0);
 });
+
+test('grid edits PATCH only the changed field and retain prior data on failure', async t => {
+    const injector=runtime.createEnvironmentInjector([{provide:runtime.AuthService,useValue:{accessToken:()=> 'test-token'}}]);
+    const service=runtime.runInInjectionContext(injector,()=>new runtime.AdminCatalogService());
+    t.after(()=>injector.destroy());
+    const item={id:'12345678-1234-4234-8234-123456789abc',name:'Material',lastStorePrice:20,linkStatus:'unchecked',stockStatus:'unchecked',status:'published'};
+    let fail=false;
+    const writes:any[]=[];
+    t.mock.method(globalThis,'fetch',async(url:string,options:any)=>{
+        if(options.method){
+            assert.equal(options.method,'PATCH');
+            assert.ok(url.endsWith(`/affiliates/${item.id}/management`));
+            writes.push(JSON.parse(options.body));
+            return fail ? Response.json({errors:{management:['Não foi possível salvar.']}},{status:500}) : new Response(null,{status:204});
+        }
+        return Response.json(url.endsWith('/affiliates')?[item]:url.endsWith('/settings')?{whatsappNumber:''}:[]);
+    });
+    await service.load();
+    await Promise.all([
+        service.updateSupplierManagement(item.id,'linkStatus','ok'),
+        service.updateSupplierManagement(item.id,'stockStatus','out_of_stock'),
+    ]);
+    assert.deepEqual(writes,[{field:'linkStatus',value:'ok'},{field:'stockStatus',value:'out_of_stock'}]);
+    assert.equal(service.allAffiliates[0].linkStatus,'ok');
+    assert.equal(service.allAffiliates[0].stockStatus,'out_of_stock');
+    assert.equal(service.allAffiliates[0].lastStorePrice,20);
+    fail=true;
+    await assert.rejects(()=>service.updateSupplierManagement(item.id,'lastStorePrice',99),/Não foi possível salvar/);
+    assert.equal(service.allAffiliates[0].lastStorePrice,20);
+    fail=false;
+    await service.updateSupplierManagement(item.id,'lastStorePrice',null);
+    assert.equal(service.allAffiliates[0].lastStorePrice,null);
+    assert.equal(service.allAffiliates[0].status,'published');
+});

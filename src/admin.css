@@ -1416,6 +1416,9 @@ crica-platform-grid {
   color: var(--blue-hover);
   text-decoration-color: currentColor;
 }
+.catalog-cell-editable { cursor: pointer; }
+.catalog-cell-editable:hover { background: #edf6fd; }
+.catalog-row-saving { opacity: .6; pointer-events: none; }
 .catalog-actions {
   display: flex;
   align-items: center;

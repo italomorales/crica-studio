@@ -805,8 +805,13 @@
                     [rows]="filtered"
                     [suppliers]="section === 'fornecedores'"
                     [pageSize]="pageSize"
+                    [savingIds]="savingManagementIds"
+                    (managementEdit)="saveManagementCell($event)"
                     (action)="gridAction($event)" />
                 <p class="catalog-grid-hint">
+                    @if (section === 'fornecedores') {
+                    Clique em Preço na loja, Link ou Estoque para editar. Enter salva; Esc cancela.
+                    }
                     Clique no título de uma coluna para consultar em outra ordem. Use “Organizar
                     exibição” para mudar a sequência no site.
                 </p>

@@ -211,6 +211,13 @@ export class AdminCatalogService {
             featured: product.featured ?? false,
         });
     }
+    async updateSupplierManagement(id: string, field: 'lastStorePrice' | 'linkStatus' | 'stockStatus', value: number | string | null) {
+        if (!isExistingCatalogId(id)) throw new Error('Este cadastro não possui uma identificação válida.');
+        if (field === 'lastStorePrice' && value !== null && (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 9999999999.99 || Math.abs(value * 100 - Math.round(value * 100)) > 0.0001))
+            throw new Error('Informe um preço válido, com até duas casas decimais.');
+        await this.write(`affiliates/${id}/management`, undefined, { field, value }, 'PATCH', false);
+        this.state.update(state => ({ ...state, affiliates: state.affiliates.map(item => item.id === id ? { ...item, [field]: value } : item) }));
+    }
     async saveTheme(theme: CatalogTheme) {
         await this.write('themes', theme.id, { name: theme.name.trim(), active: theme.active, translations:theme.translations });
     }
@@ -268,6 +275,7 @@ export class AdminCatalogService {
         id: string | undefined,
         body: unknown,
         fixedMethod?: string,
+        refresh = true,
     ) {
         const token = this.auth.accessToken();
         if (!token) throw new Error('Sua sessão expirou. Entre novamente.');
@@ -295,7 +303,7 @@ export class AdminCatalogService {
                     : problem?.detail || 'Não foi possível salvar.',
             );
         }
-        await this.load(false);
+        if (refresh) await this.load(false);
     }
     private async remove(resource: string, id: string) {
         const token = this.auth.accessToken();

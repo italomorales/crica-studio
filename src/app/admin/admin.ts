@@ -27,7 +27,7 @@ import type {
     ItemStatus,
 } from '../data/models';
 import { ImagePickerComponent } from './image-picker';
-import { CatalogGridComponent, type CatalogRow, type CatalogAction } from './catalog-grid';
+import { CatalogGridComponent, type CatalogRow, type CatalogAction, type SupplierCellEdit } from './catalog-grid';
 import { TypeGridComponent, type TypeAction } from './type-grid';
 import { ThemeGridComponent, type ThemeAction } from './theme-grid';
 import { moveCatalogItem, sameCatalogOrder } from './catalog-order';
@@ -185,6 +185,23 @@ export class AdminComponent {
             feature: () => this.toggleFeatured(event.item),
         };
         void handlers[event.kind]();
+    }
+    savingManagementIds = new Set<string>();
+    async saveManagementCell(event: SupplierCellEdit) {
+        const id = event.item.id;
+        if (this.section !== 'fornecedores' || this.savingManagementIds.has(id)) return;
+        this.savingManagementIds = new Set([...this.savingManagementIds, id]);
+        try {
+            await this.catalog.updateSupplierManagement(id, event.field, event.value);
+            this.showNotice('Alteração salva.');
+        } catch (error) {
+            this.error(error);
+        } finally {
+            const pending = new Set(this.savingManagementIds);
+            pending.delete(id);
+            this.savingManagementIds = pending;
+            this.changeDetector.markForCheck();
+        }
     }
     catalog = inject(AdminCatalogService);
     auth = inject(AuthService);

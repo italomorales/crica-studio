@@ -3,6 +3,7 @@ import type { TranslatableContent } from '../services/catalog-translations';
 export type Platform = string;
 export type ItemStatus = 'draft' | 'published' | 'inactive';
 export type PriceMode = 'consult' | 'fixed' | 'from';
+export type SupplierManagementField = 'lastStorePrice' | 'linkStatus' | 'stockStatus';
 export interface CatalogType extends TranslatableContent {
     id: string;
     name: string;
