@@ -1,0 +1,38 @@
+<crica-admin-shell>
+    <main class="statistics-page">
+        <header class="statistics-heading">
+            <div><span class="statistics-eyebrow">SEU NEGÓCIO EM NÚMEROS</span><h1>Estatísticas</h1><p>Acompanhe o interesse pelo que você cria e compartilha.</p></div>
+        </header>
+        <section class="statistics-filters" aria-label="Filtros das estatísticas">
+            <div class="statistics-presets"><button type="button" (click)="preset(7)">Últimos 7 dias</button><button type="button" (click)="preset(30)">Últimos 30 dias</button></div>
+            <label>De <input type="date" [(ngModel)]="from" /></label>
+            <label>Até <input type="date" [(ngModel)]="to" /></label>
+            <label>Área <select [(ngModel)]="type" (ngModelChange)="load()"><option value="all">Todas</option><option value="shop">Loja</option><option value="supplier">Fornecedores</option><option value="article">News</option></select></label>
+            <label>Conteúdo <select [(ngModel)]="selectedItem" (ngModelChange)="applySelection()"><option value="">Todos</option>@for(item of allItems; track item.type + item.id){<option [value]="item.type + ':' + item.id">{{item.name}}</option>}</select></label>
+            <button class="primary" type="button" (click)="load()" [disabled]="loading">Aplicar período</button>
+        </section>
+        @if(error){<p class="statistics-error" role="alert">{{error}}</p>}
+        @if(loading){<p role="status">Carregando estatísticas…</p>}
+        <section class="statistics-cards" aria-label="Resumo do período">
+            <article><span>Visualizações</span><strong>{{result.current.views}}</strong><small>{{change(result.current.views,result.previous.views)}}</small></article>
+            <article><span>Cliques nos produtos e lojas</span><strong>{{result.current.clicks}}</strong><small>{{change(result.current.clicks,result.previous.clicks)}}</small></article>
+            <article><span>Cliques no WhatsApp</span><strong>{{result.current.whatsapp}}</strong><small>{{change(result.current.whatsapp,result.previous.whatsapp)}}</small></article>
+        </section>
+        <section class="statistics-chart" aria-labelledby="statistics-chart-title">
+            <div class="statistics-chart-heading"><div><h2 id="statistics-chart-title">Evolução por dia</h2><p>Os dados seguem o horário de Brasília.</p></div><div class="statistics-legend"><span class="views">Visualizações</span><span class="clicks">Cliques</span><span class="whatsapp">WhatsApp</span></div></div>
+            <svg viewBox="0 0 800 200" preserveAspectRatio="none" role="img" aria-label="Evolução diária de visualizações, cliques e WhatsApp no período selecionado">
+                <path d="M10 25H790 M10 77H790 M10 129H790 M10 180H790" class="statistics-guides" />
+                <polyline [attr.points]="points('views')" class="statistics-line views" />
+                <polyline [attr.points]="points('clicks')" class="statistics-line clicks" />
+                <polyline [attr.points]="points('whatsapp')" class="statistics-line whatsapp" />
+            </svg>
+            <div class="statistics-axis"><span>{{label(appliedFrom)}}</span><span>{{label(appliedTo)}}</span></div>
+            <details class="statistics-daily"><summary>Ver números por dia</summary><div class="statistics-daily-scroll"><table><thead><tr><th>Data</th><th>Visualizações</th><th>Cliques</th><th>WhatsApp</th></tr></thead><tbody>@for(day of result.days; track day.day){<tr><td>{{label(day.day)}}</td><td>{{day.views}}</td><td>{{day.clicks}}</td><td>{{day.whatsapp}}</td></tr>}</tbody></table></div></details>
+        </section>
+        <section class="statistics-table" aria-labelledby="statistics-table-title">
+            <div class="statistics-table-heading"><div><h2 id="statistics-table-title">Desempenho por conteúdo</h2><p>Consulte os resultados de cada produto, indicação ou matéria.</p></div><label>Buscar conteúdo <input type="search" [(ngModel)]="search" (ngModelChange)="filter()" placeholder="Nome do conteúdo" /></label></div>
+            <div #grid class="catalog-grid" aria-label="Estatísticas por conteúdo"></div>
+        </section>
+        <p class="statistics-note">Visualizações contam entradas nas páginas. Cliques indicam interesse; não confirmam uma compra ou mensagem enviada. A contagem começa com a publicação desta funcionalidade.</p>
+    </main>
+</crica-admin-shell>

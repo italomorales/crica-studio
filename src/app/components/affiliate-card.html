@@ -30,7 +30,7 @@
         <h3>{{ (product | content:'name') }}</h3>
         <p>{{ (product | content:'description') }}</p>
         @if (url) {
-        <a class="text-action" [href]="url" target="_blank" rel="sponsored noopener noreferrer">
+        <a class="text-action" [href]="url" target="_blank" rel="sponsored noopener noreferrer" data-stat-type="supplier" [attr.data-stat-id]="product.id" data-stat-source="listing">
             {{ (preposition === 'na' ? 'Ver na {platform}' : 'Ver no {platform}') | translate:{platform: (product | content:'platform')} }}
             <span aria-hidden="true">↗</span>
             <span class="sr-only"> {{ '(link de afiliado, abre em nova aba)' | translate }} </span>

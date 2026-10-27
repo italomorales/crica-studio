@@ -6,6 +6,7 @@ import type { Product, AffiliateProduct } from '../data/models';
 import { ProductImageComponent } from './shared';
 import { validQuantity, whatsappUrl } from '../services/contact';
 import { trackWhatsAppClick } from '../services/whatsapp-tracking';
+import { trackStatistic } from '../services/statistics';
 import { PublicCatalogService } from '../services/public-catalog.service';
 import detailsTemplate from './details.html?raw';
 
@@ -60,6 +61,7 @@ export class DetailsComponent {
         const url = whatsappUrl(this.catalog.whatsappNumber(), this.message);
         if (url) {
             trackWhatsAppClick(url, { source: 'product_dialog', productId: this.product.id, quantity: this.quantity });
+            trackStatistic('shop', this.product.id, 'whatsapp', 'listing');
             window.open(url, '_blank', 'noopener,noreferrer');
         } else {
             this.preview = true;

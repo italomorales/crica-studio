@@ -11,6 +11,7 @@ import { trackWhatsAppClick } from './services/whatsapp-tracking';
 import { SeoService } from './services/seo.service';
 import { shareLink } from './services/share';
 import { productPath } from './services/product-url';
+import { trackStatistic } from './services/statistics';
 import type { Product } from './data/models';
 import productDetailTemplate from './product-detail.html?raw';
 
@@ -37,6 +38,7 @@ export class ProductDetailComponent implements OnDestroy {
     showSkeleton = false;
     loadError = false;
     private loadRequest = 0;
+    private trackedSlug = '';
     private skeletonTimer?: ReturnType<typeof setTimeout>;
     unavailable = false;
     quantity = 1;
@@ -89,6 +91,8 @@ export class ProductDetailComponent implements OnDestroy {
         const request = ++this.loadRequest;
         clearTimeout(this.skeletonTimer);
         this.product = this.catalog.cachedProduct(slug);
+        if (this.trackedSlug !== slug) this.trackedSlug = '';
+        if (this.product && !this.trackedSlug) { trackStatistic('shop', this.product.id, 'view', 'direct'); this.trackedSlug = slug; }
         this.loading = !this.product;
         this.showSkeleton = false;
         this.loadError = false;
@@ -109,6 +113,7 @@ export class ProductDetailComponent implements OnDestroy {
             if (request !== this.loadRequest) return;
             const selectedImage = this.product?.images[this.imageIndex];
             this.product = product;
+            if (product && !this.trackedSlug) { trackStatistic('shop', product.id, 'view', 'direct'); this.trackedSlug = slug; }
             this.imageIndex = Math.max(0, product?.images.indexOf(selectedImage || '') ?? 0);
             this.unavailable = !this.product;
             if (this.product) this.seo.setProduct(this.product);
@@ -132,6 +137,7 @@ export class ProductDetailComponent implements OnDestroy {
         const url = whatsappUrl(this.catalog.whatsappNumber(), this.message);
         if (url) {
             trackWhatsAppClick(url, { source: 'product', productId: this.product.id, quantity: this.quantity });
+            trackStatistic('shop', this.product.id, 'whatsapp', 'direct');
             window.open(url, '_blank', 'noopener,noreferrer');
             return;
         }

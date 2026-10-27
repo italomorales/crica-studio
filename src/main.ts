@@ -18,6 +18,7 @@ import { ConstructionComponent } from './app/construction';
 import { SeoService } from './app/services/seo.service';
 import { whatsappUrl } from './app/services/contact';
 import { installWhatsAppTracking } from './app/services/whatsapp-tracking';
+import { installStatisticClickTracking } from './app/services/statistics';
 import appTemplate from './app.html?raw';
 import { currentSiteMarket, publicHomePath } from './app/services/site-market';
 import { HomeComponent } from './app/home';
@@ -56,6 +57,7 @@ class AppComponent {
     }
 }
 installWhatsAppTracking();
+installStatisticClickTracking();
 initializeLanguage()
     .then(() =>
         bootstrapApplication(AppComponent, {
@@ -83,6 +85,7 @@ initializeLanguage()
                         },
                         { path: 'blog', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
                         { path: 'blog/:locale/:slug', resolve: { article: resolveBlogArticle }, runGuardsAndResolvers: 'paramsOrQueryParamsChange', loadComponent: () => import('./app/blog/blog-public').then(module => module.BlogPublicComponent) },
+                        { path: 'admin/estatisticas', canActivate: [authGuard], loadComponent: () => import('./app/admin/statistics-page').then(module => module.StatisticsPageComponent), title: 'Estatísticas | Crica Studio' },
                         { canActivate: [authGuard], path: 'admin/blog/autores', loadComponent: () => import('./app/blog/blog-author-admin').then(module => module.BlogAuthorAdminComponent) },
                         { canActivate: [authGuard], path: 'admin/blog/categorias', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'categories' } },
                         { canActivate: [authGuard], path: 'admin/blog/comentarios', loadComponent: () => import('./app/blog/blog-admin').then(module => module.BlogAdminComponent), data: { mode: 'moderation' } },

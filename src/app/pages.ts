@@ -16,6 +16,7 @@ import type { AffiliateProduct, Product } from './data/models';
 import { externalUrl, whatsappUrl } from './services/contact';
 import { shareLink } from './services/share';
 import { productPath } from './services/product-url';
+import { trackStatistic } from './services/statistics';
 import { ThemeFilterComponent } from './components/theme-filter';
 import { Subscription } from 'rxjs';
 import { ImageCarouselComponent } from './components/image-carousel';
@@ -121,6 +122,7 @@ export class ShopComponent implements OnInit, OnDestroy {
         this.updateFilters();
     }
     openProduct(product: Product) {
+        trackStatistic('shop', product.id, 'click', 'listing');
         void this.router.navigateByUrl(productPath(product), {
             state: { shopUrl: this.router.url },
         });

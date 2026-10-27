@@ -225,7 +225,7 @@
             } @else {
             <div class="home-product-grid">
                 @for (product of products(); track product.id) {
-                <a class="home-product-card" [routerLink]="productPath(product)">
+                <a class="home-product-card" [routerLink]="productPath(product)" data-stat-type="shop" [attr.data-stat-id]="product.id" data-stat-source="home">
                     <div class="home-product-photo">
                         <crica-product-image [src]="product.images[0]" [alt]="product.name" />
                     </div>
@@ -427,6 +427,8 @@
                 @for (supplier of suppliers(); track supplier.id) {
                 <a
                     class="home-supplier-card"
+                    [attr.data-stat-type]="externalUrl(supplier.url || '') ? 'supplier' : null"
+                    [attr.data-stat-id]="supplier.id" data-stat-source="home"
                     [href]="externalUrl(supplier.url || '') || '/fornecedores'"
                     [attr.target]="externalUrl(supplier.url || '') ? '_blank' : null"
                     rel="sponsored noopener noreferrer"

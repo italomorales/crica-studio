@@ -14,6 +14,7 @@ import { BlogStore } from './blog-store';
 import { BlogApi, type Category } from './blog-api';
 import type { ResolvedArticle } from './blog-article-resolver';
 import { blogReadingMinutes } from './blog-reading-time';
+import { trackStatistic } from '../services/statistics';
 import { SeoService } from '../services/seo.service';
 import { BlogInteractionsComponent } from './blog-interactions';
 import template from './blog-public.html?raw';
@@ -40,6 +41,7 @@ export class BlogPublicComponent {
     loading = signal(true);
     private readonly resolvedArticle = signal<ResolvedArticle>({});
     private requestId = 0;
+    private trackedArticle = '';
     async load() {
         const id = ++this.requestId;
         this.loading.set(true);
@@ -49,6 +51,8 @@ export class BlogPublicComponent {
                 const { post, error } = this.resolvedArticle();
                 if (!this.previewMode() && post) {
                     this.currentPost.set(post);
+                    const key = `${post.id}:${this.locale()}:${this.slug()}`;
+                    if (this.trackedArticle !== key) { trackStatistic('article', post.id, 'view', 'direct'); this.trackedArticle = key; }
                     const v = post.versions[this.locale()];
                     this.seo.setBlog(
                         v.seoTitle || v.title, v.seoDescription || v.summary,
